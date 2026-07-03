@@ -1,0 +1,68 @@
+# Quant A Share
+
+一个用 TuShare Pro 复刻 aiwuchuan 核心投研能力的本地工作台。
+
+## 已覆盖能力
+
+- 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、指数涨跌、趋势图。
+- 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选。
+- 板块与概念：行业/概念聚合、涨跌幅、排名变化、上涨/下跌家数、涨停家数、资金流向分布。
+- 行情：股票检索、日 K/分钟 K 数据入口、复权、均线、MACD、RSI、KDJ、画线工具入口、自选股。
+- 自选：本地分组、自选表、删除与分组管理。
+- LLM 分析：主题热度、选股池、板块看板、个股评估矩阵、产业链分析的本地研究版。
+- AI 决策矩阵：基于 TuShare 数据生成操作计划、触发条件、失效条件、仓位区间和观察点。
+- 奇门遁甲：本地任务表单、历史记录、文本解盘。
+- 订阅账号与点数：本地商品与点数账本，不接真实支付。
+
+## 快速开始
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+streamlit run streamlit_app.py
+```
+
+在 `.env` 中填入：
+
+```bash
+TUSHARE_TOKEN=你的 TuShare Pro token
+```
+
+不填 token 也可以运行，系统会自动切到演示数据。
+
+## 数据接口
+
+项目优先使用 TuShare Python SDK：
+
+- `stock_basic`
+- `daily`
+- `daily_basic`
+- `moneyflow`
+- `index_daily`
+- `index_dailybasic`
+- `limit_list_d`
+- `pro_bar`
+- `stk_mins`
+
+分钟数据在 TuShare 中通常需要单独权限，应用会在拿不到分钟数据时自动回落到日线演示分时。
+
+## 本地数据
+
+运行后会生成 `.quant_a_share/`：
+
+- `watchlists.json`
+- `strategies.json`
+- `qimen_jobs.json`
+- `wallet.json`
+
+这些都是本地状态，不会提交到 Git。
+
+## 参考
+
+- TuShare Python SDK 调用方式：https://tushare.pro/document/1?doc_id=131
+- TuShare HTTP API 说明：https://tushare.pro/document/1?doc_id=130
+- TuShare 通用行情 `pro_bar`：https://tushare.pro/wctapi/documents/109.md
+- TuShare 每日指标 `daily_basic`：https://tushare.pro/wctapi/documents/32.md
+- TuShare 分钟数据说明：https://tushare.pro/document/1?doc_id=234
