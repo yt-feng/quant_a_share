@@ -146,10 +146,10 @@ def page_market(provider: TushareProvider, start: str, end: str, max_symbols: in
     c1, c2 = st.columns([1.2, 1])
     with c1:
         fig = px.line(breadth, x="trade_date", y="amount_yi", title="大盘成交额趋势")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     with c2:
         fig = px.line(breadth, x="trade_date", y="up_ratio", title="大盘情绪(上涨占比)趋势")
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)
     c3, c4 = st.columns([1, 1])
     latest = pd.DataFrame(
         {
@@ -158,11 +158,11 @@ def page_market(provider: TushareProvider, start: str, end: str, max_symbols: in
         }
     )
     with c3:
-        st.plotly_chart(px.bar(latest, x="类型", y="数量", title="涨跌停板分布对比"), width="stretch")
+        st.plotly_chart(px.bar(latest, x="类型", y="数量", title="涨跌停板分布对比"), use_container_width=True)
     with c4:
         if not indices.empty:
             fig = px.line(indices, x="trade_date", y="pct_chg", color="ts_code", title="指数涨跌幅")
-            st.plotly_chart(fig, width="stretch")
+            st.plotly_chart(fig, use_container_width=True)
 
 
 def page_screener(provider: TushareProvider, start: str, end: str, max_symbols: int) -> None:
@@ -260,9 +260,9 @@ def page_sectors(provider: TushareProvider, start: str, end: str, max_symbols: i
     filtered = sectors[sectors["pct_chg"].between(min_pct, max_pct)]
     c1, c2 = st.columns([1, 1])
     with c1:
-        st.plotly_chart(px.bar(filtered.head(30), x="sector_name", y="net_mf_yi", title="资金流向分布"), width="stretch")
+        st.plotly_chart(px.bar(filtered.head(30), x="sector_name", y="net_mf_yi", title="资金流向分布"), use_container_width=True)
     with c2:
-        st.plotly_chart(px.pie(filtered.head(15), values="amount_yi", names="sector_name", title="成交额占比"), width="stretch")
+        st.plotly_chart(px.pie(filtered.head(15), values="amount_yi", names="sector_name", title="成交额占比"), use_container_width=True)
     st.dataframe(
         filtered.rename(
             columns={
@@ -334,7 +334,7 @@ def page_quote(provider: TushareProvider, start: str, end: str) -> None:
     elif show_rsi and "rsi14" in data.columns:
         fig.add_trace(go.Scatter(x=x, y=data["rsi14"], name="RSI14"), row=3, col=1)
     fig.update_layout(height=720, xaxis_rangeslider_visible=False)
-    st.plotly_chart(fig, width="stretch")
+    st.plotly_chart(fig, use_container_width=True)
 
     row = stock_feature(provider, code, start, end)
     st.subheader("操作计划")
@@ -394,14 +394,14 @@ def page_llm(provider: TushareProvider, start: str, end: str, max_symbols: int) 
     with tabs[0]:
         st.dataframe(sectors.head(30), width="stretch")
         if not sectors.empty:
-            st.plotly_chart(px.bar(sectors.head(20), x="sector_name", y="rps50", title="主题热度"), width="stretch")
+            st.plotly_chart(px.bar(sectors.head(20), x="sector_name", y="rps50", title="主题热度"), use_container_width=True)
     with tabs[1]:
         keys = st.multiselect("组合因子", [f.label for f in FACTOR_CATALOG], default=["站上MA20", "RPS50≥70"])
         label_to_key = {f.label: f.key for f in FACTOR_CATALOG}
         pool = stock_pool_from_factors(features, [label_to_key[k] for k in keys])
         st.dataframe(pool[[c for c in display_columns() if c in pool.columns]], width="stretch")
     with tabs[2]:
-        st.plotly_chart(px.scatter(sectors, x="pct_chg", y="net_mf_yi", size="amount_yi", hover_name="sector_name", title="板块强度矩阵"), width="stretch")
+        st.plotly_chart(px.scatter(sectors, x="pct_chg", y="net_mf_yi", size="amount_yi", hover_name="sector_name", title="板块强度矩阵"), use_container_width=True)
     with tabs[3]:
         code = st.text_input("股票代码或名称", "000001")
         row = stock_feature(provider, code, start, end)
