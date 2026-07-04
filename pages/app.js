@@ -292,6 +292,7 @@ let marketEndDate = "2026-07-04";
 let marketStateFilter = "震荡行情";
 let marketReviewUpdatedAt = "";
 let activeFactors = new Set(["ma20"]);
+const DEFAULT_SCREENER_TEMPLATE = ["ma20", "macd", "rps"];
 let customConditions = [];
 let savedStrategies = [];
 let screenerSort = { field: "rps_120", direction: "desc" };
@@ -1000,7 +1001,7 @@ function renderScreener() {
     <div class="panel">
       ${panelTitle(
         "多因子量化模型",
-        `<div class="top-actions"><button class="ghost-button compact-button" data-clear-factors="1">清空因子</button><button class="primary-button" data-run-screener="1">筛选</button></div>`
+        `<div class="top-actions"><button class="ghost-button compact-button" data-reset-screener-template="1">三因子模板</button><button class="ghost-button compact-button" data-clear-factors="1">清空因子</button><button class="primary-button" data-run-screener="1">筛选</button></div>`
       )}
       <div class="factor-grid">
         ${factorGroups
@@ -4842,7 +4843,7 @@ function loadScreenerState() {
   try {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_screener") || "null");
     if (!stored) return;
-    activeFactors = new Set(Array.isArray(stored.activeFactors) ? stored.activeFactors : Array.from(activeFactors));
+    activeFactors = new Set(validScreenerFactors(Array.isArray(stored.activeFactors) ? stored.activeFactors : Array.from(activeFactors)));
     customConditions = Array.isArray(stored.customConditions) ? stored.customConditions.map(normalizeCondition).filter(Boolean) : [];
     savedStrategies = Array.isArray(stored.savedStrategies) ? stored.savedStrategies.map(normalizeStrategy).filter(Boolean) : [];
     screenerSort = normalizeSort(stored.screenerSort);
@@ -4866,6 +4867,20 @@ function persistScreenerState() {
   } catch (error) {
     showToast("选股条件已更新，浏览器存储暂不可用。", "info");
   }
+}
+
+function validScreenerFactors(keys) {
+  const allowed = new Set(factorGroups.flatMap(([, chips]) => chips.map(([key]) => key)));
+  return (keys || []).filter((key) => allowed.has(key));
+}
+
+function applyDefaultScreenerTemplate() {
+  activeFactors = new Set(DEFAULT_SCREENER_TEMPLATE);
+  customConditions = [];
+  screenerSort = normalizeSort({ field: "rps_120", direction: "desc" });
+  selectedBacktestStrategyId = "current";
+  persistScreenerState();
+  persistStrategyLabState();
 }
 
 function loadStrategyLabState() {
@@ -5550,6 +5565,11 @@ function attachEvents() {
     persistScreenerState();
     render();
   });
+  document.querySelector("[data-reset-screener-template]")?.addEventListener("click", () => {
+    applyDefaultScreenerTemplate();
+    showToast("已恢复 MA20 + MACD + RPS 三因子模板。", "success");
+    render();
+  });
   document.querySelector("[data-run-screener]")?.addEventListener("click", async () => {
     persistScreenerState();
     const progressBar = document.querySelector("#globalProgress");
@@ -5692,12 +5712,7 @@ function attachEvents() {
     render();
   });
   document.querySelector("[data-template-strategy]")?.addEventListener("click", () => {
-    activeFactors = new Set(["ma20", "macd", "rps"]);
-    customConditions = [];
-    screenerSort = normalizeSort({ field: "rps_120", direction: "desc" });
-    selectedBacktestStrategyId = "current";
-    persistScreenerState();
-    persistStrategyLabState();
+    applyDefaultScreenerTemplate();
     showToast("已套用 MA20 + MACD + RPS 三因子模板。", "success");
     render();
   });
@@ -6110,7 +6125,7 @@ async function loadMarketSnapshot() {
 
 async function fetchLiveMarketPayload() {
   if (isGithubPages() && !VERCEL_BACKEND_URL) throw new Error("backend unavailable");
-  const params = new URLSearchParams({ symbol: selectedQuote });
+  const params = new URLSearchParams({ symbol: selectedQuote, stockLimit: "8000" });
   const tradeDate = compactDateValue(activeRequestTradeDate());
   if (tradeDate) params.set("date", tradeDate);
   if (selectedBoardCode) params.set("boardCode", selectedBoardCode);
