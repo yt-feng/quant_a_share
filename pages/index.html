@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Quant A Share Pages</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">Q</span>
+        <div>
+          <strong>Quant A Share</strong>
+          <small>GitHub Pages 静态版</small>
+        </div>
+      </div>
+      <nav id="nav"></nav>
+      <div class="sidebar-note">
+        <span>数据模式</span>
+        <strong>演示数据</strong>
+        <p>完整 TuShare 实时版请运行 Streamlit。</p>
+      </div>
+    </aside>
+
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <h1 id="page-title">大盘情绪</h1>
+          <p id="page-subtitle">公开数据研究看板，不含服务端密钥。</p>
+        </div>
+        <div class="top-actions">
+          <a class="link-button" href="https://github.com/yt-feng/quant_a_share" target="_blank" rel="noreferrer">GitHub</a>
+          <a class="primary-button" href="./" aria-label="刷新页面">刷新</a>
+        </div>
+      </header>
+
+      <section id="view"></section>
+    </main>
+
+    <template id="metric-template">
+      <div class="metric">
+        <span></span>
+        <strong></strong>
+        <small></small>
+      </div>
+    </template>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
