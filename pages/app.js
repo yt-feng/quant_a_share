@@ -332,6 +332,7 @@ function renderSectors() {
   const totalUp = data.sectors.reduce((sum, row) => sum + Number(row[4] || 0), 0);
   const totalDown = data.sectors.reduce((sum, row) => sum + Number(row[5] || 0), 0);
   const totalFund = data.sectors.reduce((sum, row) => sum + Number(row[7] || 0), 0);
+  const hasSectorFund = !marketSource.includes("sina-industry-sectors");
   return `
     <section class="panel compact-panel">
       <div class="toolbar">
@@ -351,7 +352,7 @@ function renderSectors() {
       ${metric("平均涨跌幅", `${(data.sectors.reduce((s, r) => s + r[1], 0) / Math.max(data.sectors.length, 1)).toFixed(2)}%`, "排序口径")}
       ${metric("总上涨家数", totalUp, "样本聚合")}
       ${metric("总下跌家数", totalDown, "样本聚合")}
-      ${metric("总资金流向", `${totalFund >= 0 ? "+" : ""}${totalFund.toFixed(2)}亿`, "公开源")}
+      ${metric("总资金流向", hasSectorFund ? `${totalFund >= 0 ? "+" : ""}${totalFund.toFixed(2)}亿` : "无字段", hasSectorFund ? "公开源" : "当前板块源不含资金字段")}
       ${metric("图表模式", "柱状图", "可切换饼图")}
     </section>
     <section class="panel compact-panel" style="margin-top:14px">
@@ -1122,13 +1123,14 @@ async function loadMarketSnapshot() {
     if (!payload.ok) return;
     marketSource = payload.source || "公开源";
     if (payload.market) {
+      const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
       data.metrics = [
         ["情绪温度", `${payload.market.temperature}%`, payload.market.state],
         ["成交额", `${payload.market.amountYi.toLocaleString()}亿`, marketSource],
         ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `全市场 ${payload.market.total || "-"} 只，平盘 ${payload.market.flat}`],
         ["涨停/跌停", `${payload.market.limitUp} / ${payload.market.limitDown}`, "公开行情口径"],
         ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
-        ["资金净流入", `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿`, "板块资金聚合"],
+        ["资金净流入", hasSectorFund ? `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿` : "无字段", hasSectorFund ? "板块资金聚合" : "当前板块源不含资金字段"],
       ];
       data.limitDistribution = payload.market.limitDistribution || data.limitDistribution;
     }
