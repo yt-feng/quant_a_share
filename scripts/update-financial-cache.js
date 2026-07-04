@@ -24,7 +24,38 @@ function toSymbol(value) {
 
 function pushSymbol(target, value) {
   const symbol = toSymbol(value);
-  if (symbol.length === 6 && !target.includes(symbol)) target.push(symbol);
+  if (symbol.length === 6 && isSupportedFinancialSymbol(symbol) && !target.includes(symbol)) target.push(symbol);
+}
+
+function isSupportedFinancialSymbol(symbol) {
+  return /^[036]\d{5}$/.test(String(symbol || ""));
+}
+
+function rankedStocks(rows, score, limit) {
+  return (rows || [])
+    .filter((row) => isSupportedFinancialSymbol(toSymbol(row.code)))
+    .slice()
+    .sort((a, b) => (Number(score(b)) || 0) - (Number(score(a)) || 0))
+    .slice(0, limit);
+}
+
+function pushRankedStocks(symbols, rows, score, limit) {
+  rankedStocks(rows, score, limit).forEach((stock) => pushSymbol(symbols, stock.code));
+}
+
+function pushIndustryLeaders(symbols, rows, perIndustry = 3) {
+  const buckets = new Map();
+  (rows || []).forEach((stock) => {
+    const symbol = toSymbol(stock.code);
+    if (!isSupportedFinancialSymbol(symbol)) return;
+    const industry = String(stock.industry || stock.sector || "未归类");
+    if (!buckets.has(industry)) buckets.set(industry, []);
+    buckets.get(industry).push(stock);
+  });
+  Array.from(buckets.values())
+    .flatMap((items) => rankedStocks(items, (stock) => Number(stock.amount) || Number(stock.totalMv) || 0, perIndustry))
+    .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
+    .forEach((stock) => pushSymbol(symbols, stock.code));
 }
 
 function collectSymbols() {
@@ -36,15 +67,16 @@ function collectSymbols() {
 
   const market = readJson(MARKET_CACHE_PATH);
   pushSymbol(symbols, market?.quote?.code);
-  (market?.stocks || [])
-    .slice()
-    .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
-    .slice(0, 80)
-    .forEach((stock) => pushSymbol(symbols, stock.code));
-  (market?.popularity?.rank?.items || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
-  (market?.limitPools?.limitUp || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
-  (market?.limitPools?.broken || []).slice(0, 30).forEach((item) => pushSymbol(symbols, item.code));
-  (market?.limitPools?.strong || []).slice(0, 30).forEach((item) => pushSymbol(symbols, item.code));
+  const stocks = market?.stocks || [];
+  pushRankedStocks(symbols, stocks, (stock) => stock.amount, 280);
+  pushRankedStocks(symbols, stocks, (stock) => Math.abs(Number(stock.mainNet) || 0), 180);
+  pushRankedStocks(symbols, stocks, (stock) => Number(stock.totalMv) || Number(stock.circMv) || 0, 120);
+  pushRankedStocks(symbols, stocks, (stock) => Math.abs(Number(stock.pct) || 0) * Math.log10((Number(stock.amount) || 0) + 10), 120);
+  pushIndustryLeaders(symbols, stocks, 3);
+  (market?.popularity?.rank?.items || []).slice(0, 100).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.limitUp || []).slice(0, 100).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.broken || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.strong || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
 
   return symbols.slice(0, MAX_SYMBOLS);
 }
