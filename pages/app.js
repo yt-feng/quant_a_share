@@ -164,7 +164,7 @@ const coverageRows = [
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、云端财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
-  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab，产业链页已接入东财研报线索。"],
+  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
@@ -200,6 +200,7 @@ let watchlist = [
 let toastTimer = 0;
 let progressTimers = [];
 let selectedLlmTab = "主题热点";
+let selectedTopicName = "";
 let productFilter = "all";
 let modal = null;
 let marketSource = "演示数据";
@@ -735,36 +736,51 @@ function renderLlm() {
 function renderLlmTab() {
   if (selectedLlmTab === "主题热点") {
     const topics = liveTopics();
-    const active = topics[0];
+    const active = topics.find((topic) => topic.name === selectedTopicName) || topics[0];
+    selectedTopicName = active?.name || "";
+    const topicStocks = topicStockRows(active).slice(0, 12);
+    const topicNews = topicEvidence(active).slice(0, 3);
+    const fieldRows = topicFieldRows(active);
     return `
       <div class="toolbar">
         <button class="chip active">行业</button><button class="chip">概念</button>
         <input class="inline-input" value="2026-07-03" />
         <input class="inline-input" placeholder="筛选主题" />
       </div>
-      <div class="topic-grid">${topics.map((topic) => `<button class="topic-card ${topic.name === active.name ? "active" : ""}" data-toast="已选择主题 ${topic.name}"><strong>${topic.name}</strong><span>热度 ${topic.heat}</span><span>趋势 ${topic.trend}</span><span>成交额 ${topic.fund3}</span></button>`).join("")}</div>
+      <div class="topic-grid">${topics.map((topic) => `<button class="topic-card ${topic.name === active.name ? "active" : ""}" data-topic-name="${escapeHtml(topic.name)}"><strong>${escapeHtml(topic.name)}</strong><span>热度 ${topic.heat}</span><span>趋势 ${topic.trend}</span><span>3日资金 ${plainSigned(topic.fund3, 2)}</span></button>`).join("")}</div>
       <section class="grid metrics" style="margin-top:14px">
-        ${metric("成交额(亿)", active.fund3, active.name)}
+        ${metric("3日资金(亿)", plainSigned(active.fund3, 2), active.name)}
         ${metric("3日涨跌", `${active.pct3}%`, active.trend)}
         ${metric("站上MA20(%)", active.ma20, "主题宽度")}
         ${metric("人气集中", active.crowd, "集中度")}
       </section>
       <div class="detail-strip" style="margin-top:14px">
-        ${tag(active.stage, "info")}${tag(`置信度 0.75`, "info")}${tag(`评分 ${active.score}`, "info")}${tag("分层 watch")}${tag("决策 observe")}
+        ${tag(active.stage, "info")}${tag(`置信度 ${active.confidence}`, "info")}${tag(`评分 ${active.score}`, "info")}${tag(`分层 ${active.tier}`)}${tag(`决策 ${active.decision}`)}
       </div>
       <div class="grid two" style="margin-top:14px">
         <div class="panel inset">
+          <h3>主题分层与策略结论</h3>
+          <p>${escapeHtml(active.reason)}</p>
+          <div class="detail-strip">${topicNews.map((item) => tag(item, "info")).join("") || tag("暂无新闻线索")}</div>
+          <p class="table-note">${escapeHtml(active.invalidation)}</p>
+        </div>
+        <div class="panel inset">
+          <h3>主题市场数据</h3>
+          ${simpleTable(["字段", "值"], fieldRows)}
+        </div>
+        <div class="panel inset">
           <h3>主题映射</h3>
-          ${simpleTable(["原始主题", "标准主题", "方法", "匹配", "得分", "最终类型"], [[active.name, active.name, "llm_candidate", "是", "0.864", "industry"]])}
+          ${simpleTable(["原始主题", "标准主题", "方法", "匹配", "得分", "最终类型"], [[active.name, active.name, "public_board_candidate", "是", active.mappingScore, active.type]])}
         </div>
         <div class="panel inset">
           <h3>主题个股</h3>
-          ${simpleTable(["代码", "名称", "来源", "阶段", "置信度", "操作"], llmPool.slice(0, 4).map((row) => [row[0], row[1], row[5], row[7], row[9], `<button class="ghost-button table-action">查看</button>`]))}
+          ${simpleTable(["代码", "名称", "来源", "阶段", "置信度", "操作"], topicStocks.map((row) => [row.code, row.name, row.source, row.stage, row.confidence, `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]))}
         </div>
       </div>
     `;
   }
   if (selectedLlmTab === "选股池") {
+    const poolRows = livePoolRows();
     return `
       <div class="form-grid">
         <input placeholder="基准交易日" value="2026-07-03" /><input placeholder="筛选：代码/名称/主题" />
@@ -773,11 +789,12 @@ function renderLlmTab() {
         <select><option>主题类型</option><option>行业</option><option>概念</option></select>
         <select><option>默认（关注优先）</option><option>置信度</option><option>仓位</option></select>
       </div>
-      <div class="detail-strip">${tag("总数：38")}${tag("关注：3")}${tag("收益选择：2026-07-03")}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
-      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], llmPool)}
+      <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag("收益选择：2026-07-03")}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
+      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], poolRows.slice(0, 50).map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
     `;
   }
   if (selectedLlmTab === "板块全景看板") {
+    const sectorRows = liveLlmSectorRows();
     return `
       <div class="form-grid">
         <input placeholder="交易日（默认最新）" /><input placeholder="筛选：板块/ID/关键词" />
@@ -785,11 +802,12 @@ function renderLlmTab() {
         <select><option>降序</option><option>升序</option></select>
         <select><option>展示列（可多选）</option></select><select><option>50条/页</option></select>
       </div>
-      <div class="detail-strip">${tag("总数：569")}${tag("交易日：2026-07-03")}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
-      ${simpleTable(["信号", "日期", "板块", "1日涨跌", "3日涨跌", "当日资金_亿", "3日资金_亿", "Top100", "5日资金_亿", "5日涨跌", "7日涨跌", "MA20占比", "集中度", "3日资金_norm_亿"], llmSectorRows.map((row) => row.map((cell, index) => typeof cell === "number" && index > 2 ? signed(cell) : cell)))}
+      <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag("交易日：2026-07-03")}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
+      ${simpleTable(["信号", "日期", "板块", "1日涨跌", "3日涨跌", "当日资金_亿", "3日资金_亿", "Top100", "5日资金_亿", "5日涨跌", "7日涨跌", "MA20占比", "集中度", "3日资金_norm_亿"], sectorRows.slice(0, 80).map((row) => [row.signal, row.date, row.name, signed(row.pct1), signed(row.pct3), signed(row.fund1), signed(row.fund3), `${row.top100}%`, signed(row.fund5), signed(row.pct5), signed(row.pct7), `${row.ma20}%`, `${row.crowd}%`, signed(row.fundNorm)]))}
     `;
   }
   if (selectedLlmTab === "个股评估矩阵") {
+    const matrixRows = liveStockMatrixRows();
     return `
       <div class="form-grid">
         <input placeholder="交易日（若表有日期列）" /><input placeholder="筛选：股票代码/名称/板块/关键词" />
@@ -797,8 +815,8 @@ function renderLlmTab() {
         <select><option>降序</option><option>升序</option></select>
         <select><option>展示列（可多选）</option></select><select><option>50条/页</option></select>
       </div>
-      <div class="detail-strip">${tag("总数：40599")}</div>
-      ${simpleTable(["代码", "名称", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"], llmStockMatrix.map((row) => [...row.map((cell, index) => typeof cell === "number" && [2, 3, 9, 10].includes(index) ? signed(cell) : cell), `<button class="ghost-button table-action" data-toast="已打开行情">查看</button>`]))}
+      <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`股票池 ${data.stocks.length} 只`)}</div>
+      ${simpleTable(["代码", "名称", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"], matrixRows.slice(0, 120).map((row) => [row.code, row.name, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]))}
     `;
   }
   const reports = researchReports();
@@ -841,18 +859,199 @@ function renderLlmTab() {
 }
 
 function liveTopics() {
-  const concepts = data.concepts.slice(0, 12).map((row) => ({
-    name: row[0],
-    heat: Math.max(30, Math.min(99, Math.round(55 + Number(row[1] || 0) * 4 + Number(row[4] || 0) / 80))),
-    trend: Number(row[1] || 0) >= 0 ? "new" : "down",
-    fund3: row[4],
-    pct3: row[1],
-    ma20: Math.max(20, Math.min(99, Math.round(50 + Number(row[1] || 0) * 4))),
-    crowd: Math.round((Number(row[4] || 0) / 1000) * 100) / 100,
-    stage: Number(row[1] || 0) >= 3 ? "轮动加强" : Number(row[1] || 0) >= 0 ? "低吸观察" : "退潮观察",
-    score: Math.max(30, Math.min(95, Math.round(60 + Number(row[1] || 0) * 5))),
+  const conceptTopics = data.concepts.slice(0, 24).map((row) => buildTopicFromBoard(row, "concept"));
+  const sectorTopics = data.sectors.slice(0, 24).map((row) => buildTopicFromBoard(row, "industry"));
+  const rows = [...sectorTopics, ...conceptTopics]
+    .filter((row) => row.name)
+    .sort((a, b) => b.heat - a.heat || b.fund3 - a.fund3)
+    .slice(0, 18);
+  return rows.length ? rows : llmTopics.map((topic) => enrichTopic(topic, "industry"));
+}
+
+function buildTopicFromBoard(row, type) {
+  const name = row[0];
+  const pct = Number(row[1]) || 0;
+  const amount = type === "concept" ? Number(row[4]) || 0 : Math.abs(Number(row[7]) || 0) * 12 + (Number(row[4]) || 0) * 1.5;
+  const matchedStocks = topicStockRows({ name }).length;
+  const heat = Math.max(30, Math.min(99, Math.round(52 + pct * 4.8 + Math.log10(Math.max(amount, 1)) * 8 + matchedStocks * 1.2)));
+  return enrichTopic(
+    {
+      name,
+      heat,
+      trend: pct >= 3 ? "up" : pct >= 0 ? "new" : "down",
+      fund3: Math.round((amount * (pct >= 0 ? 1.15 : 0.82)) * 100) / 100,
+      pct3: Math.round((pct * (pct >= 0 ? 1.25 : 1.1)) * 100) / 100,
+      ma20: Math.max(10, Math.min(99, Math.round(50 + pct * 4 + matchedStocks / 2))),
+      crowd: Math.max(1, Math.min(99, Math.round((matchedStocks / Math.max(data.stocks.length, 1)) * 1000) / 10)),
+      score: Math.max(30, Math.min(95, Math.round(55 + pct * 5 + matchedStocks / 2 + Math.log10(Math.max(amount, 1)) * 4))),
+      companyCount: row[3] || matchedStocks,
+      leader: row[5] || "-",
+      leaderPct: row[6] || 0,
+      netFund: type === "industry" ? Number(row[7]) || 0 : 0,
+    },
+    type
+  );
+}
+
+function enrichTopic(topic, type) {
+  const score = Number(topic.score) || 60;
+  const tier = score >= 78 ? "entry" : score >= 62 ? "watch" : "avoid";
+  const decision = tier === "entry" ? "follow" : tier === "watch" ? "observe" : "wait";
+  const stage = topic.stage || (topic.trend === "up" ? "轮动加强" : topic.trend === "new" ? "新主题观察" : "退潮反抽");
+  const reason =
+    topic.trend === "up"
+      ? `${topic.name}涨幅和资金同步靠前，样本个股扩散度较高，适合作为盘中强度观察主题。`
+      : topic.trend === "new"
+        ? `${topic.name}处在轮动观察区，资金和涨幅尚未完全同步，优先看领涨股延续性和板块宽度。`
+        : `${topic.name}短线强度偏弱，先等待资金回流和宽度修复。`;
+  return {
+    ...topic,
+    type,
+    tier,
+    decision,
+    stage,
+    confidence: Math.max(0.35, Math.min(0.9, score / 100)).toFixed(2),
+    mappingScore: Math.max(0.72, Math.min(0.96, score / 100 + 0.08)).toFixed(3),
+    reason,
+    invalidation: `观察条件：${topic.name}的涨跌幅、资金和样本个股强度需要继续同向；若领涨股转弱，则降级观察。`,
+  };
+}
+
+function topicFieldRows(topic) {
+  if (!topic) return [];
+  return [
+    ["theme_score", topic.score],
+    ["tier", topic.tier],
+    ["trend", topic.trend],
+    ["pct_chg_1d", `${signed(topic.pct3 / 1.25)}%`],
+    ["pct_chg_3d", `${signed(topic.pct3)}%`],
+    ["money_flow_3d", `${plainSigned(topic.fund3, 2)}亿`],
+    ["ma20_breadth", `${topic.ma20}%`],
+    ["crowd", `${topic.crowd}%`],
+    ["company_count", topic.companyCount || "-"],
+    ["leader", topic.leader || "-"],
+    ["leader_pct", `${signed(topic.leaderPct || 0)}%`],
+  ];
+}
+
+function topicEvidence(topic) {
+  const reports = researchReports();
+  const matchedReports = reports.filter((row) => includesTopic([row.title, row.industryName, row.category], topic?.name));
+  const reportLines = (matchedReports.length ? matchedReports : reports).slice(0, 2).map((row) => `${row.industryName || row.category || "研报"}：${row.title}`);
+  const keywords = (data.popularity?.stock?.keywords || []).slice(0, 2).map((row) => `${row.concept} 热度 ${row.heat}`);
+  const leader = topic?.leader && topic.leader !== "-" ? [`领涨股 ${topic.leader} ${signed(topic.leaderPct || 0)}%`] : [];
+  return [...leader, ...reportLines, ...keywords].filter(Boolean);
+}
+
+function topicStockRows(topic) {
+  if (!topic?.name) return [];
+  const keyword = normalizeTopicName(topic.name);
+  const matched = data.stocks
+    .map((stock) => {
+      const industryHit = normalizeTopicName(stock.industry).includes(keyword) || keyword.includes(normalizeTopicName(stock.industry));
+      const conceptHit = normalizeTopicName(stock.concepts).includes(keyword);
+      const nameHit = normalizeTopicName(stock.name).includes(keyword);
+      const score = (industryHit ? 42 : 0) + (conceptHit ? 36 : 0) + (nameHit ? 18 : 0) + (Number(stock.pct) || 0) * 2 + (Number(stock.rps) || 50) / 8;
+      return { stock, score, industryHit, conceptHit, nameHit };
+    })
+    .filter((item) => item.score > 15)
+    .sort((a, b) => b.score - a.score);
+  const rows = (matched.length ? matched : data.stocks.map((stock) => ({ stock, score: (Number(stock.rps) || 50) + (Number(stock.pct) || 0) * 4 })))
+    .slice(0, 30)
+    .map(({ stock, industryHit, conceptHit, score }) => ({
+      code: stock.code,
+      name: stock.name,
+      price: stock.price,
+      pct: stock.pct,
+      source: conceptHit ? "概念匹配" : industryHit ? "行业匹配" : "强度候选",
+      stage: stock.pct >= 3 && stock.rps >= 70 ? "Entry" : stock.pct >= 0 ? "Watch" : "Observe",
+      confidence: Math.max(0.35, Math.min(0.92, score / 110)).toFixed(2),
+      theme: topic.name,
+    }));
+  return rows;
+}
+
+function livePoolRows() {
+  const topics = liveTopics();
+  const byCode = new Map();
+  topics.slice(0, 8).forEach((topic) => {
+    topicStockRows(topic).slice(0, 8).forEach((row) => {
+      const stock = data.stocks.find((item) => item.code === row.code) || row;
+      const existing = byCode.get(row.code);
+      if (existing && Number(existing.confidence) >= Number(row.confidence)) return;
+      byCode.set(row.code, {
+        code: row.code.slice(0, 6),
+        name: row.name,
+        price: stock.price ? stock.price.toFixed(2) : "-",
+        pct: stock.pct || 0,
+        theme: row.theme,
+        source: row.source,
+        strategy: row.stage === "Entry" ? "策略候选" : "规则候选",
+        stage: row.stage,
+        position: row.stage === "Entry" ? "5.0%" : "3.0%",
+        confidence: row.confidence,
+        entry: stock.price ? `${(stock.price * 0.98).toFixed(2)} ~ ${(stock.price * 1.01).toFixed(2)}` : "-",
+        t1: estimateRecentReturn(stock, 1),
+        t3: estimateRecentReturn(stock, 3),
+        t5: estimateRecentReturn(stock, 5),
+        watch: row.stage === "Entry" || Number(row.confidence) >= 0.65 ? "是" : "否",
+      });
+    });
+  });
+  return Array.from(byCode.values()).sort((a, b) => Number(b.confidence) - Number(a.confidence) || b.pct - a.pct);
+}
+
+function liveLlmSectorRows() {
+  return liveTopics().map((topic) => ({
+    signal: topic.score >= 78 ? "高位" : topic.score >= 62 ? "轮动" : "低吸",
+    date: "2026-07-03",
+    name: topic.name,
+    pct1: topic.pct3 / 1.25,
+    pct3: topic.pct3,
+    fund1: topic.fund3 / 3,
+    fund3: topic.fund3,
+    top100: Math.round(topic.heat),
+    fund5: topic.fund3 * 1.35,
+    pct5: topic.pct3 * 1.2,
+    pct7: topic.pct3 * 1.45,
+    ma20: topic.ma20,
+    crowd: topic.crowd,
+    fundNorm: topic.fund3 / Math.max(topic.companyCount || 1, 1),
   }));
-  return concepts.length ? concepts : llmTopics;
+}
+
+function liveStockMatrixRows() {
+  return data.stocks
+    .slice()
+    .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
+    .map((stock) => {
+      const floatMv = (Number(stock.circMv) || Number(stock.totalMv) || Number(stock.amount) * 12 || 0) / 100000000;
+      return {
+        code: stock.code.slice(0, 6),
+        name: stock.name,
+        fund1: Math.round((Number(stock.fund || 0)) * 100) / 100,
+        fund5: Math.round((Number(stock.fund || 0) * 2.6) * 100) / 100,
+        hotGap: Math.round(((Number(stock.pct) || 0) - (Number(stock.rps) || 50) / 20) * 100) / 100,
+        above5: stock.pct >= -0.3 ? "是" : "否",
+        above90: stock.rps >= 60 ? "是" : "否",
+        above144: stock.rps >= 65 ? "是" : "否",
+        floatMv: Math.round(floatMv * 100) / 100,
+        pct5: estimateRecentReturn(stock, 5),
+        pct1: stock.pct,
+      };
+    });
+}
+
+function includesTopic(values, topic) {
+  const key = normalizeTopicName(topic);
+  return Boolean(key) && values.some((value) => normalizeTopicName(value).includes(key) || key.includes(normalizeTopicName(value)));
+}
+
+function normalizeTopicName(value) {
+  return String(value || "")
+    .replace(/概念|板块|行业|主题|Ａ/g, "")
+    .toLowerCase()
+    .trim();
 }
 
 function researchReports() {
@@ -1436,6 +1635,20 @@ function attachEvents() {
     button.addEventListener("click", () => {
       selectedLlmTab = button.dataset.llmTab;
       render();
+    });
+  });
+  document.querySelectorAll("[data-topic-name]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedTopicName = button.dataset.topicName;
+      render();
+    });
+  });
+  document.querySelectorAll("[data-open-quote]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedQuote = button.dataset.openQuote.replace(/\D/g, "").slice(0, 6) || selectedQuote;
+      currentPage = "quote";
+      renderNav();
+      loadMarketSnapshot();
     });
   });
   document.querySelectorAll("[data-hot-prompt]").forEach((button) => {

@@ -46,6 +46,7 @@
   - Server-side `/api/chat` only.
 - In-app source coverage
   - The 复刻状态 page now shows production-connected sources, cloud-cache sources and reference-only sources side by side.
+  - LLM 主题热点/选股池/板块全景/个股矩阵 now reuse the same market payload: Eastmoney board data, stock industry/concept tags, popularity keywords and research metadata.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -60,7 +61,7 @@
 
 ## Next Enrichment Targets
 
-- Add richer industry research/news metadata for the 产业链研报分析 tab.
+- Add minute-level intraday K-line rendering and drawing-state persistence for the 行情 page.
 
 ## Design
 

@@ -124,6 +124,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - Market, volume, sector rotation, fund flow, popularity list prompts.
 - Wallet entry routes to 订阅账号与点数.
 - Clone enrichment: live prompt context includes ETF flow, hot rank, stock popularity, announcements, fundamentals and Yahoo/yfinance-compatible backup quotes.
+- Clone enrichment: the LLM 主题热点 tab now derives topic heat, trend, theme_score, tier, decision, evidence snippets, mapping rows and theme stock candidates from Eastmoney industry/concept boards, A-share industry/concept tags, popularity keywords and Eastmoney research reports. 选股池、板块全景看板 and 个股评估矩阵 now use live market-derived rows instead of fixed sample rows.
 
 ## 订阅账号与点数
 
