@@ -1,14 +1,14 @@
 {
   "ok": true,
   "source": "financial-cache",
-  "generatedAt": "2026-07-04T06:01:54.422Z",
+  "generatedAt": "2026-07-04T09:51:56.495Z",
   "symbolCount": 40,
   "requestedSymbolCount": 40,
   "symbols": {
     "300059": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300059.SZ",
-      "name": "",
+      "name": "东方财富",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -242,13 +242,30 @@
           "group": 3
         }
       ],
+      "totalMv": 333215529367.5,
+      "circMv": 281220409042.56,
+      "peDynamic": 22.29,
+      "pb": 3.53,
+      "turnover": 3.22,
+      "amplitude": 2.65,
+      "roe": 3.99,
+      "raw": {
+        "f183": 5031027125.4,
+        "f184": 44.3380155273,
+        "f185": 37.669892046298,
+        "f186": 73.9716278356,
+        "f187": 74.2945677444,
+        "f190": 3.360883341911,
+        "f191": 876,
+        "f192": 6266
+      },
       "symbol": "300059",
-      "cachedAt": "2026-07-04T06:01:48.971Z"
+      "cachedAt": "2026-07-04T09:51:50.436Z"
     },
     "300223": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300223.SZ",
-      "name": "",
+      "name": "北京君正",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -482,13 +499,30 @@
           "group": 3
         }
       ],
+      "totalMv": 125539923098.52,
+      "circMv": 109454954079.24,
+      "peDynamic": 98.39,
+      "pb": 9.9,
+      "turnover": 13.44,
+      "amplitude": 13.25,
+      "roe": 2.54,
+      "raw": {
+        "f183": 1559766866.05,
+        "f184": 47.1155548956,
+        "f185": 331.607267145335,
+        "f186": 43.4912426444,
+        "f187": 20.5382178582,
+        "f190": 6.621711280108,
+        "f191": -2816,
+        "f192": -94
+      },
       "symbol": "300223",
-      "cachedAt": "2026-07-04T06:01:49.632Z"
+      "cachedAt": "2026-07-04T09:51:51.099Z"
     },
     "300308": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300308.SZ",
-      "name": "",
+      "name": "中际旭创",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -722,13 +756,30 @@
           "group": 3
         }
       ],
+      "totalMv": 1244601859356,
+      "circMv": 1238692792248,
+      "peDynamic": 54.26,
+      "pb": 35.93,
+      "turnover": 2.96,
+      "amplitude": 6.39,
+      "roe": 17.54,
+      "raw": {
+        "f183": 19496398083.95,
+        "f184": 192.1169094233,
+        "f185": 262.283657132941,
+        "f186": 46.0581330258,
+        "f187": 32.39978995,
+        "f190": 22.299462230415,
+        "f191": 6530,
+        "f192": 335
+      },
       "symbol": "300308",
-      "cachedAt": "2026-07-04T06:01:49.004Z"
+      "cachedAt": "2026-07-04T09:51:50.597Z"
     },
     "300502": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300502.SZ",
-      "name": "",
+      "name": "新易盛",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -962,13 +1013,30 @@
           "group": 3
         }
       ],
+      "totalMv": 733379015784,
+      "circMv": 659731901108,
+      "peDynamic": 65.95,
+      "pb": 37.78,
+      "turnover": 4.26,
+      "amplitude": 9.02,
+      "roe": 14.52,
+      "raw": {
+        "f183": 8337902040.74,
+        "f184": 105.759481459,
+        "f185": 76.799832428124,
+        "f186": 49.1609551491,
+        "f187": 33.2721138937,
+        "f190": 11.748305637307,
+        "f191": -7318,
+        "f192": -589
+      },
       "symbol": "300502",
-      "cachedAt": "2026-07-04T06:01:49.638Z"
+      "cachedAt": "2026-07-04T09:51:51.171Z"
     },
     "300750": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300750.SZ",
-      "name": "",
+      "name": "宁德时代",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -1202,13 +1270,30 @@
           "group": 3
         }
       ],
+      "totalMv": 1758118324600,
+      "circMv": 1617664575200,
+      "peDynamic": 21.19,
+      "pb": 5.38,
+      "turnover": 0.61,
+      "amplitude": 2.34,
+      "roe": 5.98,
+      "raw": {
+        "f183": 129131041000,
+        "f184": 52.4486955482,
+        "f185": 48.523716069792,
+        "f186": 24.8156219851,
+        "f187": 17.6078918159,
+        "f190": 35.647156802231,
+        "f191": 9799,
+        "f192": 2239
+      },
       "symbol": "300750",
-      "cachedAt": "2026-07-04T06:01:48.296Z"
+      "cachedAt": "2026-07-04T09:51:49.844Z"
     },
     "300821": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "300821.SZ",
-      "name": "",
+      "name": "东岳硅材",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -1442,13 +1527,30 @@
           "group": 3
         }
       ],
+      "totalMv": 23400000000,
+      "circMv": 23395919625,
+      "peDynamic": 30.15,
+      "pb": 4.59,
+      "turnover": 6.84,
+      "amplitude": 10.08,
+      "roe": 3.86,
+      "raw": {
+        "f183": 1255926659.21,
+        "f184": 4.4863195565,
+        "f185": 426.987515940938,
+        "f186": 21.0554552554,
+        "f187": 15.449467862399999,
+        "f190": 1.082735011275,
+        "f191": -7555,
+        "f192": -7865
+      },
       "symbol": "300821",
-      "cachedAt": "2026-07-04T06:01:53.666Z"
+      "cachedAt": "2026-07-04T09:51:55.445Z"
     },
     "301308": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "301308.SZ",
-      "name": "",
+      "name": "江波龙",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -1682,13 +1784,30 @@
           "group": 3
         }
       ],
+      "totalMv": 261460163546.13998,
+      "circMv": 174190106293.84,
+      "peDynamic": 16.92,
+      "pb": 21.96,
+      "turnover": 7.32,
+      "amplitude": 12.14,
+      "roe": 39.4,
+      "raw": {
+        "f183": 9908726244.41,
+        "f184": 132.7928324203,
+        "f185": 2644.04965803364,
+        "f186": 55.5274284884,
+        "f187": 40.160210661200004,
+        "f190": 15.449742021084,
+        "f191": 9119,
+        "f192": 599
+      },
       "symbol": "301308",
-      "cachedAt": "2026-07-04T06:01:49.689Z"
+      "cachedAt": "2026-07-04T09:51:51.257Z"
     },
     "600176": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600176.SH",
-      "name": "",
+      "name": "中国巨石",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -1922,13 +2041,30 @@
           "group": 3
         }
       ],
+      "totalMv": 283822394015.2,
+      "circMv": 281585520285.2,
+      "peDynamic": 56,
+      "pb": 9,
+      "turnover": 5.84,
+      "amplitude": 13.4,
+      "roe": 4,
+      "raw": {
+        "f183": 5281938122.05,
+        "f184": 17.9290509314,
+        "f185": 73.483103133969,
+        "f186": 39.6377991631,
+        "f187": 24.8833337332,
+        "f190": 5.810318503485,
+        "f191": 8711,
+        "f192": 5850
+      },
       "symbol": "600176",
-      "cachedAt": "2026-07-04T06:01:49.691Z"
+      "cachedAt": "2026-07-04T09:51:51.783Z"
     },
     "600183": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600183.SH",
-      "name": "",
+      "name": "生益科技",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -2162,13 +2298,30 @@
           "group": 3
         }
       ],
+      "totalMv": 390553789799.4,
+      "circMv": 384987958244.32,
+      "peDynamic": 84.31,
+      "pb": 24.43,
+      "turnover": 3.24,
+      "amplitude": 13.31,
+      "roe": 6.68,
+      "raw": {
+        "f183": 8141455910.4,
+        "f184": 45.0885351399,
+        "f185": 105.4723584166,
+        "f186": 28.1013204296,
+        "f187": 16.364488002999998,
+        "f190": 2.368639145597,
+        "f191": -3835,
+        "f192": -525
+      },
       "symbol": "600183",
-      "cachedAt": "2026-07-04T06:01:52.994Z"
+      "cachedAt": "2026-07-04T09:51:54.596Z"
     },
     "600487": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600487.SH",
-      "name": "",
+      "name": "亨通光电",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -2402,13 +2555,30 @@
           "group": 3
         }
       ],
+      "totalMv": 220544795620.94,
+      "circMv": 218648096197.5,
+      "peDynamic": 49.88,
+      "pb": 6.95,
+      "turnover": 7.06,
+      "amplitude": 6.16,
+      "roe": 3.44,
+      "raw": {
+        "f183": 17790560069.79,
+        "f184": 34.086710357,
+        "f185": 98.526807304936,
+        "f186": 15.9794615991,
+        "f187": 6.6436177845,
+        "f190": 7.325132129998,
+        "f191": 7697,
+        "f192": 7584
+      },
       "symbol": "600487",
-      "cachedAt": "2026-07-04T06:01:50.315Z"
+      "cachedAt": "2026-07-04T09:51:51.785Z"
     },
     "600519": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600519.SH",
-      "name": "",
+      "name": "贵州茅台",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -2642,13 +2812,30 @@
           "group": 3
         }
       ],
+      "totalMv": 1493159968314.45,
+      "circMv": 1493159968314.45,
+      "peDynamic": 13.7,
+      "pb": 6.33,
+      "turnover": 0.27,
+      "amplitude": 2.09,
+      "roe": 10.57,
+      "raw": {
+        "f183": 54702912385.23,
+        "f184": 6.3360092771,
+        "f185": 1.471418294983,
+        "f186": 89.7592176242,
+        "f187": 52.2244889889,
+        "f190": 147.282455214274,
+        "f191": -767,
+        "f192": -2
+      },
       "symbol": "600519",
-      "cachedAt": "2026-07-04T06:01:48.316Z"
+      "cachedAt": "2026-07-04T09:51:49.773Z"
     },
     "600522": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600522.SH",
-      "name": "",
+      "name": "中天科技",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -2882,13 +3069,30 @@
           "group": 3
         }
       ],
+      "totalMv": 171398331523.44,
+      "circMv": 171398331523.44,
+      "peDynamic": 46.63,
+      "pb": 4.51,
+      "turnover": 6.84,
+      "amplitude": 4.63,
+      "roe": 2.43,
+      "raw": {
+        "f183": 13142208087.22,
+        "f184": 34.7112176697,
+        "f185": 46.420350594503,
+        "f186": 15.5814103559,
+        "f187": 7.2089960129,
+        "f190": 6.201631140218,
+        "f191": 4346,
+        "f192": 7597
+      },
       "symbol": "600522",
-      "cachedAt": "2026-07-04T06:01:53.005Z"
+      "cachedAt": "2026-07-04T09:51:54.583Z"
     },
     "600580": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600580.SH",
-      "name": "",
+      "name": "卧龙电驱",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -3122,13 +3326,30 @@
           "group": 3
         }
       ],
+      "totalMv": 58345089035.85,
+      "circMv": 58177574285.85,
+      "peDynamic": 52.85,
+      "pb": 5.36,
+      "turnover": 5.13,
+      "amplitude": 6.33,
+      "roe": 2.49,
+      "raw": {
+        "f183": 3985861916.21,
+        "f184": -1.3140199361,
+        "f185": 2.940486714605,
+        "f186": 23.3058692571,
+        "f187": 7.0688935471,
+        "f190": 4.704861118115,
+        "f191": 10000,
+        "f192": 67069
+      },
       "symbol": "600580",
-      "cachedAt": "2026-07-04T06:01:53.087Z"
+      "cachedAt": "2026-07-04T09:51:55.147Z"
     },
     "600584": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600584.SH",
-      "name": "",
+      "name": "长电科技",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -3362,13 +3583,30 @@
           "group": 3
         }
       ],
+      "totalMv": 162621996121.6,
+      "circMv": 162621996121.6,
+      "peDynamic": 140.06,
+      "pb": 5.69,
+      "turnover": 9.96,
+      "amplitude": 6.91,
+      "roe": 1.01,
+      "raw": {
+        "f183": 9171039551.16,
+        "f184": -1.757947088,
+        "f185": 42.735879912598,
+        "f186": 14.5484097786,
+        "f187": 3.040893165,
+        "f190": 6.104516369256,
+        "f191": 9429,
+        "f192": 15095
+      },
       "symbol": "600584",
-      "cachedAt": "2026-07-04T06:01:50.307Z"
+      "cachedAt": "2026-07-04T09:51:51.957Z"
     },
     "600667": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "600667.SH",
-      "name": "",
+      "name": "太极实业",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -3602,13 +3840,30 @@
           "group": 3
         }
       ],
+      "totalMv": 62662603652.880005,
+      "circMv": 62662603652.880005,
+      "peDynamic": 121.32,
+      "pb": 7.28,
+      "turnover": 19.5,
+      "amplitude": 13.22,
+      "roe": 1.49,
+      "raw": {
+        "f183": 6657801346.7,
+        "f184": -0.9107242054,
+        "f185": 9.481611052924,
+        "f186": 6.900597396,
+        "f187": 2.453599373,
+        "f190": 1.219448179663,
+        "f191": 4766,
+        "f192": 11572
+      },
       "symbol": "600667",
-      "cachedAt": "2026-07-04T06:01:54.372Z"
+      "cachedAt": "2026-07-04T09:51:56.021Z"
     },
     "601211": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "601211.SH",
-      "name": "",
+      "name": "国泰海通",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -3842,13 +4097,30 @@
           "group": 3
         }
       ],
+      "totalMv": 341472293307.73004,
+      "circMv": 261435150438.41,
+      "peDynamic": 13.36,
+      "pb": 1.06,
+      "turnover": 1.03,
+      "amplitude": 2.61,
+      "roe": 1.95,
+      "raw": {
+        "f183": 16232110965,
+        "f184": 58.9069246145,
+        "f185": -47.815412352742,
+        "f186": 0,
+        "f187": 41.3028760921,
+        "f190": 4.362423069994,
+        "f191": -1964,
+        "f192": -2232
+      },
       "symbol": "601211",
-      "cachedAt": "2026-07-04T06:01:53.755Z"
+      "cachedAt": "2026-07-04T09:51:55.265Z"
     },
     "601689": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "601689.SH",
-      "name": "",
+      "name": "拓普集团",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -4082,13 +4354,30 @@
           "group": 3
         }
       ],
+      "totalMv": 108493075259.4,
+      "circMv": 108493075259.4,
+      "peDynamic": 49.15,
+      "pb": 4.57,
+      "turnover": 4.97,
+      "amplitude": 10.8,
+      "roe": 2.27,
+      "raw": {
+        "f183": 6628185769.77,
+        "f184": 14.9211723844,
+        "f185": -2.417112219973,
+        "f186": 19.2562423053,
+        "f187": 8.348689868700001,
+        "f190": 5.810162581157,
+        "f191": 10000,
+        "f192": 30108
+      },
       "symbol": "601689",
-      "cachedAt": "2026-07-04T06:01:54.382Z"
+      "cachedAt": "2026-07-04T09:51:55.809Z"
     },
     "601899": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "601899.SH",
-      "name": "",
+      "name": "紫金矿业",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -4322,13 +4611,30 @@
           "group": 3
         }
       ],
+      "totalMv": 739753680784.04,
+      "circMv": 573141885154.8,
+      "peDynamic": 9.21,
+      "pb": 3.9,
+      "turnover": 2.61,
+      "amplitude": 3.38,
+      "roe": 10.35,
+      "raw": {
+        "f183": 98497579591,
+        "f184": 24.7937696755,
+        "f185": 97.500066337394,
+        "f186": 36.3257532424,
+        "f187": 25.5495909427,
+        "f190": 5.409223983012,
+        "f191": 979,
+        "f192": 2984
+      },
       "symbol": "601899",
-      "cachedAt": "2026-07-04T06:01:50.366Z"
+      "cachedAt": "2026-07-04T09:51:51.920Z"
     },
     "603618": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "603618.SH",
-      "name": "",
+      "name": "杭电股份",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -4562,13 +4868,30 @@
           "group": 3
         }
       ],
+      "totalMv": 33877405184,
+      "circMv": 33877405184,
+      "peDynamic": 104.76,
+      "pb": 12.52,
+      "turnover": 7.95,
+      "amplitude": 8.95,
+      "roe": 2.94,
+      "raw": {
+        "f183": 2202460295.29,
+        "f184": 11.1190030021,
+        "f185": 279.964191945487,
+        "f186": 12.2889273309,
+        "f187": 3.6836962943,
+        "f190": 0.892623706503,
+        "f191": 3091,
+        "f192": 1234
+      },
       "symbol": "603618",
-      "cachedAt": "2026-07-04T06:01:53.688Z"
+      "cachedAt": "2026-07-04T09:51:55.929Z"
     },
     "603986": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "603986.SH",
-      "name": "",
+      "name": "兆易创新",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -4802,13 +5125,30 @@
           "group": 3
         }
       ],
+      "totalMv": 475624825714.23,
+      "circMv": 453083778107.18,
+      "peDynamic": 81.37,
+      "pb": 19.19,
+      "turnover": 9.33,
+      "amplitude": 10.84,
+      "roe": 6.12,
+      "raw": {
+        "f183": 4188075574.04,
+        "f184": 119.3786758368,
+        "f185": 522.788138191454,
+        "f186": 57.0767184326,
+        "f187": 35.1597107365,
+        "f190": 13.318500659991,
+        "f191": -5835,
+        "f192": -125
+      },
       "symbol": "603986",
-      "cachedAt": "2026-07-04T06:01:49.006Z"
+      "cachedAt": "2026-07-04T09:51:50.509Z"
     },
     "688008": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688008.SH",
-      "name": "",
+      "name": "澜起科技",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -5042,13 +5382,30 @@
           "group": 3
         }
       ],
+      "totalMv": 326082965602.8,
+      "circMv": 305866595802.8,
+      "peDynamic": 96.2,
+      "pb": 15.64,
+      "turnover": 6.31,
+      "amplitude": 9.3,
+      "roe": 5.39,
+      "raw": {
+        "f183": 1460718316.43,
+        "f184": 19.514563386,
+        "f185": 61.304640339934,
+        "f186": 69.7882209522,
+        "f187": 56.8025574053,
+        "f190": 5.617683914146,
+        "f191": 9611,
+        "f192": 1184
+      },
       "symbol": "688008",
-      "cachedAt": "2026-07-04T06:01:50.364Z"
+      "cachedAt": "2026-07-04T09:51:52.450Z"
     },
     "688012": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688012.SH",
-      "name": "",
+      "name": "中微公司",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -5282,13 +5639,30 @@
           "group": 3
         }
       ],
+      "totalMv": 394116498831.27,
+      "circMv": 389777492650.22,
+      "peDynamic": 105.89,
+      "pb": 15.14,
+      "turnover": 3.59,
+      "amplitude": 8.97,
+      "roe": 4,
+      "raw": {
+        "f183": 2914986518.73,
+        "f184": 34.1285376976,
+        "f185": 197.201997820704,
+        "f186": 39.8925648403,
+        "f187": 31.5075180698,
+        "f190": 8.011236067272,
+        "f191": 7206,
+        "f192": 227
+      },
       "symbol": "688012",
-      "cachedAt": "2026-07-04T06:01:50.974Z"
+      "cachedAt": "2026-07-04T09:51:52.448Z"
     },
     "688017": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688017.SH",
-      "name": "",
+      "name": "绿的谐波",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -5522,13 +5896,30 @@
           "group": 3
         }
       ],
+      "totalMv": 89465101000,
+      "circMv": 89465101000,
+      "peDynamic": 685.36,
+      "pb": 25.07,
+      "turnover": 14.7,
+      "amplitude": 19.24,
+      "roe": 0.92,
+      "raw": {
+        "f183": 140134456.3,
+        "f184": 42.9556261555,
+        "f185": 61.16876185431,
+        "f186": 33.6180098841,
+        "f187": 23.5409988386,
+        "f190": 3.015493497918,
+        "f191": 8849,
+        "f192": 667
+      },
       "symbol": "688017",
-      "cachedAt": "2026-07-04T06:01:52.419Z"
+      "cachedAt": "2026-07-04T09:51:54.397Z"
     },
     "688256": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688256.SH",
-      "name": "",
+      "name": "寒武纪",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -5762,13 +6153,30 @@
           "group": 3
         }
       ],
+      "totalMv": 850080387057,
+      "circMv": 850080387057,
+      "peDynamic": 209.75,
+      "pb": 69.46,
+      "turnover": 1.62,
+      "amplitude": 5.25,
+      "roe": 8.2,
+      "raw": {
+        "f183": 2884696746.86,
+        "f184": 159.5554734937,
+        "f185": 185.038722485382,
+        "f186": 54.3303762465,
+        "f187": 35.1206765135,
+        "f190": 0.587273891776,
+        "f191": 8104,
+        "f192": 224
+      },
       "symbol": "688256",
-      "cachedAt": "2026-07-04T06:01:50.981Z"
+      "cachedAt": "2026-07-04T09:51:52.558Z"
     },
     "688525": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688525.SH",
-      "name": "",
+      "name": "佰维存储",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -6002,13 +6410,30 @@
           "group": 3
         }
       ],
+      "totalMv": 201788087768.96002,
+      "circMv": 201788087768.96002,
+      "peDynamic": 17.4,
+      "pb": 23.92,
+      "turnover": 7.89,
+      "amplitude": 10.96,
+      "roe": 41.98,
+      "raw": {
+        "f183": 6814251870.63,
+        "f184": 341.5280090886,
+        "f185": 1567.85388766015,
+        "f186": 53.304851341,
+        "f187": 42.222412744100005,
+        "f190": 7.009214436145,
+        "f191": -7267,
+        "f192": -300
+      },
       "symbol": "688525",
-      "cachedAt": "2026-07-04T06:01:51.037Z"
+      "cachedAt": "2026-07-04T09:51:52.635Z"
     },
     "688981": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "688981.SH",
-      "name": "",
+      "name": "中芯国际",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -6242,13 +6667,30 @@
           "group": 3
         }
       ],
+      "totalMv": 1201166689158.45,
+      "circMv": 280558621250.19,
+      "peDynamic": 220.61,
+      "pb": 8.02,
+      "turnover": 3.85,
+      "amplitude": 4.34,
+      "roe": 0.9,
+      "raw": {
+        "f183": 17617218000,
+        "f184": 8.0738981485,
+        "f185": 0.356465104757,
+        "f186": 21.4758595824,
+        "f187": 9.047955244699999,
+        "f190": 5.355898034225,
+        "f191": 9559,
+        "f192": 3497
+      },
       "symbol": "688981",
-      "cachedAt": "2026-07-04T06:01:48.325Z"
+      "cachedAt": "2026-07-04T09:51:49.842Z"
     },
     "000001": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "000001.SZ",
-      "name": "",
+      "name": "平安银行",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -6482,13 +6924,30 @@
           "group": 3
         }
       ],
+      "totalMv": 199686898257.41998,
+      "circMv": 199683630719.37,
+      "peDynamic": 3.44,
+      "pb": 0.44,
+      "turnover": 0.44,
+      "amplitude": 2.14,
+      "roe": 2.83,
+      "raw": {
+        "f183": 35277000000,
+        "f184": 4.6515767303,
+        "f185": 3.02922814983,
+        "f186": 0,
+        "f187": 41.1684667064,
+        "f190": 14.259972995106,
+        "f191": -4725,
+        "f192": -8150
+      },
       "symbol": "000001",
-      "cachedAt": "2026-07-04T06:01:48.299Z"
+      "cachedAt": "2026-07-04T09:51:49.902Z"
     },
     "002594": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002594.SZ",
-      "name": "",
+      "name": "比亚迪",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -6722,253 +7181,30 @@
           "group": 3
         }
       ],
-      "symbol": "002594",
-      "cachedAt": "2026-07-04T06:01:48.973Z"
-    },
-    "000725": {
-      "source": "sina-financial-report",
-      "code": "000725.SZ",
-      "name": "",
-      "reportDate": "20260331",
-      "reportLabel": "2026一季报",
-      "financials": {
-        "parentNetProfit": 1707220076,
-        "revenue": 51001263370,
-        "netProfit": 1709087317,
-        "operatingCashFlow": 12299498803,
-        "epsBasic": 0.05,
-        "navps": 3.673893,
-        "roe": 1.26,
-        "roa": 0.740983,
-        "grossMargin": 15.595721,
-        "netMargin": 3.351068,
-        "debtRatio": 51.916055
+      "totalMv": 806598468575.55,
+      "circMv": 308460696345,
+      "peDynamic": 49.37,
+      "pb": 3.48,
+      "turnover": 2.41,
+      "amplitude": 6.32,
+      "roe": 1.65,
+      "raw": {
+        "f183": 150225314000,
+        "f184": -11.8191365639,
+        "f185": -55.384405326715,
+        "f186": 18.806213978,
+        "f187": 2.6699434957,
+        "f190": 13.177511855311,
+        "f191": -5508,
+        "f192": -3918
       },
-      "rows": [
-        {
-          "field": "PARENETP",
-          "title": "归母净利润",
-          "value": 1707220076,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTINCO",
-          "title": "营业总收入",
-          "value": 51001263370,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTCOST",
-          "title": "营业成本",
-          "value": 49493788650,
-          "group": 1
-        },
-        {
-          "field": "NETPROFIT",
-          "title": "净利润",
-          "value": 1709087317,
-          "group": 1
-        },
-        {
-          "field": "NPCUT",
-          "title": "扣非净利润",
-          "value": 1438134014,
-          "group": 1
-        },
-        {
-          "field": "RIGHAGGR",
-          "title": "股东权益合计(净资产)",
-          "value": 210466003886,
-          "group": 1
-        },
-        {
-          "field": "GOODWILL",
-          "title": "商誉",
-          "value": 653575022,
-          "group": 1
-        },
-        {
-          "field": "MANANETR",
-          "title": "经营现金流量净额",
-          "value": 12299498803,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.05,
-          "group": 1
-        },
-        {
-          "field": "NAPS",
-          "title": "每股净资产",
-          "value": 3.673893,
-          "group": 1
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股现金流",
-          "value": 0.332021,
-          "group": 1
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": 1.26,
-          "group": 1
-        },
-        {
-          "field": "ROA",
-          "title": "总资产报酬率(ROA)",
-          "value": 0.740983,
-          "group": 1
-        },
-        {
-          "field": "SGPMARGIN",
-          "title": "毛利率",
-          "value": 15.595721,
-          "group": 1
-        },
-        {
-          "field": "SNPMARGINCONMS",
-          "title": "销售净利率",
-          "value": 3.351068,
-          "group": 1
-        },
-        {
-          "field": "TRIEXPRT",
-          "title": "期间费用率",
-          "value": 11.918594,
-          "group": 1
-        },
-        {
-          "field": "ASSLIABRT",
-          "title": "资产负债率",
-          "value": 51.916055,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.05,
-          "group": 2
-        },
-        {
-          "field": "EPSFULLDILUTED",
-          "title": "稀释每股收益",
-          "value": 0.05,
-          "group": 2
-        },
-        {
-          "field": "EPSDILUTEDNEWP",
-          "title": "摊薄每股收益_最新股数",
-          "value": 0.046085,
-          "group": 2
-        },
-        {
-          "field": "NAPS",
-          "title": "摊薄每股净资产_期末股数",
-          "value": 3.673893,
-          "group": 2
-        },
-        {
-          "field": "NAPSADJ",
-          "title": "调整每股净资产_期末股数",
-          "value": 3.274007,
-          "group": 2
-        },
-        {
-          "field": "NAPSNEWP",
-          "title": "每股净资产_最新股数",
-          "value": 3.673893,
-          "group": 2
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股经营现金流",
-          "value": 0.332021,
-          "group": 2
-        },
-        {
-          "field": "NCFPS",
-          "title": "每股现金流量净额",
-          "value": 0.110183,
-          "group": 2
-        },
-        {
-          "field": "FCFFPS",
-          "title": "每股企业自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "FCFEPS",
-          "title": "每股股东自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "UPPS",
-          "title": "每股未分配利润",
-          "value": 1.213012,
-          "group": 2
-        },
-        {
-          "field": "CRPS",
-          "title": "每股资本公积金",
-          "value": 1.368143,
-          "group": 2
-        },
-        {
-          "field": "SRPS",
-          "title": "每股盈余公积金",
-          "value": 0.108945,
-          "group": 2
-        },
-        {
-          "field": "REPS",
-          "title": "每股留存收益",
-          "value": 1.321958,
-          "group": 2
-        },
-        {
-          "field": "OPREVPS",
-          "title": "每股营业收入",
-          "value": 1.376763,
-          "group": 2
-        },
-        {
-          "field": "TOPREVPS",
-          "title": "每股营业总收入",
-          "value": 1.376763,
-          "group": 2
-        },
-        {
-          "field": "EBITPS",
-          "title": "每股息税前利润",
-          "value": 0.087419,
-          "group": 2
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": 1.26,
-          "group": 3
-        },
-        {
-          "field": "ROEDILUTED",
-          "title": "摊薄净资产收益率",
-          "value": 1.254414,
-          "group": 3
-        }
-      ],
-      "symbol": "000725",
-      "cachedAt": "2026-07-04T06:01:51.022Z"
+      "symbol": "002594",
+      "cachedAt": "2026-07-04T09:51:50.666Z"
     },
     "002384": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002384.SZ",
-      "name": "",
+      "name": "东山精密",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -7202,13 +7438,287 @@
           "group": 3
         }
       ],
+      "totalMv": 426270020922.36,
+      "circMv": 322638654593.79,
+      "peDynamic": 96.02,
+      "pb": 18.83,
+      "turnover": 8.96,
+      "amplitude": 17.34,
+      "roe": 5.05,
+      "raw": {
+        "f183": 13137636263.36,
+        "f184": 52.7234327423,
+        "f185": 143.471031697826,
+        "f186": 19.3275357993,
+        "f187": 8.5567370632,
+        "f190": 6.359604102125,
+        "f191": 3029,
+        "f192": 79
+      },
       "symbol": "002384",
-      "cachedAt": "2026-07-04T06:01:51.650Z"
+      "cachedAt": "2026-07-04T09:51:53.094Z"
+    },
+    "000725": {
+      "source": "eastmoney-fundamentals+sina-financial-report",
+      "code": "000725.SZ",
+      "name": "京东方Ａ",
+      "reportDate": "20260331",
+      "reportLabel": "2026一季报",
+      "financials": {
+        "parentNetProfit": 1707220076,
+        "revenue": 51001263370,
+        "netProfit": 1709087317,
+        "operatingCashFlow": 12299498803,
+        "epsBasic": 0.05,
+        "navps": 3.673893,
+        "roe": 1.26,
+        "roa": 0.740983,
+        "grossMargin": 15.595721,
+        "netMargin": 3.351068,
+        "debtRatio": 51.916055
+      },
+      "rows": [
+        {
+          "field": "PARENETP",
+          "title": "归母净利润",
+          "value": 1707220076,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTINCO",
+          "title": "营业总收入",
+          "value": 51001263370,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTCOST",
+          "title": "营业成本",
+          "value": 49493788650,
+          "group": 1
+        },
+        {
+          "field": "NETPROFIT",
+          "title": "净利润",
+          "value": 1709087317,
+          "group": 1
+        },
+        {
+          "field": "NPCUT",
+          "title": "扣非净利润",
+          "value": 1438134014,
+          "group": 1
+        },
+        {
+          "field": "RIGHAGGR",
+          "title": "股东权益合计(净资产)",
+          "value": 210466003886,
+          "group": 1
+        },
+        {
+          "field": "GOODWILL",
+          "title": "商誉",
+          "value": 653575022,
+          "group": 1
+        },
+        {
+          "field": "MANANETR",
+          "title": "经营现金流量净额",
+          "value": 12299498803,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.05,
+          "group": 1
+        },
+        {
+          "field": "NAPS",
+          "title": "每股净资产",
+          "value": 3.673893,
+          "group": 1
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股现金流",
+          "value": 0.332021,
+          "group": 1
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 1.26,
+          "group": 1
+        },
+        {
+          "field": "ROA",
+          "title": "总资产报酬率(ROA)",
+          "value": 0.740983,
+          "group": 1
+        },
+        {
+          "field": "SGPMARGIN",
+          "title": "毛利率",
+          "value": 15.595721,
+          "group": 1
+        },
+        {
+          "field": "SNPMARGINCONMS",
+          "title": "销售净利率",
+          "value": 3.351068,
+          "group": 1
+        },
+        {
+          "field": "TRIEXPRT",
+          "title": "期间费用率",
+          "value": 11.918594,
+          "group": 1
+        },
+        {
+          "field": "ASSLIABRT",
+          "title": "资产负债率",
+          "value": 51.916055,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.05,
+          "group": 2
+        },
+        {
+          "field": "EPSFULLDILUTED",
+          "title": "稀释每股收益",
+          "value": 0.05,
+          "group": 2
+        },
+        {
+          "field": "EPSDILUTEDNEWP",
+          "title": "摊薄每股收益_最新股数",
+          "value": 0.046085,
+          "group": 2
+        },
+        {
+          "field": "NAPS",
+          "title": "摊薄每股净资产_期末股数",
+          "value": 3.673893,
+          "group": 2
+        },
+        {
+          "field": "NAPSADJ",
+          "title": "调整每股净资产_期末股数",
+          "value": 3.274007,
+          "group": 2
+        },
+        {
+          "field": "NAPSNEWP",
+          "title": "每股净资产_最新股数",
+          "value": 3.673893,
+          "group": 2
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股经营现金流",
+          "value": 0.332021,
+          "group": 2
+        },
+        {
+          "field": "NCFPS",
+          "title": "每股现金流量净额",
+          "value": 0.110183,
+          "group": 2
+        },
+        {
+          "field": "FCFFPS",
+          "title": "每股企业自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "FCFEPS",
+          "title": "每股股东自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "UPPS",
+          "title": "每股未分配利润",
+          "value": 1.213012,
+          "group": 2
+        },
+        {
+          "field": "CRPS",
+          "title": "每股资本公积金",
+          "value": 1.368143,
+          "group": 2
+        },
+        {
+          "field": "SRPS",
+          "title": "每股盈余公积金",
+          "value": 0.108945,
+          "group": 2
+        },
+        {
+          "field": "REPS",
+          "title": "每股留存收益",
+          "value": 1.321958,
+          "group": 2
+        },
+        {
+          "field": "OPREVPS",
+          "title": "每股营业收入",
+          "value": 1.376763,
+          "group": 2
+        },
+        {
+          "field": "TOPREVPS",
+          "title": "每股营业总收入",
+          "value": 1.376763,
+          "group": 2
+        },
+        {
+          "field": "EBITPS",
+          "title": "每股息税前利润",
+          "value": 0.087419,
+          "group": 2
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 1.26,
+          "group": 3
+        },
+        {
+          "field": "ROEDILUTED",
+          "title": "摊薄净资产收益率",
+          "value": 1.254414,
+          "group": 3
+        }
+      ],
+      "totalMv": 310431469176.32,
+      "circMv": 296376583900.46,
+      "peDynamic": 45.46,
+      "pb": 2.32,
+      "turnover": 11.72,
+      "amplitude": 8.57,
+      "roe": 1.26,
+      "raw": {
+        "f183": 51001263370,
+        "f184": 0.7951342048,
+        "f185": 5.775757856859,
+        "f186": 15.5957217124,
+        "f187": 3.3510685893999996,
+        "f190": 1.157183251127,
+        "f191": 2417,
+        "f192": 92078
+      },
+      "symbol": "000725",
+      "cachedAt": "2026-07-04T09:51:53.119Z"
     },
     "001309": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "001309.SZ",
-      "name": "",
+      "name": "德明利",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -7442,13 +7952,30 @@
           "group": 3
         }
       ],
+      "totalMv": 200057454246.78,
+      "circMv": 145575128699.1,
+      "peDynamic": 14.95,
+      "pb": 30.2,
+      "turnover": 12,
+      "amplitude": 11.97,
+      "roe": 67.45,
+      "raw": {
+        "f183": 7538357736.63,
+        "f184": 502.0833547633,
+        "f185": 4943.39060017792,
+        "f186": 57.4201728619,
+        "f187": 44.3887853897,
+        "f190": 19.346367582844,
+        "f191": -5948,
+        "f192": -229
+      },
       "symbol": "001309",
-      "cachedAt": "2026-07-04T06:01:51.659Z"
+      "cachedAt": "2026-07-04T09:51:53.195Z"
     },
     "002050": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002050.SZ",
-      "name": "",
+      "name": "三花智控",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -7682,13 +8209,30 @@
           "group": 3
         }
       ],
+      "totalMv": 206150602675.65,
+      "circMv": 180488837141.67,
+      "peDynamic": 55.56,
+      "pb": 6.32,
+      "turnover": 8.73,
+      "amplitude": 12.07,
+      "roe": 2.88,
+      "raw": {
+        "f183": 7773555419.29,
+        "f184": 1.3573975694,
+        "f185": 2.679345079886,
+        "f186": 27.7966881815,
+        "f187": 12.2320823481,
+        "f190": 3.580646134376,
+        "f191": -4568,
+        "f192": -5033
+      },
       "symbol": "002050",
-      "cachedAt": "2026-07-04T06:01:51.700Z"
+      "cachedAt": "2026-07-04T09:51:53.285Z"
     },
     "002747": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002747.SZ",
-      "name": "",
+      "name": "埃斯顿",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -7922,13 +8466,30 @@
           "group": 3
         }
       ],
+      "totalMv": 43328336740.810005,
+      "circMv": 35028255195.560005,
+      "peDynamic": 110.72,
+      "pb": 13.38,
+      "turnover": 16.2,
+      "amplitude": 9.21,
+      "roe": 4.95,
+      "raw": {
+        "f183": 1216554921.4,
+        "f184": -2.2164415756,
+        "f185": 674.640550299804,
+        "f186": 30.3939113603,
+        "f187": 7.9570146195,
+        "f190": 0.004505943398,
+        "f191": 10000,
+        "f192": 74748
+      },
       "symbol": "002747",
-      "cachedAt": "2026-07-04T06:01:51.731Z"
+      "cachedAt": "2026-07-04T09:51:53.744Z"
     },
     "002371": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002371.SZ",
-      "name": "",
+      "name": "北方华创",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -8162,13 +8723,30 @@
           "group": 3
         }
       ],
+      "totalMv": 592162387200,
+      "circMv": 591689635968,
+      "peDynamic": 90.56,
+      "pb": 15.29,
+      "turnover": 2.29,
+      "amplitude": 8.49,
+      "roe": 4.25,
+      "raw": {
+        "f183": 10322863908.82,
+        "f184": 25.7960902419,
+        "f185": 3.418201634519,
+        "f186": 40.7727895045,
+        "f187": 15.189160186,
+        "f190": 27.399342641409,
+        "f191": 2718,
+        "f192": 16
+      },
       "symbol": "002371",
-      "cachedAt": "2026-07-04T06:01:52.320Z"
+      "cachedAt": "2026-07-04T09:51:53.787Z"
     },
     "002475": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002475.SZ",
-      "name": "",
+      "name": "立讯精密",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -8402,13 +8980,30 @@
           "group": 3
         }
       ],
+      "totalMv": 471642072606,
+      "circMv": 470564004036.24,
+      "peDynamic": 32.22,
+      "pb": 5.34,
+      "turnover": 2.82,
+      "amplitude": 5.94,
+      "roe": 4.2,
+      "raw": {
+        "f183": 83888491960.13,
+        "f184": 35.7689406201,
+        "f185": 20.241619355975,
+        "f186": 11.9205204193,
+        "f187": 4.7296556362,
+        "f190": 9.602327167599,
+        "f191": 1945,
+        "f192": 1751
+      },
       "symbol": "002475",
-      "cachedAt": "2026-07-04T06:01:52.328Z"
+      "cachedAt": "2026-07-04T09:51:53.844Z"
     },
     "000021": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "000021.SZ",
-      "name": "",
+      "name": "深科技",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -8642,13 +9237,30 @@
           "group": 3
         }
       ],
+      "totalMv": 88023014399.79999,
+      "circMv": 88011038477.79999,
+      "peDynamic": 90.87,
+      "pb": 6.76,
+      "turnover": 14.94,
+      "amplitude": 11.78,
+      "roe": 1.83,
+      "raw": {
+        "f183": 3723775220.39,
+        "f184": 10.6738667504,
+        "f185": 35.348678865653,
+        "f186": 17.0661803011,
+        "f187": 7.7340213658,
+        "f190": 4.562922920974,
+        "f191": -7813,
+        "f192": -5581
+      },
       "symbol": "000021",
-      "cachedAt": "2026-07-04T06:01:52.368Z"
+      "cachedAt": "2026-07-04T09:51:54.117Z"
     },
     "002407": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002407.SZ",
-      "name": "",
+      "name": "多氟多",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -8882,13 +9494,30 @@
           "group": 3
         }
       ],
+      "totalMv": 58735942954.46001,
+      "circMv": 53226380802.3,
+      "peDynamic": 39.1,
+      "pb": 6.88,
+      "turnover": 22.12,
+      "amplitude": 9.98,
+      "roe": 4.38,
+      "raw": {
+        "f183": 3215501075.67,
+        "f184": 53.2602408147,
+        "f185": 480.14122757211,
+        "f186": 27.6087392596,
+        "f187": 13.4234200413,
+        "f190": 1.795455920477,
+        "f191": -10000,
+        "f192": -81346
+      },
       "symbol": "002407",
-      "cachedAt": "2026-07-04T06:01:53.026Z"
+      "cachedAt": "2026-07-04T09:51:54.779Z"
     },
     "002472": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002472.SZ",
-      "name": "",
+      "name": "双环传动",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -9122,253 +9751,30 @@
           "group": 3
         }
       ],
-      "symbol": "002472",
-      "cachedAt": "2026-07-04T06:01:53.693Z"
-    },
-    "001248": {
-      "source": "sina-financial-report",
-      "code": "001248.SZ",
-      "name": "",
-      "reportDate": "20260331",
-      "reportLabel": "2026一季报",
-      "financials": {
-        "parentNetProfit": 1616795103.15,
-        "revenue": 6210765692.24,
-        "netProfit": 1677161261.69,
-        "operatingCashFlow": 3912681971.19,
-        "epsBasic": 0.15,
-        "navps": null,
-        "roe": null,
-        "roa": 1.079112,
-        "grossMargin": 46.679858,
-        "netMargin": 27.004098,
-        "debtRatio": 60.190894
+      "totalMv": 39958391500.92,
+      "circMv": 35191468155.659996,
+      "peDynamic": 35.16,
+      "pb": 3.97,
+      "turnover": 9.97,
+      "amplitude": 8.87,
+      "roe": 2.79,
+      "raw": {
+        "f183": 2095472955.93,
+        "f184": 1.4879662829,
+        "f185": 2.92884083109,
+        "f186": 27.5480451392,
+        "f187": 14.3227253676,
+        "f190": 5.13566355299,
+        "f191": 10000,
+        "f192": 50589
       },
-      "rows": [
-        {
-          "field": "PARENETP",
-          "title": "归母净利润",
-          "value": 1616795103.15,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTINCO",
-          "title": "营业总收入",
-          "value": 6210765692.24,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTCOST",
-          "title": "营业成本",
-          "value": 4196106690.53,
-          "group": 1
-        },
-        {
-          "field": "NETPROFIT",
-          "title": "净利润",
-          "value": 1677161261.69,
-          "group": 1
-        },
-        {
-          "field": "NPCUT",
-          "title": "扣非净利润",
-          "value": 1609065000,
-          "group": 1
-        },
-        {
-          "field": "RIGHAGGR",
-          "title": "股东权益合计(净资产)",
-          "value": 95969357012.5,
-          "group": 1
-        },
-        {
-          "field": "GOODWILL",
-          "title": "商誉",
-          "value": 434903949.78,
-          "group": 1
-        },
-        {
-          "field": "MANANETR",
-          "title": "经营现金流量净额",
-          "value": 3912681971.19,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.15,
-          "group": 1
-        },
-        {
-          "field": "NAPS",
-          "title": "每股净资产",
-          "value": null,
-          "group": 1
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股现金流",
-          "value": null,
-          "group": 1
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": null,
-          "group": 1
-        },
-        {
-          "field": "ROA",
-          "title": "总资产报酬率(ROA)",
-          "value": 1.079112,
-          "group": 1
-        },
-        {
-          "field": "SGPMARGIN",
-          "title": "毛利率",
-          "value": 46.679858,
-          "group": 1
-        },
-        {
-          "field": "SNPMARGINCONMS",
-          "title": "销售净利率",
-          "value": 27.004098,
-          "group": 1
-        },
-        {
-          "field": "TRIEXPRT",
-          "title": "期间费用率",
-          "value": 13.413144,
-          "group": 1
-        },
-        {
-          "field": "ASSLIABRT",
-          "title": "资产负债率",
-          "value": 60.190894,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.15,
-          "group": 2
-        },
-        {
-          "field": "EPSFULLDILUTED",
-          "title": "稀释每股收益",
-          "value": 0.15,
-          "group": 2
-        },
-        {
-          "field": "EPSDILUTEDNEWP",
-          "title": "摊薄每股收益_最新股数",
-          "value": 0.124316,
-          "group": 2
-        },
-        {
-          "field": "NAPS",
-          "title": "摊薄每股净资产_期末股数",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "NAPSADJ",
-          "title": "调整每股净资产_期末股数",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "NAPSNEWP",
-          "title": "每股净资产_最新股数",
-          "value": 7.122663,
-          "group": 2
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股经营现金流",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "NCFPS",
-          "title": "每股现金流量净额",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "FCFFPS",
-          "title": "每股企业自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "FCFEPS",
-          "title": "每股股东自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "UPPS",
-          "title": "每股未分配利润",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "CRPS",
-          "title": "每股资本公积金",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "SRPS",
-          "title": "每股盈余公积金",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "REPS",
-          "title": "每股留存收益",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "OPREVPS",
-          "title": "每股营业收入",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "TOPREVPS",
-          "title": "每股营业总收入",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "EBITPS",
-          "title": "每股息税前利润",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": null,
-          "group": 3
-        },
-        {
-          "field": "ROEDILUTED",
-          "title": "摊薄净资产收益率",
-          "value": 1.745358,
-          "group": 3
-        }
-      ],
-      "symbol": "001248",
-      "cachedAt": "2026-07-04T06:01:54.339Z"
+      "symbol": "002472",
+      "cachedAt": "2026-07-04T09:51:55.249Z"
     },
     "002979": {
-      "source": "sina-financial-report",
+      "source": "eastmoney-fundamentals+sina-financial-report",
       "code": "002979.SZ",
-      "name": "",
+      "name": "雷赛智能",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
@@ -9602,8 +10008,282 @@
           "group": 3
         }
       ],
+      "totalMv": 21977574032.05,
+      "circMv": 15491793663.449999,
+      "peDynamic": 76.18,
+      "pb": 11.61,
+      "turnover": 2.48,
+      "amplitude": 0,
+      "roe": 3.96,
+      "raw": {
+        "f183": 525392709.49,
+        "f184": 34.5483250016,
+        "f185": 29.202775769303,
+        "f186": 38.944248206,
+        "f187": 14.0190590409,
+        "f190": 2.914915591711,
+        "f191": 10000,
+        "f192": 38071
+      },
       "symbol": "002979",
-      "cachedAt": "2026-07-04T06:01:54.421Z"
+      "cachedAt": "2026-07-04T09:51:56.114Z"
+    },
+    "002896": {
+      "source": "eastmoney-fundamentals+sina-financial-report",
+      "code": "002896.SZ",
+      "name": "中大力德",
+      "reportDate": "20260331",
+      "reportLabel": "2026一季报",
+      "financials": {
+        "parentNetProfit": 11062020.61,
+        "revenue": 242301287.43,
+        "netProfit": 11093460.16,
+        "operatingCashFlow": -9797699.44,
+        "epsBasic": 0.06,
+        "navps": 6.130666,
+        "roe": 0.92,
+        "roa": 0.675438,
+        "grossMargin": 24.407046,
+        "netMargin": 4.578374,
+        "debtRatio": 34.977707
+      },
+      "rows": [
+        {
+          "field": "PARENETP",
+          "title": "归母净利润",
+          "value": 11062020.61,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTINCO",
+          "title": "营业总收入",
+          "value": 242301287.43,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTCOST",
+          "title": "营业成本",
+          "value": 234455934.57,
+          "group": 1
+        },
+        {
+          "field": "NETPROFIT",
+          "title": "净利润",
+          "value": 11093460.16,
+          "group": 1
+        },
+        {
+          "field": "NPCUT",
+          "title": "扣非净利润",
+          "value": 6804036.91,
+          "group": 1
+        },
+        {
+          "field": "RIGHAGGR",
+          "title": "股东权益合计(净资产)",
+          "value": 1206581124.92,
+          "group": 1
+        },
+        {
+          "field": "GOODWILL",
+          "title": "商誉",
+          "value": null,
+          "group": 1
+        },
+        {
+          "field": "MANANETR",
+          "title": "经营现金流量净额",
+          "value": -9797699.44,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.06,
+          "group": 1
+        },
+        {
+          "field": "NAPS",
+          "title": "每股净资产",
+          "value": 6.130666,
+          "group": 1
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股现金流",
+          "value": -0.049855,
+          "group": 1
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 0.92,
+          "group": 1
+        },
+        {
+          "field": "ROA",
+          "title": "总资产报酬率(ROA)",
+          "value": 0.675438,
+          "group": 1
+        },
+        {
+          "field": "SGPMARGIN",
+          "title": "毛利率",
+          "value": 24.407046,
+          "group": 1
+        },
+        {
+          "field": "SNPMARGINCONMS",
+          "title": "销售净利率",
+          "value": 4.578374,
+          "group": 1
+        },
+        {
+          "field": "TRIEXPRT",
+          "title": "期间费用率",
+          "value": 20.19538,
+          "group": 1
+        },
+        {
+          "field": "ASSLIABRT",
+          "title": "资产负债率",
+          "value": 34.977707,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.06,
+          "group": 2
+        },
+        {
+          "field": "EPSFULLDILUTED",
+          "title": "稀释每股收益",
+          "value": 0.06,
+          "group": 2
+        },
+        {
+          "field": "EPSDILUTEDNEWP",
+          "title": "摊薄每股收益_最新股数",
+          "value": 0.056288,
+          "group": 2
+        },
+        {
+          "field": "NAPS",
+          "title": "摊薄每股净资产_期末股数",
+          "value": 6.130666,
+          "group": 2
+        },
+        {
+          "field": "NAPSADJ",
+          "title": "调整每股净资产_期末股数",
+          "value": 5.496867,
+          "group": 2
+        },
+        {
+          "field": "NAPSNEWP",
+          "title": "每股净资产_最新股数",
+          "value": 6.130666,
+          "group": 2
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股经营现金流",
+          "value": -0.049855,
+          "group": 2
+        },
+        {
+          "field": "NCFPS",
+          "title": "每股现金流量净额",
+          "value": -0.039728,
+          "group": 2
+        },
+        {
+          "field": "FCFFPS",
+          "title": "每股企业自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "FCFEPS",
+          "title": "每股股东自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "UPPS",
+          "title": "每股未分配利润",
+          "value": 2.356699,
+          "group": 2
+        },
+        {
+          "field": "CRPS",
+          "title": "每股资本公积金",
+          "value": 2.437583,
+          "group": 2
+        },
+        {
+          "field": "SRPS",
+          "title": "每股盈余公积金",
+          "value": 0.349144,
+          "group": 2
+        },
+        {
+          "field": "REPS",
+          "title": "每股留存收益",
+          "value": 2.705844,
+          "group": 2
+        },
+        {
+          "field": "OPREVPS",
+          "title": "每股营业收入",
+          "value": 1.232943,
+          "group": 2
+        },
+        {
+          "field": "TOPREVPS",
+          "title": "每股营业总收入",
+          "value": 1.232943,
+          "group": 2
+        },
+        {
+          "field": "EBITPS",
+          "title": "每股息税前利润",
+          "value": 0.063734,
+          "group": 2
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 0.92,
+          "group": 3
+        },
+        {
+          "field": "ROEDILUTED",
+          "title": "摊薄净资产收益率",
+          "value": 0.918151,
+          "group": 3
+        }
+      ],
+      "totalMv": 16826271005.400002,
+      "circMv": 16826271005.400002,
+      "peDynamic": 380.27,
+      "pb": 14.24,
+      "turnover": 10.3,
+      "amplitude": 5.92,
+      "roe": 0.92,
+      "raw": {
+        "f183": 242301287.43,
+        "f184": 5.1163758719,
+        "f185": -36.418658251733,
+        "f186": 24.4070467422,
+        "f187": 4.5783744188,
+        "f190": 2.23669978288,
+        "f191": 10000,
+        "f192": 15486
+      },
+      "symbol": "002896",
+      "cachedAt": "2026-07-04T09:51:56.495Z"
     }
   },
   "errors": []
