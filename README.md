@@ -12,7 +12,7 @@ Pages 由 `.github/workflows/pages.yml` 自动部署，静态文件位于 `pages
 
 ## Vercel 后端版
 
-Vercel 版提供 `/api/chat` 和 `/api/health`，前端问答模块会调用服务端 DeepSeek API。
+Vercel 版提供 `/api/chat`、`/api/health` 和 `/api/market`，前端问答模块会调用服务端 DeepSeek API，行情模块会由云端函数拉取公开行情源。
 
 线上地址：
 
@@ -35,6 +35,7 @@ npm run check:pages
 
 项目后续按“免费公开源优先、TuShare 作为增强源”的方式接数据：
 
+- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于 A 股成交额榜、行业板块、单股 quote 和 K 线。
 - `AKShare`：优先覆盖 A 股实时行情、行业/概念板块、涨停池、资金流、人气榜、公告和特色投研数据。
 - `BaoStock`：作为免费历史 K 线、估值、换手率、财务字段的稳定补位，适合批量因子计算。
 - `yfinance`：作为全球股票、ETF、港美股，以及 A 股基础 K 线的备用入口。
@@ -45,6 +46,7 @@ npm run check:pages
 
 ## 已覆盖能力
 
+- 原站全量可见功能审计见：`docs/AIWUCHUAN_FULL_AUDIT.md`
 - 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、指数涨跌、趋势图。
 - 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选。
 - 板块与概念：行业/概念聚合、涨跌幅、排名变化、上涨/下跌家数、涨停家数、资金流向分布。

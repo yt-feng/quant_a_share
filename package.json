@@ -3,6 +3,6 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js"
+    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js && node --check api/market.js"
   }
 }
