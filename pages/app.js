@@ -165,14 +165,14 @@ const pages = [
 ];
 
 const coverageRows = [
-  ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
+  ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜；日期区间会联动趋势图和复盘统计。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表；筛选条件会实时影响表格与图表。"],
   ["行情", "已对齐", "股票查询、日期、复权、近半年/近一年、加载更多历史、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题类型、关键词、来源、策略、排序、列集、页大小和翻页会联动表格并进入问答上下文。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
-  ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
+  ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答、最近对话记录和多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通、7000点旗舰包和钱包账单。"],
 ];
 
@@ -191,6 +191,10 @@ const dataSourceRows = [
 ];
 
 let currentPage = "market";
+let marketStartDate = "2026-07-01";
+let marketEndDate = "2026-07-04";
+let marketStateFilter = "震荡行情";
+let marketReviewUpdatedAt = "";
 let activeFactors = new Set(["ma20"]);
 let customConditions = [];
 let savedStrategies = [];
@@ -235,13 +239,20 @@ let quoteIndicator2 = "MACD";
 let quoteVolParams = { m1: 5, m2: 10 };
 let quoteMacdParams = { short: 12, long: 26, mid: 9 };
 let quoteDrawings = [];
+let aiRealtime = true;
+let aiMode = "快速模式";
+let aiQuestion = "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。";
+let aiHistory = [];
+let aiCurrentAnswer = "";
 
 function mount() {
   loadShellState();
+  loadMarketState();
   loadScreenerState();
   loadWatchlistState();
   loadQuoteState();
   loadLlmState();
+  loadAiState();
   loadQimenState();
   loadSubscriptionState();
   applyShellState();
@@ -395,18 +406,54 @@ function attachShellEvents() {
   });
 }
 
+function loadMarketState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_market") || "null");
+    if (!stored) return;
+    marketStartDate = normalizeDateValue(stored.startDate) || marketStartDate;
+    marketEndDate = normalizeDateValue(stored.endDate) || marketEndDate;
+    if (["震荡行情", "强势行情", "弱势整理"].includes(stored.stateFilter)) marketStateFilter = stored.stateFilter;
+    marketReviewUpdatedAt = stored.updatedAt || "";
+  } catch (error) {
+    // Bad local storage should not block market overview.
+  }
+}
+
+function persistMarketState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_market",
+      JSON.stringify({
+        startDate: marketStartDate,
+        endDate: marketEndDate,
+        stateFilter: marketStateFilter,
+        updatedAt: marketReviewUpdatedAt || new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("大盘复盘条件已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
 function renderMarket() {
+  const review = marketReviewStats();
+  const rows = filteredMarketBreadth();
   return `
     <section class="panel compact-panel">
       <div class="toolbar">
-        <label><span class="label">开始日期</span><input value="2026-07-01" /></label>
-        <label><span class="label">结束日期</span><input value="2026-07-04" /></label>
-        <label><span class="label">行情状态</span><select><option>震荡行情</option><option>强势行情</option><option>弱势整理</option></select></label>
-        <button class="primary-button" data-refresh-market="1">加载复盘数据统计</button>
+        <label><span class="label">开始日期</span><input id="marketStartDate" type="date" value="${escapeHtml(marketStartDate)}" /></label>
+        <label><span class="label">结束日期</span><input id="marketEndDate" type="date" value="${escapeHtml(marketEndDate)}" /></label>
+        <label><span class="label">行情状态</span><select id="marketStateFilter"><option ${selectedAttr(marketStateFilter === "震荡行情")}>震荡行情</option><option ${selectedAttr(marketStateFilter === "强势行情")}>强势行情</option><option ${selectedAttr(marketStateFilter === "弱势整理")}>弱势整理</option></select></label>
+        <button class="primary-button" data-load-market-review="1">加载复盘数据统计</button>
         ${tag(`数据源 ${marketSource}`, "info")}
       </div>
     </section>
-    <section class="grid metrics" style="margin-top:14px">${data.metrics.map((m) => metric(...m)).join("")}</section>
+    <section class="grid metrics" style="margin-top:14px">
+      ${data.metrics.map((m) => metric(...m)).join("")}
+      ${metric("复盘天数", `${rows.length} 天`, marketStateFilter)}
+      ${metric("区间均额", `${review.avgAmountYi.toLocaleString()}亿`, `${marketStartDate} 至 ${marketEndDate}`)}
+      ${metric("区间均涨跌", `${plainSigned(review.avgPct, 2, "%")}`, marketReviewUpdatedAt ? `更新 ${marketReviewUpdatedAt.slice(0, 10)}` : "待加载")}
+    </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel"><h2>大盘成交额趋势</h2><div id="amountChart" class="chart"></div></div>
       <div class="panel"><h2>上证涨跌趋势</h2><div id="breadthChart" class="chart"></div></div>
@@ -435,9 +482,28 @@ function renderMarket() {
     </section>
     <section class="panel" style="margin-top:14px">
       ${panelTitle("复盘数据统计", `<button class="ghost-button" data-refresh-market="1">刷新</button>`)}
-      ${simpleTable(["维度", "当前值", "说明"], data.metrics.map((m) => [m[0], m[1], m[2]]))}
+      ${simpleTable(["维度", "当前值", "说明"], [...data.metrics.map((m) => [m[0], m[1], m[2]]), ["复盘区间", `${marketStartDate} 至 ${marketEndDate}`, `${rows.length} 个交易样本`], ["区间成交额", `${review.avgAmountYi.toLocaleString()}亿`, "按当前图表样本均值"], ["区间涨跌", `${plainSigned(review.avgPct, 2, "%")}`, marketStateFilter]])}
     </section>
   `;
+}
+
+function filteredMarketBreadth() {
+  const start = normalizeDateValue(marketStartDate);
+  const end = normalizeDateValue(marketEndDate);
+  const rows = data.breadth.filter((row) => {
+    const date = normalizeDateValue(row[0]);
+    if (start && date < start) return false;
+    if (end && date > end) return false;
+    return true;
+  });
+  return rows.length ? rows : data.breadth;
+}
+
+function marketReviewStats() {
+  const rows = filteredMarketBreadth();
+  const avgAmountYi = Math.round((rows.reduce((sum, row) => sum + (Number(row[1]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
+  const avgPct = Math.round((rows.reduce((sum, row) => sum + (Number(row[2]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
+  return { avgAmountYi, avgPct };
 }
 
 function renderScreener() {
@@ -1392,6 +1458,86 @@ function completeSubscriptionOrder(orderId) {
   persistSubscriptionState();
 }
 
+function loadAiState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_ai") || "null");
+    if (!stored) return;
+    aiRealtime = stored.realtime !== false;
+    if (["快速模式", "专家模式", "深度思考"].includes(stored.mode)) aiMode = stored.mode;
+    aiQuestion = String(stored.question || aiQuestion);
+    aiHistory = Array.isArray(stored.history) ? stored.history.map(normalizeAiHistoryItem).filter(Boolean).slice(0, 30) : [];
+    aiCurrentAnswer = String(stored.currentAnswer || aiHistory[0]?.answer || "");
+  } catch (error) {
+    // Bad local storage should not block AI matrix.
+  }
+}
+
+function persistAiState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_ai",
+      JSON.stringify({
+        realtime: aiRealtime,
+        mode: aiMode,
+        question: aiQuestion,
+        currentAnswer: aiCurrentAnswer,
+        history: aiHistory,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("AI 对话状态已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeAiHistoryItem(item) {
+  if (!item?.question) return null;
+  return {
+    id: String(item.id || `ai_${Date.now()}_${Math.random().toString(16).slice(2)}`),
+    at: String(item.at || nowLabel()),
+    mode: String(item.mode || aiMode),
+    realtime: item.realtime !== false,
+    question: String(item.question || "").slice(0, 500),
+    answer: String(item.answer || ""),
+  };
+}
+
+function recordAiHistory(question, mode, answer) {
+  const item = normalizeAiHistoryItem({
+    id: `ai_${Date.now()}`,
+    at: nowLabel(),
+    mode,
+    realtime: aiRealtime,
+    question,
+    answer,
+  });
+  if (!item) return;
+  aiHistory = [item, ...aiHistory].slice(0, 30);
+  aiQuestion = question;
+  aiCurrentAnswer = answer;
+  persistAiState();
+}
+
+function resetAiConversation() {
+  aiQuestion = "";
+  aiCurrentAnswer = "";
+  persistAiState();
+}
+
+function aiHistoryTable() {
+  if (!aiHistory.length) return `<div class="empty-state compact-empty"><strong>暂无对话记录</strong><span>生成回答后会保留最近 30 条。</span></div>`;
+  return simpleTable(
+    ["时间", "模式", "实时", "问题", "操作"],
+    aiHistory.slice(0, 8).map((item) => [
+      escapeHtml(item.at),
+      escapeHtml(item.mode),
+      item.realtime ? "开" : "关",
+      escapeHtml(item.question.slice(0, 42)),
+      `<button class="ghost-button table-action" data-load-ai-history="${escapeHtml(item.id)}">载入</button>`,
+    ])
+  );
+}
+
 function dedupeWatchlist(entries) {
   const seen = new Set();
   return entries.filter((entry) => {
@@ -1420,16 +1566,16 @@ function renderAi() {
   return `
     <section class="grid two">
       <div class="panel">
-        ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-toast="已新建对话">新对话</button><button class="ghost-button" data-goto-page="subscription">钱包</button></div>`)}
+        ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-new-ai-chat="1">新对话</button><button class="ghost-button" data-goto-page="subscription">钱包</button></div>`)}
         <div class="toolbar">
-          <label class="toggle"><input type="checkbox" checked />实时搜索</label>
-          <button class="chip active" data-mode-pick="快速模式">⚡ 快速模式</button>
-          <button class="chip" data-mode-pick="专家模式">◈ 专家模式</button>
-          <button class="chip" data-mode-pick="深度思考">🧠 深度思考</button>
+          <label class="toggle"><input type="checkbox" data-ai-realtime ${aiRealtime ? "checked" : ""} />实时搜索</label>
+          <button class="chip ${aiMode === "快速模式" ? "active" : ""}" data-mode-pick="快速模式">快速模式</button>
+          <button class="chip ${aiMode === "专家模式" ? "active" : ""}" data-mode-pick="专家模式">专家模式</button>
+          <button class="chip ${aiMode === "深度思考" ? "active" : ""}" data-mode-pick="深度思考">深度思考</button>
         </div>
-        <label><span class="label">问题</span><textarea id="question" placeholder="请输入你的问题，AI将基于多维数据为你解答...">结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。</textarea></label>
+        <label><span class="label">问题</span><textarea id="question" placeholder="请输入你的问题，AI将基于多维数据为你解答...">${escapeHtml(aiQuestion)}</textarea></label>
         <div class="toolbar" style="margin-top:12px">
-          <select id="mode"><option>快速模式</option><option>专家模式</option><option>深度思考</option></select>
+          <select id="mode"><option ${selectedAttr(aiMode === "快速模式")}>快速模式</option><option ${selectedAttr(aiMode === "专家模式")}>专家模式</option><option ${selectedAttr(aiMode === "深度思考")}>深度思考</option></select>
           <button class="primary-button" data-chat-module="ai_matrix" data-target="aiAnswer">生成回答</button>
         </div>
         <p class="notice">Vercel 后端会读取服务端 DEEPSEEK_API_KEY，浏览器端不保存密钥。</p>
@@ -1437,7 +1583,9 @@ function renderAi() {
       </div>
       <div class="panel">
         <h2>结果</h2>
-        <div id="aiAnswer" class="answer">点击“生成回答”查看分析。</div>
+        <div id="aiAnswer" class="answer">${aiCurrentAnswer ? answerHtml(aiCurrentAnswer) : "点击“生成回答”查看分析。"}</div>
+        <h2 style="margin-top:16px">对话记录</h2>
+        ${aiHistoryTable()}
       </div>
     </section>
   `;
@@ -2673,15 +2821,57 @@ function attachEvents() {
     button.addEventListener("click", () => {
       const question = document.querySelector("#question");
       if (question) question.value = button.dataset.hotPrompt;
+      if (currentPage === "ai") {
+        aiQuestion = button.dataset.hotPrompt;
+        persistAiState();
+      }
       showToast("热门问题已填入输入框。", "success");
     });
   });
   document.querySelectorAll("[data-mode-pick]").forEach((button) => {
     button.addEventListener("click", () => {
+      aiMode = button.dataset.modePick;
       const mode = document.querySelector("#mode");
-      if (mode) mode.value = button.dataset.modePick;
-      showToast(`已切换 ${button.dataset.modePick}`, "success");
+      if (mode) mode.value = aiMode;
+      persistAiState();
+      if (currentPage === "ai") render();
+      else showToast(`已切换 ${button.dataset.modePick}`, "success");
     });
+  });
+  document.querySelector("[data-ai-realtime]")?.addEventListener("change", (event) => {
+    aiRealtime = Boolean(event.currentTarget.checked);
+    persistAiState();
+  });
+  document.querySelector("[data-new-ai-chat]")?.addEventListener("click", () => {
+    resetAiConversation();
+    showToast("已新建对话。", "success");
+    render();
+  });
+  document.querySelectorAll("[data-load-ai-history]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const item = aiHistory.find((row) => row.id === button.dataset.loadAiHistory);
+      if (!item) return;
+      aiQuestion = item.question;
+      aiMode = item.mode;
+      aiRealtime = item.realtime;
+      aiCurrentAnswer = item.answer;
+      persistAiState();
+      render();
+    });
+  });
+  document.querySelector("[data-load-market-review]")?.addEventListener("click", () => {
+    marketStartDate = normalizeDateValue(document.querySelector("#marketStartDate")?.value) || marketStartDate;
+    marketEndDate = normalizeDateValue(document.querySelector("#marketEndDate")?.value) || marketEndDate;
+    marketStateFilter = document.querySelector("#marketStateFilter")?.value || marketStateFilter;
+    marketReviewUpdatedAt = new Date().toISOString();
+    persistMarketState();
+    showToast("正在刷新公开行情。", "info");
+    loadMarketSnapshot();
+  });
+  document.querySelector("#mode")?.addEventListener("change", (event) => {
+    if (currentPage !== "ai") return;
+    aiMode = event.currentTarget.value;
+    persistAiState();
   });
   document.querySelectorAll("[data-refresh-market]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2896,6 +3086,11 @@ function attachEvents() {
       const target = document.querySelector(`#${button.dataset.target}`);
       const question = document.querySelector("#question")?.value || "";
       const mode = document.querySelector("#mode")?.value || "专家模式";
+      if (button.dataset.chatModule === "ai_matrix") {
+        aiQuestion = question;
+        aiMode = mode;
+        persistAiState();
+      }
       const defaultText = button.dataset.defaultText || button.textContent;
       button.dataset.defaultText = defaultText;
       const progress = startChatProgress(button.dataset.chatModule, target);
@@ -2909,6 +3104,7 @@ function attachEvents() {
         });
         progress.succeed();
         target.textContent = result.answer || "后端没有返回内容。";
+        if (button.dataset.chatModule === "ai_matrix") recordAiHistory(question, mode, result.answer || "后端没有返回内容。");
         showToast("分析完成，结果已更新。", "success");
       } catch (error) {
         progress.fail();
@@ -2998,6 +3194,18 @@ function contextForModule(moduleName) {
     moduleName,
     marketSource,
     selectedLlmTab,
+    marketControls: {
+      startDate: marketStartDate,
+      endDate: marketEndDate,
+      stateFilter: marketStateFilter,
+      reviewUpdatedAt: marketReviewUpdatedAt,
+      reviewStats: marketReviewStats(),
+    },
+    aiControls: {
+      realtime: aiRealtime,
+      mode: aiMode,
+      recentQuestions: aiHistory.slice(0, 5).map((item) => ({ at: item.at, mode: item.mode, realtime: item.realtime, question: item.question })),
+    },
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
     concepts: data.concepts.slice(0, 8),
@@ -3558,8 +3766,9 @@ function renderCharts() {
     font: { family: "Inter, system-ui, sans-serif" },
   };
   if (currentPage === "market") {
-    Plotly.newPlot("amountChart", [{ x: data.breadth.map((d) => d[0]), y: data.breadth.map((d) => d[1]), type: "scatter", mode: "lines+markers", line: { color: "#2563eb" } }], baseLayout, plotConfig);
-    Plotly.newPlot("breadthChart", [{ x: data.breadth.map((d) => d[0]), y: data.breadth.map((d) => d[2]), type: "scatter", mode: "lines+markers", line: { color: "#0f766e" } }], baseLayout, plotConfig);
+    const marketRows = filteredMarketBreadth();
+    Plotly.newPlot("amountChart", [{ x: marketRows.map((d) => d[0]), y: marketRows.map((d) => d[1]), type: "scatter", mode: "lines+markers", line: { color: "#2563eb" } }], baseLayout, plotConfig);
+    Plotly.newPlot("breadthChart", [{ x: marketRows.map((d) => d[0]), y: marketRows.map((d) => d[2]), type: "scatter", mode: "lines+markers", line: { color: "#0f766e" } }], baseLayout, plotConfig);
     const distribution = data.limitDistribution || {};
     Plotly.newPlot("limitChart", [{ x: ["上涨", "下跌", "平盘", "涨停", "跌停"], y: [distribution.up || 0, distribution.down || 0, distribution.flat || 0, distribution.limitUp || 0, distribution.limitDown || 0], type: "bar", marker: { color: ["#dc2626", "#15803d", "#64748b", "#b91c1c", "#166534"] } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
     Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
