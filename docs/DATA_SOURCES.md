@@ -26,6 +26,10 @@
 - GitHub Actions market snapshot
   - `.github/workflows/market-cache.yml` runs the same Node adapters in the cloud and writes `pages/data/market-cache.json`.
   - `/api/market` reads this bundled snapshot when live public endpoints return empty data, preserving market breadth, concept, limit-pool, ETF, popularity, announcement and financial fields.
+- GitHub Actions financial snapshot
+  - `scripts/update-financial-cache.js` reuses the production Eastmoney/Sina financial adapters and writes `pages/data/financial-cache.json`.
+  - The cache universe is collected from BaoStock symbols, current market-cache leaders, hot-rank names and limit-up pool names, capped by `FINANCIAL_CACHE_MAX_SYMBOLS`.
+  - `/api/market` uses this file as a static financial-field fallback when live financial endpoints are unavailable.
 - CNInfo announcements
   - Secondary announcement source using `www.cninfo.com.cn/new/hisAnnouncement/query`; merged with Eastmoney announcements and deduplicated by date/title.
   - CNInfo relation/调研 feed is available as `disclosures.relations` for symbols that have recent investor-relation disclosure records.
@@ -43,6 +47,7 @@
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
 - BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 24 symbols from live market context.
+- Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets up to 40 symbols.
 - yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.
 - efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
 - Tencent/Sina quote endpoints: useful as low-cost online fallbacks for current quote fields; names require GBK/GB18030 decoding for some quote APIs.
@@ -57,5 +62,6 @@
 - Fetch public HTTP endpoints on demand and cache with `s-maxage`.
 - Cache slow financial and board/popularity endpoints in Vercel serverless memory while the function instance is warm.
 - Refresh a compact market snapshot on GitHub Actions during trading days, then use it as bundled read-only fallback in Vercel.
+- Refresh compact BaoStock and financial snapshots in the same workflow, then use them as static read-only fallbacks in Vercel.
 - Return compact normalized JSON to the frontend.
 - Use sample data only when every online source fails.

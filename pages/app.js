@@ -161,7 +161,7 @@ const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存、自定义条件、单因子命中数和相似候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
-  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
+  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、云端财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
@@ -174,9 +174,10 @@ const dataSourceRows = [
   ["Sina", "核心接入", "全A兜底、行业/概念兜底、财报字段兜底，补齐东财列表偶发为空时的股票池。"],
   ["CNInfo 巨潮", "核心接入", "公告二源合并、投资者关系/调研披露，已进入行情页和 LLM 上下文。"],
   ["BaoStock", "云缓存接入", "GitHub Actions 批量生成历史K线、换手率、PE/PB/PS/PCF、收益与均线摘要，Vercel 按股票读取。"],
+  ["财务字段缓存", "云缓存接入", "GitHub Actions 生成 financial-cache.json，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。"],
   ["Yahoo/yfinance-compatible", "后端接入", "用 Yahoo chart API 作为 A股 .SS/.SZ、港美股和 ETF 的全球行情/K线备用源。"],
   ["Tencent", "后端接入", "个股报价兜底，用于东财单股报价不可用时补价格、涨跌幅、成交额等字段。"],
-  ["GitHub Actions", "云缓存接入", "定时生成 market-cache 和 baostock-cache，Vercel 线上读取静态缓存兜底。"],
+  ["GitHub Actions", "云缓存接入", "定时生成 market-cache、baostock-cache 和 financial-cache，Vercel 线上读取静态缓存兜底。"],
   ["AKShare", "参考映射", "接口地图已映射到 Node 适配器，生产不依赖 Python 服务。"],
   ["efinance", "参考映射", "参考东财字段和接口口径，生产走 Node HTTP 适配器。"],
 ];
@@ -988,7 +989,7 @@ function renderAbout() {
     </section>
     <section class="panel" style="margin-top:14px">
       <h2>数据源覆盖</h2>
-      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}</div>
+      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}${tag(`财务字段 ${data.fundamentals?.rows?.length || 0} 项`)}</div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>来源</th><th>状态</th><th>用途</th></tr></thead>

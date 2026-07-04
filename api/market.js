@@ -25,6 +25,7 @@ const BOARD_CACHE_MS = 8 * 60 * 1000;
 const FINANCIAL_CACHE_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_CACHE_FILE = path.join("pages", "data", "market-cache.json");
 const BAOSTOCK_CACHE_FILE = path.join("pages", "data", "baostock-cache.json");
+const FINANCIAL_CACHE_FILE = path.join("pages", "data", "financial-cache.json");
 
 const memoryCache = new Map();
 
@@ -99,7 +100,8 @@ module.exports = async function handler(req, res) {
   const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
   const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
-  const enrichedFundamentals = enrichFundamentalsFromQuote(fundamentals, selectedQuote);
+  const financialCache = needsFinancialCache(fundamentals) ? await readFinancialCache(symbol, req) : null;
+  const enrichedFundamentals = enrichFundamentalsFromQuote(mergeFinancialSources(fundamentals, financialCache), selectedQuote);
   const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
   const baostock = await readBaoStockCache(symbol, req);
   const source = [
@@ -178,7 +180,7 @@ function readMarketSnapshot() {
 }
 
 async function readBaoStockCache(symbol, req) {
-  const payload = readBundledJson(BAOSTOCK_CACHE_FILE) || (await readPublicBaoStockCache(req));
+  const payload = readBundledJson(BAOSTOCK_CACHE_FILE) || (await readPublicJsonCache(req, BAOSTOCK_CACHE_FILE));
   const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
   const item = payload?.symbols?.[key];
   if (!item?.rows?.length) {
@@ -191,17 +193,55 @@ async function readBaoStockCache(symbol, req) {
   };
 }
 
-async function readPublicBaoStockCache(req) {
+async function readFinancialCache(symbol, req) {
+  const payload = readBundledJson(FINANCIAL_CACHE_FILE) || (await readPublicJsonCache(req, FINANCIAL_CACHE_FILE));
+  const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
+  const item = payload?.symbols?.[key];
+  if (!item) return null;
+  return {
+    ...item,
+    source: item.source?.includes("financial-cache") ? item.source : `${item.source || "financial-cache"}+financial-cache`,
+    cache: {
+      scope: "github-actions-json",
+      generatedAt: payload.generatedAt,
+      symbolCount: Object.keys(payload.symbols || {}).length,
+    },
+  };
+}
+
+function needsFinancialCache(fundamentals) {
+  if (!fundamentals) return true;
+  return emptyRows(fundamentals.rows) || Object.keys(fundamentals.financials || {}).length === 0;
+}
+
+function mergeFinancialSources(live, cached) {
+  if (!live) return cached;
+  if (!cached) return live;
+  const sources = [live.source, cached.source].filter(Boolean);
+  return {
+    ...cached,
+    ...live,
+    source: [...new Set(sources.join("+").split("+").filter(Boolean))].join("+"),
+    financials: Object.keys(live.financials || {}).length ? live.financials : cached.financials,
+    rows: hasRows(live.rows) ? live.rows : cached.rows,
+    reportDate: live.reportDate || cached.reportDate,
+    reportLabel: live.reportLabel || cached.reportLabel,
+    cache: cached.cache,
+  };
+}
+
+async function readPublicJsonCache(req, relativePath) {
   const host = req?.headers?.host;
   if (!host || host.includes("localhost") || host.includes("127.0.0.1")) return null;
-  const cacheKey = `public-json:${host}:${BAOSTOCK_CACHE_FILE}`;
+  const cacheKey = `public-json:${host}:${relativePath}`;
   const cached = memoryCache.get(cacheKey);
   if (cached && cached.expires > Date.now()) return cached.value;
   const protocol = host.includes("vercel.app") || host.includes(".com") || host.includes(".cn") ? "https" : "http";
+  const publicPath = `/${String(relativePath).replace(/^pages\//, "")}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 2500);
   try {
-    const response = await fetch(`${protocol}://${host}/data/baostock-cache.json`, {
+    const response = await fetch(`${protocol}://${host}${publicPath}`, {
       cache: "no-store",
       signal: controller.signal,
     });
@@ -1583,6 +1623,11 @@ function formatSinaCode(symbol, code) {
   if (raw.startsWith("bj")) return `${cleanCode}.BJ`;
   return `${cleanCode}.SZ`;
 }
+
+module.exports.adapters = {
+  fetchFundamentals,
+  secidFromSymbol,
+};
 
 function clean(value) {
   return String(value ?? "").trim();

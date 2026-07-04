@@ -3,8 +3,9 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js && node --check api/market.js && node --check scripts/update-market-cache.js && python3 -m py_compile scripts/update_baostock_cache.py",
+    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js && node --check api/market.js && node --check scripts/update-market-cache.js && node --check scripts/update-financial-cache.js && python3 -m py_compile scripts/update_baostock_cache.py",
     "cache:market": "node scripts/update-market-cache.js",
-    "cache:baostock": "python3 scripts/update_baostock_cache.py"
+    "cache:baostock": "python3 scripts/update_baostock_cache.py",
+    "cache:financial": "node scripts/update-financial-cache.js"
   }
 }
