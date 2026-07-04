@@ -245,6 +245,12 @@ p {
   color: var(--ink);
 }
 
+.compact-button {
+  min-height: 34px;
+  margin: 0;
+  font-size: 14px;
+}
+
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -350,6 +356,8 @@ p {
 }
 
 .chip {
+  display: inline-flex;
+  align-items: center;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 7px 12px;
@@ -361,6 +369,29 @@ p {
 .chip.active {
   border-color: var(--teal);
   background: #e7f5f3;
+  color: #075e56;
+}
+
+.factor-chip {
+  gap: 8px;
+}
+
+.chip-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  padding: 0 6px;
+  background: #edf2f7;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.chip.active .chip-count {
+  background: white;
   color: #075e56;
 }
 
@@ -567,6 +598,11 @@ p {
 
 .empty-state strong {
   color: var(--ink);
+}
+
+.compact-empty {
+  min-height: 86px;
+  margin-bottom: 12px;
 }
 
 .table-note {

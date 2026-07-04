@@ -159,7 +159,7 @@ const pages = [
 
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
-  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存和自定义条件。"],
+  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存、自定义条件、单因子命中数和相似候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表和操作列。"],
@@ -169,8 +169,20 @@ const coverageRows = [
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
 ];
 
+const dataSourceRows = [
+  ["东方财富", "核心接入", "A股行情、指数、板块、涨停池、炸板池、强势股、ETF、个股资金流、北向资金、人气榜、公告、单股行情与K线。"],
+  ["Sina", "核心接入", "全A兜底、行业/概念兜底、财报字段兜底，补齐东财列表偶发为空时的股票池。"],
+  ["CNInfo 巨潮", "核心接入", "公告二源合并、投资者关系/调研披露，已进入行情页和 LLM 上下文。"],
+  ["BaoStock", "云缓存接入", "GitHub Actions 批量生成历史K线、换手率、PE/PB/PS/PCF、收益与均线摘要，Vercel 按股票读取。"],
+  ["Yahoo/yfinance-compatible", "后端接入", "用 Yahoo chart API 作为 A股 .SS/.SZ、港美股和 ETF 的全球行情/K线备用源。"],
+  ["Tencent", "后端接入", "个股报价兜底，用于东财单股报价不可用时补价格、涨跌幅、成交额等字段。"],
+  ["GitHub Actions", "云缓存接入", "定时生成 market-cache 和 baostock-cache，Vercel 线上读取静态缓存兜底。"],
+  ["AKShare", "参考映射", "接口地图已映射到 Node 适配器，生产不依赖 Python 服务。"],
+  ["efinance", "参考映射", "参考东财字段和接口口径，生产走 Node HTTP 适配器。"],
+];
+
 let currentPage = "market";
-let activeFactors = new Set(["ma20", "rps"]);
+let activeFactors = new Set(["ma20"]);
 let watchlist = ["300750.SZ", "688981.SH", "002230.SZ"];
 let toastTimer = 0;
 let progressTimers = [];
@@ -314,17 +326,28 @@ function renderMarket() {
 
 function renderScreener() {
   const filtered = filteredStocks();
+  const relaxed = filtered.length ? [] : relaxedStocks();
+  const visibleRows = filtered.length ? filtered : relaxed;
   const activeLabel = activeFactorLabels();
+  const factorCounts = factorHitCounts();
   return `
     <div class="panel">
-      ${panelTitle("多因子量化模型", `<button class="primary-button" data-toast="已执行筛选">筛选</button>`)}
+      ${panelTitle(
+        "多因子量化模型",
+        `<div class="top-actions"><button class="ghost-button compact-button" data-clear-factors="1">清空因子</button><button class="primary-button" data-toast="已执行筛选">筛选</button></div>`
+      )}
       <div class="factor-grid">
         ${factorGroups
           .map(
             ([group, chips]) => `
               <section class="factor-group">
                 <h3>${group}</h3>
-                <div class="toolbar">${chips.map(([key, label]) => `<button class="chip ${activeFactors.has(key) ? "active" : ""}" data-factor="${key}">${label}</button>`).join("")}</div>
+                <div class="toolbar">${chips
+                  .map(([key, label]) => {
+                    const count = factorCounts.get(key) || 0;
+                    return `<button class="chip factor-chip ${activeFactors.has(key) ? "active" : ""}" data-factor="${key}" title="单因子命中 ${count} 只"><span>${label}</span><span class="chip-count">${count}</span></button>`;
+                  })
+                  .join("")}</div>
               </section>
             `
           )
@@ -365,9 +388,9 @@ function renderScreener() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(`筛选结果 ${filtered.length} 条`, `${tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info")}`)}
-      ${filtered.length ? stockTable(filtered.slice(0, 120)) : screenerEmptyState(activeLabel)}
-      ${filtered.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
+      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, `${tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info")}`)}
+      ${filtered.length ? stockTable(visibleRows.slice(0, 120)) : relaxed.length ? screenerRelaxedState(activeLabel, activeFactors.size) + stockTable(visibleRows.slice(0, 120)) : screenerEmptyState(activeLabel)}
+      ${visibleRows.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
     </section>
   `;
 }
@@ -886,11 +909,46 @@ function renderAbout() {
         </table>
       </div>
     </section>
+    <section class="panel" style="margin-top:14px">
+      <h2>数据源覆盖</h2>
+      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>来源</th><th>状态</th><th>用途</th></tr></thead>
+          <tbody>${dataSourceRows.map(([source, status, usage]) => `<tr><td>${source}</td><td>${statusBadge(status)}</td><td>${usage}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+    </section>
   `;
 }
 
 function filteredStocks() {
-  return data.stocks.filter((stock) => Array.from(activeFactors).every((key) => factorPasses(stock, key)));
+  return data.stocks.filter((stock) => Array.from(activeFactors).every((key) => factorPasses(stock, key))).sort(sortScreenerRows);
+}
+
+function relaxedStocks() {
+  const keys = Array.from(activeFactors);
+  if (!keys.length) return [];
+  return data.stocks
+    .map((stock) => {
+      const score = keys.reduce((sum, key) => sum + (factorPasses(stock, key) ? 1 : 0), 0);
+      return { ...stock, factorScore: score, factorTotal: keys.length };
+    })
+    .filter((stock) => stock.factorScore > 0)
+    .sort((a, b) => b.factorScore - a.factorScore || sortScreenerRows(a, b))
+    .slice(0, 120);
+}
+
+function factorHitCounts() {
+  const counts = new Map();
+  factorGroups.flatMap(([, chips]) => chips).forEach(([key]) => {
+    counts.set(key, data.stocks.filter((stock) => factorPasses(stock, key)).length);
+  });
+  return counts;
+}
+
+function sortScreenerRows(a, b) {
+  return (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
 }
 
 function factorPasses(stock, key) {
@@ -998,15 +1056,27 @@ function screenerEmptyState(activeLabel) {
   `;
 }
 
+function screenerRelaxedState(activeLabel, factorTotal) {
+  return `
+    <div class="empty-state compact-empty">
+      <div>
+        <strong>严格组合暂未命中</strong>
+        <p>条件：${escapeHtml(activeLabel || "未选择因子")}。下方按匹配 ${factorTotal} 个因子的数量、成交额和强度排序。</p>
+      </div>
+    </div>
+  `;
+}
+
 function stockTable(rows) {
   if (!rows.length) return `<p>暂无匹配数据。</p>`;
+  const hasFactorScore = rows.some((stock) => Number.isFinite(stock.factorScore));
   return `
     <div class="table-wrap">
       <table>
-        <thead><tr><th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th></tr></thead>
+        <thead><tr>${hasFactorScore ? "<th>匹配</th>" : ""}<th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th></tr></thead>
         <tbody>
           ${rows
-            .map((stock, index) => stockTableRow(stock, index))
+            .map((stock, index) => stockTableRow(stock, index, hasFactorScore))
             .join("")}
         </tbody>
       </table>
@@ -1014,11 +1084,12 @@ function stockTable(rows) {
   `;
 }
 
-function stockTableRow(stock, index) {
+function stockTableRow(stock, index, hasFactorScore = false) {
   const floatMvYi = Math.round(((stock.circMv || stock.totalMv || stock.amount * 12 || 0) / 100000000) * 10) / 10;
   const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
   const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
-  return `<tr><td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td></tr>`;
+  const scoreCell = hasFactorScore ? `<td>${stock.factorScore}/${stock.factorTotal}</td>` : "";
+  return `<tr>${scoreCell}<td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td></tr>`;
 }
 
 function sectorMiniTable() {
@@ -1114,6 +1185,10 @@ function attachEvents() {
       else activeFactors.add(key);
       render();
     });
+  });
+  document.querySelector("[data-clear-factors]")?.addEventListener("click", () => {
+    activeFactors = new Set();
+    render();
   });
   document.querySelectorAll("[data-chat-module]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -1503,7 +1578,7 @@ function showToast(message, state = "info") {
 }
 
 function statusBadge(status) {
-  const cls = status.includes("已对齐") || status.includes("核心") ? "done" : status.includes("演示") ? "demo" : "partial";
+  const cls = status.includes("已对齐") || status.includes("核心") || status.includes("接入") ? "done" : status.includes("演示") ? "demo" : "partial";
   return `<span class="coverage-badge ${cls}">${status}</span>`;
 }
 

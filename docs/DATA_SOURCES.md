@@ -32,9 +32,11 @@
 - BaoStock cache
   - `scripts/update_baostock_cache.py` queries historical daily K-line, turnover, PE/PB/PS/PCF fields and writes `pages/data/baostock-cache.json`.
   - The symbol universe is expanded from the bundled market snapshot: default core names, current quote, high-amount stocks, hot-rank stocks and limit-up pool names, capped by `BAOSTOCK_MAX_SYMBOLS`.
-  - `/api/market` exposes the matching symbol cache as `baostock` for quote, LLM and factor context.
+  - `/api/market` exposes the matching symbol cache as `baostock` for quote, LLM and factor context, reading the bundled file first and the deployed static JSON as a fallback on Vercel.
 - DeepSeek API
   - Server-side `/api/chat` only.
+- In-app source coverage
+  - The 复刻状态 page now shows production-connected sources, cloud-cache sources and reference-only sources side by side.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -48,7 +50,6 @@
 ## Next Enrichment Targets
 
 - Add richer industry research/news metadata for the 产业链研报分析 tab.
-- Add a small source-health view for operators to inspect which providers filled each field.
 
 ## Design
 

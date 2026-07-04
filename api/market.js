@@ -101,7 +101,7 @@ module.exports = async function handler(req, res) {
   const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
   const enrichedFundamentals = enrichFundamentalsFromQuote(fundamentals, selectedQuote);
   const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
-  const baostock = readBaoStockCache(symbol);
+  const baostock = await readBaoStockCache(symbol, req);
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
@@ -177,8 +177,8 @@ function readMarketSnapshot() {
   return null;
 }
 
-function readBaoStockCache(symbol) {
-  const payload = readBundledJson(BAOSTOCK_CACHE_FILE);
+async function readBaoStockCache(symbol, req) {
+  const payload = readBundledJson(BAOSTOCK_CACHE_FILE) || (await readPublicBaoStockCache(req));
   const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
   const item = payload?.symbols?.[key];
   if (!item?.rows?.length) {
@@ -189,6 +189,31 @@ function readBaoStockCache(symbol) {
     generatedAt: payload.generatedAt,
     lookbackDays: payload.lookbackDays,
   };
+}
+
+async function readPublicBaoStockCache(req) {
+  const host = req?.headers?.host;
+  if (!host || host.includes("localhost") || host.includes("127.0.0.1")) return null;
+  const cacheKey = `public-json:${host}:${BAOSTOCK_CACHE_FILE}`;
+  const cached = memoryCache.get(cacheKey);
+  if (cached && cached.expires > Date.now()) return cached.value;
+  const protocol = host.includes("vercel.app") || host.includes(".com") || host.includes(".cn") ? "https" : "http";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 2500);
+  try {
+    const response = await fetch(`${protocol}://${host}/data/baostock-cache.json`, {
+      cache: "no-store",
+      signal: controller.signal,
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    memoryCache.set(cacheKey, { expires: Date.now() + 10 * 60 * 1000, value: payload });
+    return payload;
+  } catch (error) {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function readBundledJson(relativePath) {
