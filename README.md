@@ -10,6 +10,23 @@ https://yt-feng.github.io/quant_a_share/
 
 Pages 由 `.github/workflows/pages.yml` 自动部署，静态文件位于 `pages/`。这个版本不包含服务端密钥；需要 TuShare 实时数据时运行 Streamlit，本地或服务器端再读取 `.env`。
 
+## Vercel 后端版
+
+Vercel 版提供 `/api/chat` 和 `/api/health`，前端问答模块会调用服务端 DeepSeek API。
+
+需要配置环境变量：
+
+```bash
+DEEPSEEK_API_KEY=你的 DeepSeek key
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+本地检查：
+
+```bash
+npm run check:pages
+```
+
 ## 已覆盖能力
 
 - 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、指数涨跌、趋势图。

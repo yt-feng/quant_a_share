@@ -48,14 +48,18 @@ const data = {
   ],
 };
 
+const VERCEL_BACKEND_URL = "";
+
 const pages = [
   ["market", "大盘情绪", "情绪温度、成交额、涨跌比与指数表现"],
   ["screener", "量化因子选股", "估值、趋势、资金和技术信号组合筛选"],
   ["sectors", "板块与概念", "板块排名、资金流向和涨跌分布"],
   ["quote", "行情", "单股行情、指标和操作计划"],
   ["watchlist", "自选", "本地演示自选分组"],
-  ["ai", "AI决策矩阵", "静态规则版问答，服务端版可接 DeepSeek"],
-  ["about", "Pages说明", "GitHub Pages 部署说明"],
+  ["llm", "LLM分析", "主题热点、选股池、板块看板和产业链问答"],
+  ["qimen", "奇门遁甲", "事项起局、任务提交和解盘问答"],
+  ["ai", "AI决策矩阵", "DeepSeek 服务端问答"],
+  ["about", "部署说明", "GitHub Pages 与 Vercel 后端说明"],
 ];
 
 let currentPage = "market";
@@ -96,6 +100,8 @@ function render() {
     sectors: renderSectors,
     quote: renderQuote,
     watchlist: renderWatchlist,
+    llm: renderLlm,
+    qimen: renderQimen,
     ai: renderAi,
     about: renderAbout,
   };
@@ -209,13 +215,67 @@ function renderAi() {
         <label><span class="label">问题</span><textarea id="question">结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。</textarea></label>
         <div class="toolbar" style="margin-top:12px">
           <select id="mode"><option>快速模式</option><option>专家模式</option><option>深度思考</option></select>
-          <button class="primary-button" data-answer="1">生成回答</button>
+          <button class="primary-button" data-chat-module="ai_matrix" data-target="aiAnswer">生成回答</button>
         </div>
-        <p class="notice">这是 GitHub Pages 静态规则版。DeepSeek 需要后端接口承载密钥，不能放在浏览器端。</p>
+        <p class="notice">Vercel 后端会读取服务端 DEEPSEEK_API_KEY，浏览器端不保存密钥。</p>
       </div>
       <div class="panel">
         <h2>结果</h2>
         <div id="aiAnswer" class="answer">点击“生成回答”查看分析。</div>
+      </div>
+    </section>
+  `;
+}
+
+function renderLlm() {
+  return `
+    <section class="grid two">
+      <div class="panel">
+        <h2>LLM分析</h2>
+        <div class="toolbar">
+          <span class="chip active">主题热点</span>
+          <span class="chip active">选股池</span>
+          <span class="chip active">板块全景看板</span>
+          <span class="chip active">产业链研报分析</span>
+        </div>
+        <label><span class="label">研究问题</span><textarea id="question">今天哪些板块资金在持续流入？结合主题热点、行业轮动和样本股票池，给我低吸观察顺序。</textarea></label>
+        <div class="toolbar" style="margin-top:12px">
+          <select id="mode"><option>专家模式</option><option>快速模式</option><option>深度思考</option></select>
+          <button class="primary-button" data-chat-module="llm_analysis" data-target="llmAnswer">生成研究结论</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>研究结果</h2>
+        <div id="llmAnswer" class="answer">点击“生成研究结论”调用后端。</div>
+      </div>
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel"><h2>主题热度样本</h2>${sectorMiniTable()}</div>
+      <div class="panel"><h2>选股池样本</h2>${stockTable(filteredStocks().slice(0, 5))}</div>
+    </section>
+  `;
+}
+
+function renderQimen() {
+  return `
+    <section class="grid two">
+      <div class="panel">
+        <h2>奇门遁甲</h2>
+        <div class="form-grid">
+          <label><span class="label">事项类型</span><select id="itemType"><option>金融</option><option>工作</option><option>合作</option></select></label>
+          <label><span class="label">当前阶段</span><select id="stage"><option>在考虑阶段</option><option>已持有/已开始</option><option>准备执行</option></select></label>
+          <label><span class="label">城市</span><input id="city" value="上海" /></label>
+          <label><span class="label">解盘档位</span><select id="mode"><option>深入分析</option><option>快速结论</option></select></label>
+        </div>
+        <label style="margin-top:12px"><span class="label">事情摘要</span><textarea id="question">我最近在看一只科技股，已经涨了一段时间，现在担心追高，但又怕错过后面的上涨，想判断现在适不适合进场。</textarea></label>
+        <div class="toolbar" style="margin-top:12px">
+          <button class="ghost-button" data-fill-now="1">同步起局</button>
+          <button class="primary-button" data-chat-module="qimen" data-target="qimenAnswer">提交解盘任务</button>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>结果与详情</h2>
+        <div id="qimenAnswer" class="answer">请先起局，或直接提交解盘任务。</div>
       </div>
     </section>
   `;
@@ -226,13 +286,13 @@ function renderAbout() {
     <section class="grid two">
       <div class="panel">
         <h2>部署方式</h2>
-        <p>本页面由 GitHub Actions 上传 <code>pages/</code> 静态目录，再通过 GitHub Pages 发布。</p>
-        <p>Streamlit 版本仍保留在仓库里，适合本地或服务器运行 TuShare 实时数据。</p>
+        <p>GitHub Pages 发布 <code>pages/</code>，用于展示和备用访问。</p>
+        <p>Vercel 发布同一套前端，并提供 <code>/api/chat</code> 后端问答接口。</p>
       </div>
       <div class="panel">
-        <h2>后端扩展位</h2>
-        <p>需要 DeepSeek 实时问答时，用 Vercel / Cloudflare Workers / FastAPI 提供 API route，并把密钥放到服务端 secret。</p>
-        <p>Pages 前端只调用自己的后端接口，不直接持有密钥。</p>
+        <h2>服务端密钥</h2>
+        <p>DeepSeek key 只配置为 Vercel 环境变量 <code>DEEPSEEK_API_KEY</code>。</p>
+        <p>浏览器只调用后端接口，不直接持有密钥。</p>
       </div>
     </section>
   `;
@@ -261,6 +321,15 @@ function stockTable(rows) {
   `;
 }
 
+function sectorMiniTable() {
+  return `
+    <table>
+      <thead><tr><th>板块</th><th>涨跌幅</th><th>资金流向</th><th>上涨家数</th></tr></thead>
+      <tbody>${data.sectors.slice(0, 6).map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${signed(s[7])}亿</td><td>${s[4]}</td></tr>`).join("")}</tbody>
+    </table>
+  `;
+}
+
 function attachEvents() {
   document.querySelectorAll("[data-factor]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -270,17 +339,31 @@ function attachEvents() {
       render();
     });
   });
-  document.querySelector("[data-answer]")?.addEventListener("click", () => {
-    const mode = document.querySelector("#mode").value;
-    const answer = `结论：宁德时代当前可跟踪试错。
-
-- 模式：${mode}
-- 当前价：268.40，RPS50：88，资金净流入：+14.20亿
-- 触发条件：放量站稳 268.40 上方，或回踩 260.35 附近不破
-- 失效条件：跌破 260.35 且无法快速收回
-- 仓位区间：20%-35%
-- 观察点：新能源车板块强度、成交额、MA20、资金净流入是否同向`;
-    document.querySelector("#aiAnswer").textContent = answer;
+  document.querySelectorAll("[data-chat-module]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const target = document.querySelector(`#${button.dataset.target}`);
+      const question = document.querySelector("#question")?.value || "";
+      const mode = document.querySelector("#mode")?.value || "专家模式";
+      target.textContent = "后端分析中...";
+      button.setAttribute("disabled", "disabled");
+      try {
+        const result = await askBackend({
+          module: button.dataset.chatModule,
+          question,
+          mode,
+          context: contextForModule(button.dataset.chatModule),
+        });
+        target.textContent = result.answer || "后端没有返回内容。";
+      } catch (error) {
+        target.textContent = error.message || "后端调用失败。";
+      } finally {
+        button.removeAttribute("disabled");
+      }
+    });
+  });
+  document.querySelector("[data-fill-now]")?.addEventListener("click", () => {
+    const target = document.querySelector("#qimenAnswer");
+    target.textContent = `已同步起局：${new Date().toLocaleString("zh-CN")}，城市：${document.querySelector("#city")?.value || "上海"}。`;
   });
   document.querySelector("[data-add-watch]")?.addEventListener("click", (event) => {
     const code = event.currentTarget.dataset.addWatch;
@@ -291,6 +374,42 @@ function attachEvents() {
     watchlist = [];
     render();
   });
+}
+
+function contextForModule(moduleName) {
+  return {
+    moduleName,
+    metrics: data.metrics,
+    sectors: data.sectors.slice(0, 8),
+    stocks: data.stocks.slice(0, 8),
+    qimen: {
+      itemType: document.querySelector("#itemType")?.value,
+      stage: document.querySelector("#stage")?.value,
+      city: document.querySelector("#city")?.value,
+    },
+  };
+}
+
+function apiBase() {
+  if (location.hostname.endsWith("github.io")) return VERCEL_BACKEND_URL;
+  return "";
+}
+
+async function askBackend(payload) {
+  const base = apiBase();
+  if (location.hostname.endsWith("github.io") && !base) {
+    throw new Error("当前是 GitHub Pages 展示版；后端问答请打开 Vercel 版本。");
+  }
+  const response = await fetch(`${base}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || "后端调用失败。");
+  }
+  return data;
 }
 
 function renderCharts() {

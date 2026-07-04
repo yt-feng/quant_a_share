@@ -1,0 +1,8 @@
+{
+  "name": "quant-a-share",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js"
+  }
+}
