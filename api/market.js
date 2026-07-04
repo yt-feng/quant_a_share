@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 
-const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21";
+const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21,f23,f100,f102,f103";
 const BOARD_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106,f128,f136,f140,f141";
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
 const EASTMONEY_A_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23";
@@ -552,9 +552,9 @@ async function fetchEastmoneyStockPage(page, fs = EASTMONEY_A_FS) {
     fs,
     fields: STOCK_FIELDS,
   });
-  const payload = await fetchJson(`https://82.push2.eastmoney.com/api/qt/clist/get?${params}`, {
-    attempts: 1,
-    timeoutMs: 1500,
+  const payload = await fetchJson(`${EASTMONEY_ETF_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 2500,
     headers: { Referer: "https://quote.eastmoney.com/" },
   });
   const rows = payload?.data?.diff || [];
@@ -1397,6 +1397,10 @@ function normalizeStockRow(row) {
     turnover: num(row.f8),
     pe: num(row.f9),
     volumeRatio: num(row.f10),
+    pb: num(row.f23),
+    industry: clean(row.f100),
+    area: clean(row.f102),
+    concepts: clean(row.f103),
     high: num(row.f15),
     low: num(row.f16),
     open: num(row.f17),

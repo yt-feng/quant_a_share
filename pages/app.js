@@ -1828,8 +1828,7 @@ function buildClientStockRows(rows) {
   const baseRows = rows.slice(0, 800);
   const pctValues = baseRows.map((stock) => Number(stock.pct) || 0).sort((a, b) => a - b);
   const amountValues = baseRows.map((stock) => Number(stock.amount) || 0).sort((a, b) => a - b);
-  const fallbackIndustries = data.stocks.length ? data.stocks.map((stock) => stock.industry || "A股") : ["A股"];
-  return baseRows.map((stock, index) => {
+  return baseRows.map((stock) => {
     const pct = Number(stock.pct) || 0;
     const amount = Number(stock.amount) || 0;
     const price = Number(stock.price) || 0;
@@ -1844,7 +1843,8 @@ function buildClientStockRows(rows) {
       price,
       pct,
       change: Number(stock.change) || 0,
-      industry: stock.industry || fallbackIndustries[index % fallbackIndustries.length] || "A股",
+      industry: stock.industry || stock.area || "A股",
+      concepts: stock.concepts || "",
       rps,
       rps120: Math.max(20, Math.min(99, Math.round((rps + amountRank * 100) / 2))),
       sectorRps,
