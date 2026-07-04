@@ -71,6 +71,7 @@ module.exports = async function handler(req, res) {
     researchReports,
     yahooChart,
     klines,
+    minuteKlines,
     marketKlines,
     quote,
     tencentQuote,
@@ -95,6 +96,7 @@ module.exports = async function handler(req, res) {
     fetchCached("eastmoney:research-reports", BOARD_CACHE_MS, fetchEastmoneyResearchReports).catch(() => null),
     fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
+    fetchEastmoneyMinuteKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
     fetchEastmoneyQuote(secid).catch(() => null),
     fetchTencentQuote(symbol).catch(() => null),
@@ -125,6 +127,7 @@ module.exports = async function handler(req, res) {
     cninfoRelations?.items?.length ? "cninfo-relations" : "relation-fallback",
     researchReports?.reports?.length ? "eastmoney-research-reports" : "research-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
+    minuteKlines?.length ? "eastmoney-minute-trends" : "minute-fallback",
     baostock?.rows?.length ? "baostock-history-cache" : "baostock-cache-miss",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
     quote ? "eastmoney-quote" : tencentQuote ? "tencent-quote" : "quote-fallback",
@@ -156,6 +159,7 @@ module.exports = async function handler(req, res) {
     },
     research: researchReports || { source: "", reports: [], stats: {} },
     yahooChart,
+    minuteKlines,
     baostock,
     indices,
     quote: mergeQuoteFundamentals(selectedQuote, enrichedFundamentals),
@@ -304,6 +308,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("marketKlines", emptyRows, hasRows);
   fill("quote", (value) => !value || next.source.includes("quote-fallback"), (value) => value?.code, true);
   fill("klines", emptyRows, hasRows, true);
+  fill("minuteKlines", emptyRows, hasRows, true);
   fill("moneyFlow", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
   fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
   fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
@@ -1120,6 +1125,31 @@ async function fetchEastmoneyKlines(secid) {
       pct: num(pct),
       change: num(change),
       turnover: num(turnover),
+    };
+  });
+}
+
+async function fetchEastmoneyMinuteKlines(secid) {
+  const url =
+    "https://push2delay.eastmoney.com/api/qt/stock/trends2/get" +
+    `?secid=${secid}&fields1=f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13&fields2=f51,f52,f53,f54,f55,f56,f57,f58&ndays=1&iscr=0&iscca=0`;
+  const payload = await fetchJson(url, {
+    attempts: 2,
+    timeoutMs: 4500,
+    headers: { Referer: "https://quote.eastmoney.com/" },
+  });
+  return (payload?.data?.trends || []).map((line) => {
+    const [time, open, close, high, low, volume, amount, avgPrice] = String(line).split(",");
+    return {
+      time,
+      date: time,
+      open: num(open),
+      high: num(high),
+      low: num(low),
+      close: num(close),
+      volume: num(volume),
+      amount: num(amount),
+      avgPrice: num(avgPrice),
     };
   });
 }

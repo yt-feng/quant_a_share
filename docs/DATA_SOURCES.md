@@ -7,7 +7,7 @@
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
   - Concept board quotes from `m:90+t:3`, including pct/change, amount, fund flow,涨跌家数, constituent count and leading stock fields.
   - Index quotes for 上证指数、深证成指、创业板指、沪深300、中证500.
-  - Single-stock quote and daily K-line.
+  - Single-stock quote, daily K-line and 1-minute intraday trend lines from Eastmoney quote/trends endpoints.
   - Limit-up pool, broken-board pool, strong-stock pool, seal fund, first/last seal time and streak height.
   - Individual stock money flow day K: main/super/big/mid/small order net flow and ratios.
   - Northbound/southbound Stock Connect quota and net buy summary.
@@ -61,7 +61,7 @@
 
 ## Next Enrichment Targets
 
-- Add minute-level intraday K-line rendering and drawing-state persistence for the 行情 page.
+- Add more exact intraday drawing geometry for the 行情 page, including draggable line endpoints.
 
 ## Design
 

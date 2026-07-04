@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "source": "eastmoney-a-share-pages+eastmoney-sector-flow+eastmoney-concept-boards+eastmoney-limit-pools+eastmoney-etf-spot+eastmoney-moneyflow+eastmoney-northbound+sina-financial-report+eastmoney-hot-rank+eastmoney-stock-popularity+eastmoney-announcements+cninfo-announcements+relation-fallback+eastmoney-research-reports+yahoo-chart-yfinance-compatible+baostock-history-cache+index-fallback+tencent-quote",
-  "asOf": "2026-07-04T06:01:50.142Z",
+  "source": "eastmoney-a-share-pages+eastmoney-sector-flow+eastmoney-concept-boards+eastmoney-limit-pools+eastmoney-etf-spot+eastmoney-moneyflow+eastmoney-northbound+sina-financial-report+eastmoney-hot-rank+eastmoney-stock-popularity+eastmoney-announcements+cninfo-announcements+relation-fallback+eastmoney-research-reports+yahoo-chart-yfinance-compatible+eastmoney-minute-trends+baostock-history-cache+index-fallback+tencent-quote",
+  "asOf": "2026-07-04T06:19:36.685Z",
   "tradeDate": "20260703",
   "market": {
     "temperature": 78.3,
@@ -43868,7 +43868,7 @@
     "cache": {
       "scope": "vercel-serverless-memory",
       "hit": false,
-      "updatedAt": "2026-07-04T06:01:48.336Z",
+      "updatedAt": "2026-07-04T06:19:35.061Z",
       "ttlSeconds": 21600
     },
     "totalMv": 1493160000000,
@@ -43985,7 +43985,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 1,
+          "rankChange": 0,
           "historyRankChange": -7
         },
         {
@@ -43994,7 +43994,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": -1,
+          "rankChange": 0,
           "historyRankChange": -6
         },
         {
@@ -44035,21 +44035,21 @@
         },
         {
           "rank": 18,
-          "code": "600143.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 5
-        },
-        {
-          "rank": 19,
           "code": "002896.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": 7
+          "historyRankChange": 8
+        },
+        {
+          "rank": 19,
+          "code": "600143.SH",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": 4
         },
         {
           "rank": 20,
@@ -44147,7 +44147,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
+          "rankChange": 1,
           "historyRankChange": -6
         },
         {
@@ -44156,7 +44156,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
+          "rankChange": -1,
           "historyRankChange": 8
         },
         {
@@ -44251,66 +44251,66 @@
         },
         {
           "rank": 42,
-          "code": "003021.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 12
-        },
-        {
-          "rank": 43,
           "code": "600522.SH",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -13
+          "rankChange": 1,
+          "historyRankChange": -12
+        },
+        {
+          "rank": 43,
+          "code": "003021.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": 11
         },
         {
           "rank": 44,
+          "code": "002422.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": 73
+        },
+        {
+          "rank": 45,
           "code": "002202.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": 2
-        },
-        {
-          "rank": 45,
-          "code": "002422.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 1,
-          "historyRankChange": 72
+          "historyRankChange": 1
         },
         {
           "rank": 46,
-          "code": "002292.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": -1,
-          "historyRankChange": 60
-        },
-        {
-          "rank": 47,
           "code": "600487.SH",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": -13
+          "historyRankChange": -12
         },
         {
-          "rank": 48,
+          "rank": 47,
           "code": "001270.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 24
+          "rankChange": 1,
+          "historyRankChange": 25
+        },
+        {
+          "rank": 48,
+          "code": "002292.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": 58
         },
         {
           "rank": 49,
@@ -44332,21 +44332,21 @@
         },
         {
           "rank": 51,
-          "code": "001287.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 146
-        },
-        {
-          "rank": 52,
           "code": "601899.SH",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": -8
+          "historyRankChange": -7
+        },
+        {
+          "rank": 52,
+          "code": "603728.SH",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 1,
+          "historyRankChange": 79
         },
         {
           "rank": 53,
@@ -44354,35 +44354,35 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
+          "rankChange": 1,
           "historyRankChange": 55
         },
         {
           "rank": 54,
-          "code": "000908.SZ",
+          "code": "001287.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 19
+          "rankChange": -2,
+          "historyRankChange": 143
         },
         {
           "rank": 55,
-          "code": "603728.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 76
-        },
-        {
-          "rank": 56,
           "code": "600110.SH",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -24
+          "rankChange": 1,
+          "historyRankChange": -23
+        },
+        {
+          "rank": 56,
+          "code": "000908.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": 17
         },
         {
           "rank": 57,
@@ -44395,21 +44395,21 @@
         },
         {
           "rank": 58,
-          "code": "002434.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -7
-        },
-        {
-          "rank": 59,
           "code": "688525.SH",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 9
+          "rankChange": 1,
+          "historyRankChange": 10
+        },
+        {
+          "rank": 59,
+          "code": "002434.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": -8
         },
         {
           "rank": 60,
@@ -44467,21 +44467,21 @@
         },
         {
           "rank": 66,
-          "code": "002594.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -31
-        },
-        {
-          "rank": 67,
           "code": "002709.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 40
+          "rankChange": 1,
+          "historyRankChange": 41
+        },
+        {
+          "rank": 67,
+          "code": "002594.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": -32
         },
         {
           "rank": 68,
@@ -44548,21 +44548,21 @@
         },
         {
           "rank": 75,
-          "code": "002141.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -18
-        },
-        {
-          "rank": 76,
           "code": "002409.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 24
+          "rankChange": 1,
+          "historyRankChange": 25
+        },
+        {
+          "rank": 76,
+          "code": "002141.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": -19
         },
         {
           "rank": 77,
@@ -44593,21 +44593,21 @@
         },
         {
           "rank": 80,
-          "code": "002148.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 19
-        },
-        {
-          "rank": 81,
           "code": "688322.SH",
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 57
+          "rankChange": 1,
+          "historyRankChange": 58
+        },
+        {
+          "rank": 81,
+          "code": "002148.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": -1,
+          "historyRankChange": 18
         },
         {
           "rank": 82,
@@ -44647,21 +44647,21 @@
         },
         {
           "rank": 86,
-          "code": "300912.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 87,
           "code": "600378.SH",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": 28
+          "historyRankChange": 29
+        },
+        {
+          "rank": 87,
+          "code": "300912.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": -1
         },
         {
           "rank": 88,
@@ -44674,30 +44674,30 @@
         },
         {
           "rank": 89,
+          "code": "002821.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": 25
+        },
+        {
+          "rank": 90,
           "code": "601138.SH",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": -18
+          "historyRankChange": -19
         },
         {
-          "rank": 90,
+          "rank": 91,
           "code": "600592.SH",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": 19
-        },
-        {
-          "rank": 91,
-          "code": "002821.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 1,
-          "historyRankChange": 23
+          "historyRankChange": 18
         },
         {
           "rank": 92,
@@ -44705,44 +44705,44 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": -1,
+          "rankChange": 0,
           "historyRankChange": -28
         },
         {
           "rank": 93,
-          "code": "300433.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -4
-        },
-        {
-          "rank": 94,
-          "code": "300660.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -2
-        },
-        {
-          "rank": 95,
           "code": "002475.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": -39
+          "historyRankChange": -37
         },
         {
-          "rank": 96,
+          "rank": 94,
+          "code": "300433.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": -5
+        },
+        {
+          "rank": 95,
           "code": "002056.SZ",
           "name": "",
           "price": 0,
           "pct": 0,
           "rankChange": 0,
-          "historyRankChange": -2
+          "historyRankChange": -1
+        },
+        {
+          "rank": 96,
+          "code": "300660.SZ",
+          "name": "",
+          "price": 0,
+          "pct": 0,
+          "rankChange": 0,
+          "historyRankChange": -4
         },
         {
           "rank": 97,
@@ -44768,7 +44768,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": 1,
+          "rankChange": 0,
           "historyRankChange": -54
         },
         {
@@ -44777,7 +44777,7 @@
           "name": "",
           "price": 0,
           "pct": 0,
-          "rankChange": -1,
+          "rankChange": 0,
           "historyRankChange": 42
         }
       ]
@@ -44789,48 +44789,48 @@
         "rank": 20,
         "rankChange": 0,
         "historyRankChange": 27,
-        "historyRank": 2370,
+        "historyRank": 2379,
         "total": 5528,
-        "calcTime": "2026-07-04 14:00:00"
+        "calcTime": "2026-07-04 14:16:00"
       },
       "keywords": [
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "白酒",
           "conceptId": "BK0896",
-          "heat": 10342
+          "heat": 10344
         },
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "电商概念",
           "conceptId": "BK0665",
           "heat": 387
         },
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "超级品牌",
           "conceptId": "BK0811",
           "heat": 112
         },
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "茅指数",
           "conceptId": "BK0999",
           "heat": 78
         },
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "机构重仓",
           "conceptId": "BK0552",
           "heat": 19
         },
         {
-          "time": "2026-07-04 13:00:00",
+          "time": "2026-07-04 14:00:00",
           "code": "600519.SH",
           "concept": "国企改革",
           "conceptId": "BK0683",
@@ -44900,10 +44900,6 @@
         }
       ],
       "realtime": [
-        {
-          "time": "2026-07-04 08:10:00",
-          "rank": 39
-        },
         {
           "time": "2026-07-04 08:20:00",
           "rank": 39
@@ -45042,6 +45038,10 @@
         },
         {
           "time": "2026-07-04 14:00:00",
+          "rank": 20
+        },
+        {
+          "time": "2026-07-04 14:10:00",
           "rank": 20
         }
       ]
@@ -48445,6 +48445,2659 @@
       }
     ]
   },
+  "minuteKlines": [
+    {
+      "time": "2026-07-03 09:30",
+      "date": "2026-07-03 09:30",
+      "open": 1205.24,
+      "high": 1205.24,
+      "low": 1205.24,
+      "close": 1205.24,
+      "volume": 390,
+      "amount": 46958561,
+      "avgPrice": 1205.24
+    },
+    {
+      "time": "2026-07-03 09:31",
+      "date": "2026-07-03 09:31",
+      "open": 1205,
+      "high": 1207,
+      "low": 1201.1,
+      "close": 1203,
+      "volume": 871,
+      "amount": 104940291,
+      "avgPrice": 1204.648
+    },
+    {
+      "time": "2026-07-03 09:32",
+      "date": "2026-07-03 09:32",
+      "open": 1203,
+      "high": 1209.88,
+      "low": 1203,
+      "close": 1208.88,
+      "volume": 371,
+      "amount": 44793634,
+      "avgPrice": 1205.268
+    },
+    {
+      "time": "2026-07-03 09:33",
+      "date": "2026-07-03 09:33",
+      "open": 1205.98,
+      "high": 1208.88,
+      "low": 1205,
+      "close": 1205,
+      "volume": 332,
+      "amount": 40066393,
+      "avgPrice": 1205.53
+    },
+    {
+      "time": "2026-07-03 09:34",
+      "date": "2026-07-03 09:34",
+      "open": 1205.01,
+      "high": 1208.92,
+      "low": 1205.01,
+      "close": 1208.5,
+      "volume": 442,
+      "amount": 53387397,
+      "avgPrice": 1205.958
+    },
+    {
+      "time": "2026-07-03 09:35",
+      "date": "2026-07-03 09:35",
+      "open": 1209,
+      "high": 1210,
+      "low": 1208.5,
+      "close": 1209.82,
+      "volume": 322,
+      "amount": 38946640,
+      "avgPrice": 1206.379
+    },
+    {
+      "time": "2026-07-03 09:36",
+      "date": "2026-07-03 09:36",
+      "open": 1209.82,
+      "high": 1210.14,
+      "low": 1209.8,
+      "close": 1209.88,
+      "volume": 420,
+      "amount": 50816206,
+      "avgPrice": 1206.85
+    },
+    {
+      "time": "2026-07-03 09:37",
+      "date": "2026-07-03 09:37",
+      "open": 1209.99,
+      "high": 1209.99,
+      "low": 1206.22,
+      "close": 1206.22,
+      "volume": 382,
+      "amount": 46168259,
+      "avgPrice": 1207.039
+    },
+    {
+      "time": "2026-07-03 09:38",
+      "date": "2026-07-03 09:38",
+      "open": 1206.01,
+      "high": 1206.01,
+      "low": 1200,
+      "close": 1200.38,
+      "volume": 537,
+      "amount": 64526517,
+      "avgPrice": 1206.322
+    },
+    {
+      "time": "2026-07-03 09:39",
+      "date": "2026-07-03 09:39",
+      "open": 1200.44,
+      "high": 1204.68,
+      "low": 1200.44,
+      "close": 1201.78,
+      "volume": 346,
+      "amount": 41617855,
+      "avgPrice": 1206.048
+    },
+    {
+      "time": "2026-07-03 09:40",
+      "date": "2026-07-03 09:40",
+      "open": 1201.63,
+      "high": 1201.69,
+      "low": 1197.33,
+      "close": 1198.05,
+      "volume": 559,
+      "amount": 67060218,
+      "avgPrice": 1205.328
+    },
+    {
+      "time": "2026-07-03 09:41",
+      "date": "2026-07-03 09:41",
+      "open": 1198.32,
+      "high": 1199.42,
+      "low": 1197,
+      "close": 1198.01,
+      "volume": 336,
+      "amount": 40266913,
+      "avgPrice": 1204.868
+    },
+    {
+      "time": "2026-07-03 09:42",
+      "date": "2026-07-03 09:42",
+      "open": 1198.01,
+      "high": 1199.98,
+      "low": 1198,
+      "close": 1198.25,
+      "volume": 329,
+      "amount": 39448481,
+      "avgPrice": 1204.528
+    },
+    {
+      "time": "2026-07-03 09:43",
+      "date": "2026-07-03 09:43",
+      "open": 1200,
+      "high": 1201.08,
+      "low": 1198.02,
+      "close": 1198.99,
+      "volume": 211,
+      "amount": 25305027,
+      "avgPrice": 1204.339
+    },
+    {
+      "time": "2026-07-03 09:44",
+      "date": "2026-07-03 09:44",
+      "open": 1199,
+      "high": 1199,
+      "low": 1198,
+      "close": 1198.03,
+      "volume": 207,
+      "amount": 24808439,
+      "avgPrice": 1204.139
+    },
+    {
+      "time": "2026-07-03 09:45",
+      "date": "2026-07-03 09:45",
+      "open": 1198.15,
+      "high": 1200.56,
+      "low": 1198.02,
+      "close": 1200.56,
+      "volume": 254,
+      "amount": 30454814,
+      "avgPrice": 1203.94
+    },
+    {
+      "time": "2026-07-03 09:46",
+      "date": "2026-07-03 09:46",
+      "open": 1201.5,
+      "high": 1201.81,
+      "low": 1199.99,
+      "close": 1200,
+      "volume": 143,
+      "amount": 17172513,
+      "avgPrice": 1203.872
+    },
+    {
+      "time": "2026-07-03 09:47",
+      "date": "2026-07-03 09:47",
+      "open": 1200,
+      "high": 1200.1,
+      "low": 1198.64,
+      "close": 1198.73,
+      "volume": 234,
+      "amount": 28070248,
+      "avgPrice": 1203.722
+    },
+    {
+      "time": "2026-07-03 09:48",
+      "date": "2026-07-03 09:48",
+      "open": 1198.6,
+      "high": 1199.51,
+      "low": 1198.6,
+      "close": 1199.49,
+      "volume": 120,
+      "amount": 14359880,
+      "avgPrice": 1203.638
+    },
+    {
+      "time": "2026-07-03 09:49",
+      "date": "2026-07-03 09:49",
+      "open": 1199.51,
+      "high": 1201.46,
+      "low": 1198.77,
+      "close": 1201.46,
+      "volume": 149,
+      "amount": 17874806,
+      "avgPrice": 1203.553
+    },
+    {
+      "time": "2026-07-03 09:50",
+      "date": "2026-07-03 09:50",
+      "open": 1201.46,
+      "high": 1204.61,
+      "low": 1201.46,
+      "close": 1204.2,
+      "volume": 142,
+      "amount": 17079159,
+      "avgPrice": 1203.537
+    },
+    {
+      "time": "2026-07-03 09:51",
+      "date": "2026-07-03 09:51",
+      "open": 1204.01,
+      "high": 1206.1,
+      "low": 1204,
+      "close": 1205.99,
+      "volume": 258,
+      "amount": 31103118,
+      "avgPrice": 1203.607
+    },
+    {
+      "time": "2026-07-03 09:52",
+      "date": "2026-07-03 09:52",
+      "open": 1206.77,
+      "high": 1208.86,
+      "low": 1206.77,
+      "close": 1207,
+      "volume": 230,
+      "amount": 27772095,
+      "avgPrice": 1203.725
+    },
+    {
+      "time": "2026-07-03 09:53",
+      "date": "2026-07-03 09:53",
+      "open": 1207.5,
+      "high": 1208.26,
+      "low": 1205.18,
+      "close": 1205.18,
+      "volume": 199,
+      "amount": 24031613,
+      "avgPrice": 1203.824
+    },
+    {
+      "time": "2026-07-03 09:54",
+      "date": "2026-07-03 09:54",
+      "open": 1205,
+      "high": 1207.76,
+      "low": 1204.22,
+      "close": 1207.76,
+      "volume": 193,
+      "amount": 23275759,
+      "avgPrice": 1203.877
+    },
+    {
+      "time": "2026-07-03 09:55",
+      "date": "2026-07-03 09:55",
+      "open": 1207.91,
+      "high": 1207.92,
+      "low": 1203.2,
+      "close": 1203.2,
+      "volume": 214,
+      "amount": 25822417,
+      "avgPrice": 1203.949
+    },
+    {
+      "time": "2026-07-03 09:56",
+      "date": "2026-07-03 09:56",
+      "open": 1203.31,
+      "high": 1204,
+      "low": 1201.41,
+      "close": 1202.6,
+      "volume": 150,
+      "amount": 18046526,
+      "avgPrice": 1203.934
+    },
+    {
+      "time": "2026-07-03 09:57",
+      "date": "2026-07-03 09:57",
+      "open": 1201.42,
+      "high": 1201.42,
+      "low": 1201,
+      "close": 1201.05,
+      "volume": 107,
+      "amount": 12854331,
+      "avgPrice": 1203.901
+    },
+    {
+      "time": "2026-07-03 09:58",
+      "date": "2026-07-03 09:58",
+      "open": 1201.04,
+      "high": 1205.79,
+      "low": 1201.04,
+      "close": 1203.59,
+      "volume": 153,
+      "amount": 18396280,
+      "avgPrice": 1203.874
+    },
+    {
+      "time": "2026-07-03 09:59",
+      "date": "2026-07-03 09:59",
+      "open": 1203.57,
+      "high": 1203.57,
+      "low": 1200.91,
+      "close": 1200.94,
+      "volume": 101,
+      "amount": 12133862,
+      "avgPrice": 1203.845
+    },
+    {
+      "time": "2026-07-03 10:00",
+      "date": "2026-07-03 10:00",
+      "open": 1200.73,
+      "high": 1200.73,
+      "low": 1198.38,
+      "close": 1199,
+      "volume": 279,
+      "amount": 33462204,
+      "avgPrice": 1203.706
+    },
+    {
+      "time": "2026-07-03 10:01",
+      "date": "2026-07-03 10:01",
+      "open": 1198.96,
+      "high": 1199.02,
+      "low": 1198.51,
+      "close": 1198.74,
+      "volume": 230,
+      "amount": 27575187,
+      "avgPrice": 1203.586
+    },
+    {
+      "time": "2026-07-03 10:02",
+      "date": "2026-07-03 10:02",
+      "open": 1198.98,
+      "high": 1198.99,
+      "low": 1197.1,
+      "close": 1197.19,
+      "volume": 387,
+      "amount": 46362409,
+      "avgPrice": 1203.361
+    },
+    {
+      "time": "2026-07-03 10:03",
+      "date": "2026-07-03 10:03",
+      "open": 1197.21,
+      "high": 1197.27,
+      "low": 1196.2,
+      "close": 1196.56,
+      "volume": 342,
+      "amount": 40939372,
+      "avgPrice": 1203.144
+    },
+    {
+      "time": "2026-07-03 10:04",
+      "date": "2026-07-03 10:04",
+      "open": 1196.21,
+      "high": 1197.2,
+      "low": 1196.06,
+      "close": 1197.2,
+      "volume": 124,
+      "amount": 14852036,
+      "avgPrice": 1203.06
+    },
+    {
+      "time": "2026-07-03 10:05",
+      "date": "2026-07-03 10:05",
+      "open": 1197.79,
+      "high": 1198.86,
+      "low": 1197.79,
+      "close": 1198.51,
+      "volume": 76,
+      "amount": 9108151,
+      "avgPrice": 1203.025
+    },
+    {
+      "time": "2026-07-03 10:06",
+      "date": "2026-07-03 10:06",
+      "open": 1198.62,
+      "high": 1199.99,
+      "low": 1198.56,
+      "close": 1199.1,
+      "volume": 91,
+      "amount": 10912217,
+      "avgPrice": 1202.99
+    },
+    {
+      "time": "2026-07-03 10:07",
+      "date": "2026-07-03 10:07",
+      "open": 1199.04,
+      "high": 1199.04,
+      "low": 1197.9,
+      "close": 1198.29,
+      "volume": 158,
+      "amount": 18933417,
+      "avgPrice": 1202.919
+    },
+    {
+      "time": "2026-07-03 10:08",
+      "date": "2026-07-03 10:08",
+      "open": 1198.18,
+      "high": 1198.25,
+      "low": 1197.89,
+      "close": 1198.17,
+      "volume": 104,
+      "amount": 12459629,
+      "avgPrice": 1202.871
+    },
+    {
+      "time": "2026-07-03 10:09",
+      "date": "2026-07-03 10:09",
+      "open": 1198.04,
+      "high": 1198.1,
+      "low": 1196.87,
+      "close": 1196.94,
+      "volume": 160,
+      "amount": 19161472,
+      "avgPrice": 1202.792
+    },
+    {
+      "time": "2026-07-03 10:10",
+      "date": "2026-07-03 10:10",
+      "open": 1197.32,
+      "high": 1198,
+      "low": 1197.32,
+      "close": 1197.96,
+      "volume": 301,
+      "amount": 36033866,
+      "avgPrice": 1202.636
+    },
+    {
+      "time": "2026-07-03 10:11",
+      "date": "2026-07-03 10:11",
+      "open": 1198.07,
+      "high": 1199.25,
+      "low": 1197.96,
+      "close": 1199.03,
+      "volume": 104,
+      "amount": 12463810,
+      "avgPrice": 1202.597
+    },
+    {
+      "time": "2026-07-03 10:12",
+      "date": "2026-07-03 10:12",
+      "open": 1199.25,
+      "high": 1200.98,
+      "low": 1199.25,
+      "close": 1200.16,
+      "volume": 104,
+      "amount": 12480450,
+      "avgPrice": 1202.573
+    },
+    {
+      "time": "2026-07-03 10:13",
+      "date": "2026-07-03 10:13",
+      "open": 1200.11,
+      "high": 1202,
+      "low": 1200.11,
+      "close": 1201.78,
+      "volume": 93,
+      "amount": 11169048,
+      "avgPrice": 1202.56
+    },
+    {
+      "time": "2026-07-03 10:14",
+      "date": "2026-07-03 10:14",
+      "open": 1201.73,
+      "high": 1203,
+      "low": 1200.89,
+      "close": 1203,
+      "volume": 104,
+      "amount": 12494645,
+      "avgPrice": 1202.549
+    },
+    {
+      "time": "2026-07-03 10:15",
+      "date": "2026-07-03 10:15",
+      "open": 1203,
+      "high": 1205,
+      "low": 1202.9,
+      "close": 1204.66,
+      "volume": 189,
+      "amount": 22726060,
+      "avgPrice": 1202.567
+    },
+    {
+      "time": "2026-07-03 10:16",
+      "date": "2026-07-03 10:16",
+      "open": 1204.7,
+      "high": 1206.5,
+      "low": 1203.33,
+      "close": 1203.34,
+      "volume": 437,
+      "amount": 52669552,
+      "avgPrice": 1202.665
+    },
+    {
+      "time": "2026-07-03 10:17",
+      "date": "2026-07-03 10:17",
+      "open": 1204.68,
+      "high": 1204.68,
+      "low": 1202.8,
+      "close": 1203.73,
+      "volume": 147,
+      "amount": 17697075,
+      "avgPrice": 1202.68
+    },
+    {
+      "time": "2026-07-03 10:18",
+      "date": "2026-07-03 10:18",
+      "open": 1203.67,
+      "high": 1203.73,
+      "low": 1200.83,
+      "close": 1200.83,
+      "volume": 68,
+      "amount": 8172387,
+      "avgPrice": 1202.675
+    },
+    {
+      "time": "2026-07-03 10:19",
+      "date": "2026-07-03 10:19",
+      "open": 1201.11,
+      "high": 1201.79,
+      "low": 1201.11,
+      "close": 1201.79,
+      "volume": 63,
+      "amount": 7568891,
+      "avgPrice": 1202.669
+    },
+    {
+      "time": "2026-07-03 10:20",
+      "date": "2026-07-03 10:20",
+      "open": 1201.79,
+      "high": 1202.75,
+      "low": 1201.7,
+      "close": 1202.75,
+      "volume": 60,
+      "amount": 7211572,
+      "avgPrice": 1202.665
+    },
+    {
+      "time": "2026-07-03 10:21",
+      "date": "2026-07-03 10:21",
+      "open": 1202.54,
+      "high": 1203.08,
+      "low": 1202.39,
+      "close": 1202.57,
+      "volume": 61,
+      "amount": 7336082,
+      "avgPrice": 1202.665
+    },
+    {
+      "time": "2026-07-03 10:22",
+      "date": "2026-07-03 10:22",
+      "open": 1202.53,
+      "high": 1203.61,
+      "low": 1202.41,
+      "close": 1203.6,
+      "volume": 92,
+      "amount": 11063670,
+      "avgPrice": 1202.664
+    },
+    {
+      "time": "2026-07-03 10:23",
+      "date": "2026-07-03 10:23",
+      "open": 1203.61,
+      "high": 1203.62,
+      "low": 1202.55,
+      "close": 1202.55,
+      "volume": 121,
+      "amount": 14557062,
+      "avgPrice": 1202.668
+    },
+    {
+      "time": "2026-07-03 10:24",
+      "date": "2026-07-03 10:24",
+      "open": 1202.39,
+      "high": 1202.39,
+      "low": 1201.9,
+      "close": 1201.9,
+      "volume": 69,
+      "amount": 8294779,
+      "avgPrice": 1202.665
+    },
+    {
+      "time": "2026-07-03 10:25",
+      "date": "2026-07-03 10:25",
+      "open": 1201.75,
+      "high": 1201.75,
+      "low": 1200.5,
+      "close": 1201.67,
+      "volume": 106,
+      "amount": 12735371,
+      "avgPrice": 1202.655
+    },
+    {
+      "time": "2026-07-03 10:26",
+      "date": "2026-07-03 10:26",
+      "open": 1200.76,
+      "high": 1201.6,
+      "low": 1200.76,
+      "close": 1201.2,
+      "volume": 18,
+      "amount": 2162203,
+      "avgPrice": 1202.653
+    },
+    {
+      "time": "2026-07-03 10:27",
+      "date": "2026-07-03 10:27",
+      "open": 1201.2,
+      "high": 1201.21,
+      "low": 1200.51,
+      "close": 1200.51,
+      "volume": 72,
+      "amount": 8646856,
+      "avgPrice": 1202.644
+    },
+    {
+      "time": "2026-07-03 10:28",
+      "date": "2026-07-03 10:28",
+      "open": 1200.89,
+      "high": 1200.91,
+      "low": 1200.51,
+      "close": 1200.51,
+      "volume": 36,
+      "amount": 4322371,
+      "avgPrice": 1202.638
+    },
+    {
+      "time": "2026-07-03 10:29",
+      "date": "2026-07-03 10:29",
+      "open": 1200.5,
+      "high": 1200.5,
+      "low": 1199.88,
+      "close": 1199.88,
+      "volume": 113,
+      "amount": 13560613,
+      "avgPrice": 1202.616
+    },
+    {
+      "time": "2026-07-03 10:30",
+      "date": "2026-07-03 10:30",
+      "open": 1199.89,
+      "high": 1201.18,
+      "low": 1199.89,
+      "close": 1201,
+      "volume": 76,
+      "amount": 9122470,
+      "avgPrice": 1202.602
+    },
+    {
+      "time": "2026-07-03 10:31",
+      "date": "2026-07-03 10:31",
+      "open": 1200.84,
+      "high": 1200.84,
+      "low": 1200,
+      "close": 1200.11,
+      "volume": 45,
+      "amount": 5401538,
+      "avgPrice": 1202.595
+    },
+    {
+      "time": "2026-07-03 10:32",
+      "date": "2026-07-03 10:32",
+      "open": 1200.1,
+      "high": 1200.11,
+      "low": 1199.09,
+      "close": 1199.09,
+      "volume": 62,
+      "amount": 7439666,
+      "avgPrice": 1202.582
+    },
+    {
+      "time": "2026-07-03 10:33",
+      "date": "2026-07-03 10:33",
+      "open": 1199.19,
+      "high": 1201.56,
+      "low": 1198.89,
+      "close": 1200.62,
+      "volume": 145,
+      "amount": 17389809,
+      "avgPrice": 1202.546
+    },
+    {
+      "time": "2026-07-03 10:34",
+      "date": "2026-07-03 10:34",
+      "open": 1200.63,
+      "high": 1200.64,
+      "low": 1200.57,
+      "close": 1200.59,
+      "volume": 40,
+      "amount": 4802395,
+      "avgPrice": 1202.541
+    },
+    {
+      "time": "2026-07-03 10:35",
+      "date": "2026-07-03 10:35",
+      "open": 1200.51,
+      "high": 1200.51,
+      "low": 1199.1,
+      "close": 1199.1,
+      "volume": 43,
+      "amount": 5159633,
+      "avgPrice": 1202.532
+    },
+    {
+      "time": "2026-07-03 10:36",
+      "date": "2026-07-03 10:36",
+      "open": 1199.2,
+      "high": 1199.2,
+      "low": 1199,
+      "close": 1199.06,
+      "volume": 43,
+      "amount": 5155966,
+      "avgPrice": 1202.521
+    },
+    {
+      "time": "2026-07-03 10:37",
+      "date": "2026-07-03 10:37",
+      "open": 1199.04,
+      "high": 1199.92,
+      "low": 1198.67,
+      "close": 1199,
+      "volume": 104,
+      "amount": 12471345,
+      "avgPrice": 1202.495
+    },
+    {
+      "time": "2026-07-03 10:38",
+      "date": "2026-07-03 10:38",
+      "open": 1199.35,
+      "high": 1199.35,
+      "low": 1198.2,
+      "close": 1198.49,
+      "volume": 68,
+      "amount": 8150382,
+      "avgPrice": 1202.476
+    },
+    {
+      "time": "2026-07-03 10:39",
+      "date": "2026-07-03 10:39",
+      "open": 1198.49,
+      "high": 1198.58,
+      "low": 1198.49,
+      "close": 1198.58,
+      "volume": 48,
+      "amount": 5752883,
+      "avgPrice": 1202.462
+    },
+    {
+      "time": "2026-07-03 10:40",
+      "date": "2026-07-03 10:40",
+      "open": 1198.6,
+      "high": 1198.7,
+      "low": 1198.03,
+      "close": 1198.03,
+      "volume": 95,
+      "amount": 11385046,
+      "avgPrice": 1202.434
+    },
+    {
+      "time": "2026-07-03 10:41",
+      "date": "2026-07-03 10:41",
+      "open": 1198.05,
+      "high": 1198.1,
+      "low": 1197.57,
+      "close": 1197.57,
+      "volume": 114,
+      "amount": 13656172,
+      "avgPrice": 1202.397
+    },
+    {
+      "time": "2026-07-03 10:42",
+      "date": "2026-07-03 10:42",
+      "open": 1197.49,
+      "high": 1197.49,
+      "low": 1197.05,
+      "close": 1197.19,
+      "volume": 65,
+      "amount": 7781359,
+      "avgPrice": 1202.373
+    },
+    {
+      "time": "2026-07-03 10:43",
+      "date": "2026-07-03 10:43",
+      "open": 1197.16,
+      "high": 1197.36,
+      "low": 1197.15,
+      "close": 1197.23,
+      "volume": 75,
+      "amount": 8979000,
+      "avgPrice": 1202.345
+    },
+    {
+      "time": "2026-07-03 10:44",
+      "date": "2026-07-03 10:44",
+      "open": 1197.18,
+      "high": 1197.31,
+      "low": 1196.58,
+      "close": 1196.58,
+      "volume": 287,
+      "amount": 34353534,
+      "avgPrice": 1202.238
+    },
+    {
+      "time": "2026-07-03 10:45",
+      "date": "2026-07-03 10:45",
+      "open": 1196.51,
+      "high": 1196.55,
+      "low": 1196.3,
+      "close": 1196.3,
+      "volume": 99,
+      "amount": 11845400,
+      "avgPrice": 1202.198
+    },
+    {
+      "time": "2026-07-03 10:46",
+      "date": "2026-07-03 10:46",
+      "open": 1196.3,
+      "high": 1196.66,
+      "low": 1196.3,
+      "close": 1196.5,
+      "volume": 105,
+      "amount": 12563316,
+      "avgPrice": 1202.157
+    },
+    {
+      "time": "2026-07-03 10:47",
+      "date": "2026-07-03 10:47",
+      "open": 1196.48,
+      "high": 1196.51,
+      "low": 1196.12,
+      "close": 1196.12,
+      "volume": 107,
+      "amount": 12800483,
+      "avgPrice": 1202.114
+    },
+    {
+      "time": "2026-07-03 10:48",
+      "date": "2026-07-03 10:48",
+      "open": 1196.09,
+      "high": 1196.11,
+      "low": 1196.02,
+      "close": 1196.03,
+      "volume": 82,
+      "amount": 9807841,
+      "avgPrice": 1202.081
+    },
+    {
+      "time": "2026-07-03 10:49",
+      "date": "2026-07-03 10:49",
+      "open": 1196.03,
+      "high": 1197,
+      "low": 1196.02,
+      "close": 1196.99,
+      "volume": 154,
+      "amount": 18432676,
+      "avgPrice": 1202.027
+    },
+    {
+      "time": "2026-07-03 10:50",
+      "date": "2026-07-03 10:50",
+      "open": 1197.59,
+      "high": 1197.59,
+      "low": 1196.54,
+      "close": 1196.59,
+      "volume": 84,
+      "amount": 9993747,
+      "avgPrice": 1201.998
+    },
+    {
+      "time": "2026-07-03 10:51",
+      "date": "2026-07-03 10:51",
+      "open": 1196.6,
+      "high": 1196.7,
+      "low": 1196.56,
+      "close": 1196.68,
+      "volume": 74,
+      "amount": 8855160,
+      "avgPrice": 1201.972
+    },
+    {
+      "time": "2026-07-03 10:52",
+      "date": "2026-07-03 10:52",
+      "open": 1196.69,
+      "high": 1197.12,
+      "low": 1196.68,
+      "close": 1196.79,
+      "volume": 59,
+      "amount": 7062025,
+      "avgPrice": 1201.952
+    },
+    {
+      "time": "2026-07-03 10:53",
+      "date": "2026-07-03 10:53",
+      "open": 1196.78,
+      "high": 1197,
+      "low": 1196.56,
+      "close": 1197,
+      "volume": 83,
+      "amount": 9957622,
+      "avgPrice": 1201.923
+    },
+    {
+      "time": "2026-07-03 10:54",
+      "date": "2026-07-03 10:54",
+      "open": 1197.01,
+      "high": 1197.21,
+      "low": 1196.91,
+      "close": 1197.21,
+      "volume": 50,
+      "amount": 5985338,
+      "avgPrice": 1201.908
+    },
+    {
+      "time": "2026-07-03 10:55",
+      "date": "2026-07-03 10:55",
+      "open": 1197.22,
+      "high": 1197.22,
+      "low": 1196.52,
+      "close": 1196.53,
+      "volume": 110,
+      "amount": 13138036,
+      "avgPrice": 1201.87
+    },
+    {
+      "time": "2026-07-03 10:56",
+      "date": "2026-07-03 10:56",
+      "open": 1196.69,
+      "high": 1196.93,
+      "low": 1196.1,
+      "close": 1196.22,
+      "volume": 112,
+      "amount": 13400618,
+      "avgPrice": 1201.831
+    },
+    {
+      "time": "2026-07-03 10:57",
+      "date": "2026-07-03 10:57",
+      "open": 1196.22,
+      "high": 1196.23,
+      "low": 1196,
+      "close": 1196.03,
+      "volume": 123,
+      "amount": 14711264,
+      "avgPrice": 1201.785
+    },
+    {
+      "time": "2026-07-03 10:58",
+      "date": "2026-07-03 10:58",
+      "open": 1196,
+      "high": 1196.16,
+      "low": 1196,
+      "close": 1196.02,
+      "volume": 105,
+      "amount": 12558239,
+      "avgPrice": 1201.746
+    },
+    {
+      "time": "2026-07-03 10:59",
+      "date": "2026-07-03 10:59",
+      "open": 1196.02,
+      "high": 1196.8,
+      "low": 1196.02,
+      "close": 1196.8,
+      "volume": 69,
+      "amount": 8254408,
+      "avgPrice": 1201.722
+    },
+    {
+      "time": "2026-07-03 11:00",
+      "date": "2026-07-03 11:00",
+      "open": 1197.02,
+      "high": 1197.11,
+      "low": 1196.8,
+      "close": 1197.11,
+      "volume": 39,
+      "amount": 4668420,
+      "avgPrice": 1201.711
+    },
+    {
+      "time": "2026-07-03 11:01",
+      "date": "2026-07-03 11:01",
+      "open": 1197.05,
+      "high": 1197.09,
+      "low": 1196.9,
+      "close": 1197.01,
+      "volume": 46,
+      "amount": 5506322,
+      "avgPrice": 1201.697
+    },
+    {
+      "time": "2026-07-03 11:02",
+      "date": "2026-07-03 11:02",
+      "open": 1197,
+      "high": 1197,
+      "low": 1196.49,
+      "close": 1196.49,
+      "volume": 100,
+      "amount": 11931626,
+      "avgPrice": 1201.666
+    },
+    {
+      "time": "2026-07-03 11:03",
+      "date": "2026-07-03 11:03",
+      "open": 1196.51,
+      "high": 1196.74,
+      "low": 1196.49,
+      "close": 1196.49,
+      "volume": 63,
+      "amount": 7538623,
+      "avgPrice": 1201.646
+    },
+    {
+      "time": "2026-07-03 11:04",
+      "date": "2026-07-03 11:04",
+      "open": 1196.3,
+      "high": 1196.3,
+      "low": 1196,
+      "close": 1196,
+      "volume": 225,
+      "amount": 26945327,
+      "avgPrice": 1201.568
+    },
+    {
+      "time": "2026-07-03 11:05",
+      "date": "2026-07-03 11:05",
+      "open": 1195.15,
+      "high": 1195.21,
+      "low": 1195,
+      "close": 1195.21,
+      "volume": 282,
+      "amount": 33710015,
+      "avgPrice": 1201.462
+    },
+    {
+      "time": "2026-07-03 11:06",
+      "date": "2026-07-03 11:06",
+      "open": 1195.11,
+      "high": 1195.53,
+      "low": 1195.05,
+      "close": 1195.09,
+      "volume": 92,
+      "amount": 10995420,
+      "avgPrice": 1201.427
+    },
+    {
+      "time": "2026-07-03 11:07",
+      "date": "2026-07-03 11:07",
+      "open": 1195.57,
+      "high": 1195.57,
+      "low": 1195,
+      "close": 1195.02,
+      "volume": 143,
+      "amount": 17089535,
+      "avgPrice": 1201.373
+    },
+    {
+      "time": "2026-07-03 11:08",
+      "date": "2026-07-03 11:08",
+      "open": 1195.03,
+      "high": 1195.06,
+      "low": 1193.86,
+      "close": 1194,
+      "volume": 327,
+      "amount": 39065139,
+      "avgPrice": 1201.244
+    },
+    {
+      "time": "2026-07-03 11:09",
+      "date": "2026-07-03 11:09",
+      "open": 1193.98,
+      "high": 1193.98,
+      "low": 1193,
+      "close": 1193.07,
+      "volume": 102,
+      "amount": 12170826,
+      "avgPrice": 1201.196
+    },
+    {
+      "time": "2026-07-03 11:10",
+      "date": "2026-07-03 11:10",
+      "open": 1193.16,
+      "high": 1193.24,
+      "low": 1193.03,
+      "close": 1193.06,
+      "volume": 78,
+      "amount": 9306114,
+      "avgPrice": 1201.159
+    },
+    {
+      "time": "2026-07-03 11:11",
+      "date": "2026-07-03 11:11",
+      "open": 1193.07,
+      "high": 1193.22,
+      "low": 1193.04,
+      "close": 1193.08,
+      "volume": 74,
+      "amount": 8829027,
+      "avgPrice": 1201.125
+    },
+    {
+      "time": "2026-07-03 11:12",
+      "date": "2026-07-03 11:12",
+      "open": 1193.08,
+      "high": 1193.76,
+      "low": 1193.08,
+      "close": 1193.44,
+      "volume": 86,
+      "amount": 10253247,
+      "avgPrice": 1201.086
+    },
+    {
+      "time": "2026-07-03 11:13",
+      "date": "2026-07-03 11:13",
+      "open": 1193.44,
+      "high": 1194.29,
+      "low": 1193.44,
+      "close": 1194.27,
+      "volume": 109,
+      "amount": 13014056,
+      "avgPrice": 1201.041
+    },
+    {
+      "time": "2026-07-03 11:14",
+      "date": "2026-07-03 11:14",
+      "open": 1194.02,
+      "high": 1195.52,
+      "low": 1194.02,
+      "close": 1195.15,
+      "volume": 109,
+      "amount": 13020774,
+      "avgPrice": 1201.001
+    },
+    {
+      "time": "2026-07-03 11:15",
+      "date": "2026-07-03 11:15",
+      "open": 1195.47,
+      "high": 1195.47,
+      "low": 1193.78,
+      "close": 1193.79,
+      "volume": 123,
+      "amount": 14692570,
+      "avgPrice": 1200.956
+    },
+    {
+      "time": "2026-07-03 11:16",
+      "date": "2026-07-03 11:16",
+      "open": 1193.77,
+      "high": 1193.95,
+      "low": 1193.44,
+      "close": 1193.44,
+      "volume": 98,
+      "amount": 11699860,
+      "avgPrice": 1200.917
+    },
+    {
+      "time": "2026-07-03 11:17",
+      "date": "2026-07-03 11:17",
+      "open": 1193.19,
+      "high": 1193.19,
+      "low": 1191,
+      "close": 1191,
+      "volume": 355,
+      "amount": 42337922,
+      "avgPrice": 1200.751
+    },
+    {
+      "time": "2026-07-03 11:18",
+      "date": "2026-07-03 11:18",
+      "open": 1191.06,
+      "high": 1191.97,
+      "low": 1190.8,
+      "close": 1191.12,
+      "volume": 157,
+      "amount": 18700123,
+      "avgPrice": 1200.668
+    },
+    {
+      "time": "2026-07-03 11:19",
+      "date": "2026-07-03 11:19",
+      "open": 1191,
+      "high": 1191.64,
+      "low": 1190.89,
+      "close": 1191,
+      "volume": 94,
+      "amount": 11195584,
+      "avgPrice": 1200.619
+    },
+    {
+      "time": "2026-07-03 11:20",
+      "date": "2026-07-03 11:20",
+      "open": 1190.95,
+      "high": 1192.74,
+      "low": 1190.5,
+      "close": 1191.26,
+      "volume": 191,
+      "amount": 22757665,
+      "avgPrice": 1200.525
+    },
+    {
+      "time": "2026-07-03 11:21",
+      "date": "2026-07-03 11:21",
+      "open": 1191.34,
+      "high": 1192.81,
+      "low": 1191.21,
+      "close": 1191.51,
+      "volume": 86,
+      "amount": 10252175,
+      "avgPrice": 1200.487
+    },
+    {
+      "time": "2026-07-03 11:22",
+      "date": "2026-07-03 11:22",
+      "open": 1191.24,
+      "high": 1193.21,
+      "low": 1191.24,
+      "close": 1192.01,
+      "volume": 193,
+      "amount": 23014989,
+      "avgPrice": 1200.405
+    },
+    {
+      "time": "2026-07-03 11:23",
+      "date": "2026-07-03 11:23",
+      "open": 1192.02,
+      "high": 1193.38,
+      "low": 1191.98,
+      "close": 1192.86,
+      "volume": 88,
+      "amount": 10493858,
+      "avgPrice": 1200.368
+    },
+    {
+      "time": "2026-07-03 11:24",
+      "date": "2026-07-03 11:24",
+      "open": 1192.85,
+      "high": 1192.85,
+      "low": 1191.48,
+      "close": 1191.63,
+      "volume": 105,
+      "amount": 12514595,
+      "avgPrice": 1200.322
+    },
+    {
+      "time": "2026-07-03 11:25",
+      "date": "2026-07-03 11:25",
+      "open": 1191.53,
+      "high": 1192.83,
+      "low": 1191.33,
+      "close": 1192.65,
+      "volume": 103,
+      "amount": 12275890,
+      "avgPrice": 1200.276
+    },
+    {
+      "time": "2026-07-03 11:26",
+      "date": "2026-07-03 11:26",
+      "open": 1191.61,
+      "high": 1192.79,
+      "low": 1191.39,
+      "close": 1192.6,
+      "volume": 88,
+      "amount": 10491040,
+      "avgPrice": 1200.239
+    },
+    {
+      "time": "2026-07-03 11:27",
+      "date": "2026-07-03 11:27",
+      "open": 1191.51,
+      "high": 1192.49,
+      "low": 1191.35,
+      "close": 1191.38,
+      "volume": 98,
+      "amount": 11679045,
+      "avgPrice": 1200.196
+    },
+    {
+      "time": "2026-07-03 11:28",
+      "date": "2026-07-03 11:28",
+      "open": 1191.38,
+      "high": 1192.32,
+      "low": 1191.33,
+      "close": 1191.34,
+      "volume": 176,
+      "amount": 20977948,
+      "avgPrice": 1200.122
+    },
+    {
+      "time": "2026-07-03 11:29",
+      "date": "2026-07-03 11:29",
+      "open": 1191.35,
+      "high": 1191.41,
+      "low": 1191.32,
+      "close": 1191.33,
+      "volume": 82,
+      "amount": 9769239,
+      "avgPrice": 1200.085
+    },
+    {
+      "time": "2026-07-03 11:30",
+      "date": "2026-07-03 11:30",
+      "open": 1191.3,
+      "high": 1191.33,
+      "low": 1191.01,
+      "close": 1191.31,
+      "volume": 100,
+      "amount": 11912690,
+      "avgPrice": 1200.041
+    },
+    {
+      "time": "2026-07-03 13:01",
+      "date": "2026-07-03 13:01",
+      "open": 1191,
+      "high": 1191.33,
+      "low": 1188,
+      "close": 1189.56,
+      "volume": 1116,
+      "amount": 132797912,
+      "avgPrice": 1199.505
+    },
+    {
+      "time": "2026-07-03 13:02",
+      "date": "2026-07-03 13:02",
+      "open": 1189.18,
+      "high": 1189.89,
+      "low": 1188.01,
+      "close": 1188.53,
+      "volume": 198,
+      "amount": 23535622,
+      "avgPrice": 1199.403
+    },
+    {
+      "time": "2026-07-03 13:03",
+      "date": "2026-07-03 13:03",
+      "open": 1188.57,
+      "high": 1189.68,
+      "low": 1188.18,
+      "close": 1188.29,
+      "volume": 140,
+      "amount": 16637633,
+      "avgPrice": 1199.33
+    },
+    {
+      "time": "2026-07-03 13:04",
+      "date": "2026-07-03 13:04",
+      "open": 1188.29,
+      "high": 1189.66,
+      "low": 1188.2,
+      "close": 1189.66,
+      "volume": 99,
+      "amount": 11770072,
+      "avgPrice": 1199.282
+    },
+    {
+      "time": "2026-07-03 13:05",
+      "date": "2026-07-03 13:05",
+      "open": 1189.66,
+      "high": 1190.8,
+      "low": 1188.2,
+      "close": 1188.93,
+      "volume": 164,
+      "amount": 19504569,
+      "avgPrice": 1199.205
+    },
+    {
+      "time": "2026-07-03 13:06",
+      "date": "2026-07-03 13:06",
+      "open": 1188.38,
+      "high": 1190.55,
+      "low": 1188.3,
+      "close": 1190.55,
+      "volume": 159,
+      "amount": 18905780,
+      "avgPrice": 1199.131
+    },
+    {
+      "time": "2026-07-03 13:07",
+      "date": "2026-07-03 13:07",
+      "open": 1189.63,
+      "high": 1190.99,
+      "low": 1189.03,
+      "close": 1190.17,
+      "volume": 112,
+      "amount": 13331361,
+      "avgPrice": 1199.085
+    },
+    {
+      "time": "2026-07-03 13:08",
+      "date": "2026-07-03 13:08",
+      "open": 1190.17,
+      "high": 1192.33,
+      "low": 1190.17,
+      "close": 1191.01,
+      "volume": 184,
+      "amount": 21912789,
+      "avgPrice": 1199.017
+    },
+    {
+      "time": "2026-07-03 13:09",
+      "date": "2026-07-03 13:09",
+      "open": 1190.98,
+      "high": 1190.98,
+      "low": 1189.01,
+      "close": 1189.78,
+      "volume": 174,
+      "amount": 20707703,
+      "avgPrice": 1198.946
+    },
+    {
+      "time": "2026-07-03 13:10",
+      "date": "2026-07-03 13:10",
+      "open": 1189.05,
+      "high": 1191.35,
+      "low": 1189.05,
+      "close": 1191.35,
+      "volume": 112,
+      "amount": 13328449,
+      "avgPrice": 1198.901
+    },
+    {
+      "time": "2026-07-03 13:11",
+      "date": "2026-07-03 13:11",
+      "open": 1190.12,
+      "high": 1191.16,
+      "low": 1190.01,
+      "close": 1190.01,
+      "volume": 122,
+      "amount": 14521523,
+      "avgPrice": 1198.854
+    },
+    {
+      "time": "2026-07-03 13:12",
+      "date": "2026-07-03 13:12",
+      "open": 1190.01,
+      "high": 1190.01,
+      "low": 1189.35,
+      "close": 1189.41,
+      "volume": 135,
+      "amount": 16060494,
+      "avgPrice": 1198.799
+    },
+    {
+      "time": "2026-07-03 13:13",
+      "date": "2026-07-03 13:13",
+      "open": 1189.47,
+      "high": 1190,
+      "low": 1189.47,
+      "close": 1189.98,
+      "volume": 135,
+      "amount": 16059560,
+      "avgPrice": 1198.744
+    },
+    {
+      "time": "2026-07-03 13:14",
+      "date": "2026-07-03 13:14",
+      "open": 1189.62,
+      "high": 1190.12,
+      "low": 1189.1,
+      "close": 1190,
+      "volume": 157,
+      "amount": 18675389,
+      "avgPrice": 1198.681
+    },
+    {
+      "time": "2026-07-03 13:15",
+      "date": "2026-07-03 13:15",
+      "open": 1189.22,
+      "high": 1190.73,
+      "low": 1189.22,
+      "close": 1189.24,
+      "volume": 105,
+      "amount": 12492109,
+      "avgPrice": 1198.639
+    },
+    {
+      "time": "2026-07-03 13:16",
+      "date": "2026-07-03 13:16",
+      "open": 1189.97,
+      "high": 1191,
+      "low": 1189.84,
+      "close": 1190.1,
+      "volume": 100,
+      "amount": 11901449,
+      "avgPrice": 1198.602
+    },
+    {
+      "time": "2026-07-03 13:17",
+      "date": "2026-07-03 13:17",
+      "open": 1190.11,
+      "high": 1190.21,
+      "low": 1189,
+      "close": 1189.01,
+      "volume": 231,
+      "amount": 27481567,
+      "avgPrice": 1198.514
+    },
+    {
+      "time": "2026-07-03 13:18",
+      "date": "2026-07-03 13:18",
+      "open": 1189.01,
+      "high": 1189.18,
+      "low": 1188.6,
+      "close": 1188.6,
+      "volume": 126,
+      "amount": 14980903,
+      "avgPrice": 1198.462
+    },
+    {
+      "time": "2026-07-03 13:19",
+      "date": "2026-07-03 13:19",
+      "open": 1188.6,
+      "high": 1189.81,
+      "low": 1188.21,
+      "close": 1189.72,
+      "volume": 124,
+      "amount": 14738172,
+      "avgPrice": 1198.41
+    },
+    {
+      "time": "2026-07-03 13:20",
+      "date": "2026-07-03 13:20",
+      "open": 1189.69,
+      "high": 1191.23,
+      "low": 1189.5,
+      "close": 1191.12,
+      "volume": 110,
+      "amount": 13093890,
+      "avgPrice": 1198.372
+    },
+    {
+      "time": "2026-07-03 13:21",
+      "date": "2026-07-03 13:21",
+      "open": 1190.61,
+      "high": 1190.61,
+      "low": 1189.29,
+      "close": 1190,
+      "volume": 163,
+      "amount": 19398895,
+      "avgPrice": 1198.315
+    },
+    {
+      "time": "2026-07-03 13:22",
+      "date": "2026-07-03 13:22",
+      "open": 1189.98,
+      "high": 1191.5,
+      "low": 1189.95,
+      "close": 1191,
+      "volume": 115,
+      "amount": 13691146,
+      "avgPrice": 1198.278
+    },
+    {
+      "time": "2026-07-03 13:23",
+      "date": "2026-07-03 13:23",
+      "open": 1190.34,
+      "high": 1191.95,
+      "low": 1189.84,
+      "close": 1189.84,
+      "volume": 141,
+      "amount": 16791431,
+      "avgPrice": 1198.234
+    },
+    {
+      "time": "2026-07-03 13:24",
+      "date": "2026-07-03 13:24",
+      "open": 1190.09,
+      "high": 1191.5,
+      "low": 1189.88,
+      "close": 1190.97,
+      "volume": 109,
+      "amount": 12975657,
+      "avgPrice": 1198.199
+    },
+    {
+      "time": "2026-07-03 13:25",
+      "date": "2026-07-03 13:25",
+      "open": 1191.37,
+      "high": 1191.37,
+      "low": 1189.88,
+      "close": 1190,
+      "volume": 91,
+      "amount": 10830633,
+      "avgPrice": 1198.169
+    },
+    {
+      "time": "2026-07-03 13:26",
+      "date": "2026-07-03 13:26",
+      "open": 1190.97,
+      "high": 1190.97,
+      "low": 1189.5,
+      "close": 1189.5,
+      "volume": 58,
+      "amount": 6901951,
+      "avgPrice": 1198.149
+    },
+    {
+      "time": "2026-07-03 13:27",
+      "date": "2026-07-03 13:27",
+      "open": 1189.61,
+      "high": 1190.02,
+      "low": 1189,
+      "close": 1189,
+      "volume": 156,
+      "amount": 18551604,
+      "avgPrice": 1198.092
+    },
+    {
+      "time": "2026-07-03 13:28",
+      "date": "2026-07-03 13:28",
+      "open": 1188.88,
+      "high": 1189.41,
+      "low": 1188.7,
+      "close": 1188.8,
+      "volume": 106,
+      "amount": 12602510,
+      "avgPrice": 1198.052
+    },
+    {
+      "time": "2026-07-03 13:29",
+      "date": "2026-07-03 13:29",
+      "open": 1188.7,
+      "high": 1189.91,
+      "low": 1188.7,
+      "close": 1188.8,
+      "volume": 85,
+      "amount": 10105566,
+      "avgPrice": 1198.02
+    },
+    {
+      "time": "2026-07-03 13:30",
+      "date": "2026-07-03 13:30",
+      "open": 1188.8,
+      "high": 1189.66,
+      "low": 1188.8,
+      "close": 1189.01,
+      "volume": 81,
+      "amount": 9632518,
+      "avgPrice": 1197.991
+    },
+    {
+      "time": "2026-07-03 13:31",
+      "date": "2026-07-03 13:31",
+      "open": 1189.01,
+      "high": 1189.02,
+      "low": 1188.88,
+      "close": 1188.88,
+      "volume": 112,
+      "amount": 13316681,
+      "avgPrice": 1197.951
+    },
+    {
+      "time": "2026-07-03 13:32",
+      "date": "2026-07-03 13:32",
+      "open": 1188.95,
+      "high": 1189.08,
+      "low": 1188.52,
+      "close": 1188.52,
+      "volume": 192,
+      "amount": 22822938,
+      "avgPrice": 1197.879
+    },
+    {
+      "time": "2026-07-03 13:33",
+      "date": "2026-07-03 13:33",
+      "open": 1188.25,
+      "high": 1188.25,
+      "low": 1187,
+      "close": 1187,
+      "volume": 461,
+      "amount": 54765162,
+      "avgPrice": 1197.7
+    },
+    {
+      "time": "2026-07-03 13:34",
+      "date": "2026-07-03 13:34",
+      "open": 1187,
+      "high": 1187.98,
+      "low": 1187,
+      "close": 1187.98,
+      "volume": 169,
+      "amount": 20061600,
+      "avgPrice": 1197.63
+    },
+    {
+      "time": "2026-07-03 13:35",
+      "date": "2026-07-03 13:35",
+      "open": 1187.98,
+      "high": 1187.98,
+      "low": 1186.66,
+      "close": 1186.66,
+      "volume": 147,
+      "amount": 17450530,
+      "avgPrice": 1197.569
+    },
+    {
+      "time": "2026-07-03 13:36",
+      "date": "2026-07-03 13:36",
+      "open": 1186.63,
+      "high": 1186.63,
+      "low": 1186,
+      "close": 1186,
+      "volume": 171,
+      "amount": 20281868,
+      "avgPrice": 1197.494
+    },
+    {
+      "time": "2026-07-03 13:37",
+      "date": "2026-07-03 13:37",
+      "open": 1186.01,
+      "high": 1186.34,
+      "low": 1186,
+      "close": 1186.01,
+      "volume": 170,
+      "amount": 20162486,
+      "avgPrice": 1197.419
+    },
+    {
+      "time": "2026-07-03 13:38",
+      "date": "2026-07-03 13:38",
+      "open": 1186.01,
+      "high": 1186.17,
+      "low": 1186.01,
+      "close": 1186.07,
+      "volume": 101,
+      "amount": 11979052,
+      "avgPrice": 1197.375
+    },
+    {
+      "time": "2026-07-03 13:39",
+      "date": "2026-07-03 13:39",
+      "open": 1186.06,
+      "high": 1186.09,
+      "low": 1185,
+      "close": 1185.09,
+      "volume": 249,
+      "amount": 29520607,
+      "avgPrice": 1197.264
+    },
+    {
+      "time": "2026-07-03 13:40",
+      "date": "2026-07-03 13:40",
+      "open": 1185.07,
+      "high": 1185.7,
+      "low": 1185.01,
+      "close": 1185.03,
+      "volume": 85,
+      "amount": 10073120,
+      "avgPrice": 1197.225
+    },
+    {
+      "time": "2026-07-03 13:41",
+      "date": "2026-07-03 13:41",
+      "open": 1185.65,
+      "high": 1185.65,
+      "low": 1185.02,
+      "close": 1185.12,
+      "volume": 94,
+      "amount": 11142934,
+      "avgPrice": 1197.183
+    },
+    {
+      "time": "2026-07-03 13:42",
+      "date": "2026-07-03 13:42",
+      "open": 1185.67,
+      "high": 1185.88,
+      "low": 1185.51,
+      "close": 1185.88,
+      "volume": 48,
+      "amount": 5691416,
+      "avgPrice": 1197.162
+    },
+    {
+      "time": "2026-07-03 13:43",
+      "date": "2026-07-03 13:43",
+      "open": 1185.9,
+      "high": 1185.9,
+      "low": 1185.15,
+      "close": 1185.6,
+      "volume": 125,
+      "amount": 14820291,
+      "avgPrice": 1197.108
+    },
+    {
+      "time": "2026-07-03 13:44",
+      "date": "2026-07-03 13:44",
+      "open": 1185.6,
+      "high": 1186,
+      "low": 1185.6,
+      "close": 1185.67,
+      "volume": 83,
+      "amount": 9841719,
+      "avgPrice": 1197.073
+    },
+    {
+      "time": "2026-07-03 13:45",
+      "date": "2026-07-03 13:45",
+      "open": 1186,
+      "high": 1186,
+      "low": 1185.67,
+      "close": 1185.75,
+      "volume": 59,
+      "amount": 6995911,
+      "avgPrice": 1197.048
+    },
+    {
+      "time": "2026-07-03 13:46",
+      "date": "2026-07-03 13:46",
+      "open": 1185.76,
+      "high": 1187.06,
+      "low": 1185.76,
+      "close": 1186.96,
+      "volume": 107,
+      "amount": 12691668,
+      "avgPrice": 1197.005
+    },
+    {
+      "time": "2026-07-03 13:47",
+      "date": "2026-07-03 13:47",
+      "open": 1187.06,
+      "high": 1187.79,
+      "low": 1187.06,
+      "close": 1187.79,
+      "volume": 74,
+      "amount": 8786430,
+      "avgPrice": 1196.979
+    },
+    {
+      "time": "2026-07-03 13:48",
+      "date": "2026-07-03 13:48",
+      "open": 1187.53,
+      "high": 1188.15,
+      "low": 1187.53,
+      "close": 1188.15,
+      "volume": 50,
+      "amount": 5939472,
+      "avgPrice": 1196.962
+    },
+    {
+      "time": "2026-07-03 13:49",
+      "date": "2026-07-03 13:49",
+      "open": 1188.18,
+      "high": 1188.26,
+      "low": 1187.57,
+      "close": 1188,
+      "volume": 110,
+      "amount": 13066533,
+      "avgPrice": 1196.926
+    },
+    {
+      "time": "2026-07-03 13:50",
+      "date": "2026-07-03 13:50",
+      "open": 1188.26,
+      "high": 1189.8,
+      "low": 1188.26,
+      "close": 1189.26,
+      "volume": 50,
+      "amount": 5943654,
+      "avgPrice": 1196.911
+    },
+    {
+      "time": "2026-07-03 13:51",
+      "date": "2026-07-03 13:51",
+      "open": 1189.69,
+      "high": 1189.69,
+      "low": 1188.8,
+      "close": 1188.88,
+      "volume": 61,
+      "amount": 7253791,
+      "avgPrice": 1196.893
+    },
+    {
+      "time": "2026-07-03 13:52",
+      "date": "2026-07-03 13:52",
+      "open": 1188.88,
+      "high": 1189.01,
+      "low": 1188.67,
+      "close": 1189.01,
+      "volume": 45,
+      "amount": 5350107,
+      "avgPrice": 1196.88
+    },
+    {
+      "time": "2026-07-03 13:53",
+      "date": "2026-07-03 13:53",
+      "open": 1189,
+      "high": 1190,
+      "low": 1189,
+      "close": 1190,
+      "volume": 60,
+      "amount": 7137376,
+      "avgPrice": 1196.864
+    },
+    {
+      "time": "2026-07-03 13:54",
+      "date": "2026-07-03 13:54",
+      "open": 1190,
+      "high": 1190,
+      "low": 1189.59,
+      "close": 1189.84,
+      "volume": 73,
+      "amount": 8686700,
+      "avgPrice": 1196.846
+    },
+    {
+      "time": "2026-07-03 13:55",
+      "date": "2026-07-03 13:55",
+      "open": 1189.93,
+      "high": 1190.31,
+      "low": 1189.58,
+      "close": 1189.82,
+      "volume": 73,
+      "amount": 8686209,
+      "avgPrice": 1196.827
+    },
+    {
+      "time": "2026-07-03 13:56",
+      "date": "2026-07-03 13:56",
+      "open": 1189.8,
+      "high": 1189.96,
+      "low": 1189.08,
+      "close": 1189.15,
+      "volume": 71,
+      "amount": 8445398,
+      "avgPrice": 1196.809
+    },
+    {
+      "time": "2026-07-03 13:57",
+      "date": "2026-07-03 13:57",
+      "open": 1189.18,
+      "high": 1190.71,
+      "low": 1189.15,
+      "close": 1190.46,
+      "volume": 67,
+      "amount": 7971283,
+      "avgPrice": 1196.792
+    },
+    {
+      "time": "2026-07-03 13:58",
+      "date": "2026-07-03 13:58",
+      "open": 1190.48,
+      "high": 1190.48,
+      "low": 1190.29,
+      "close": 1190.36,
+      "volume": 37,
+      "amount": 4404312,
+      "avgPrice": 1196.783
+    },
+    {
+      "time": "2026-07-03 13:59",
+      "date": "2026-07-03 13:59",
+      "open": 1190.37,
+      "high": 1190.96,
+      "low": 1190.36,
+      "close": 1190.96,
+      "volume": 101,
+      "amount": 12025930,
+      "avgPrice": 1196.761
+    },
+    {
+      "time": "2026-07-03 14:00",
+      "date": "2026-07-03 14:00",
+      "open": 1191.06,
+      "high": 1191.06,
+      "low": 1190.38,
+      "close": 1190.4,
+      "volume": 35,
+      "amount": 4167255,
+      "avgPrice": 1196.753
+    },
+    {
+      "time": "2026-07-03 14:01",
+      "date": "2026-07-03 14:01",
+      "open": 1190.4,
+      "high": 1191.99,
+      "low": 1190.4,
+      "close": 1191.51,
+      "volume": 164,
+      "amount": 19530954,
+      "avgPrice": 1196.719
+    },
+    {
+      "time": "2026-07-03 14:02",
+      "date": "2026-07-03 14:02",
+      "open": 1191.51,
+      "high": 1191.51,
+      "low": 1191,
+      "close": 1191.11,
+      "volume": 56,
+      "amount": 6670831,
+      "avgPrice": 1196.708
+    },
+    {
+      "time": "2026-07-03 14:03",
+      "date": "2026-07-03 14:03",
+      "open": 1190.77,
+      "high": 1192.13,
+      "low": 1190.44,
+      "close": 1192.13,
+      "volume": 138,
+      "amount": 16441952,
+      "avgPrice": 1196.683
+    },
+    {
+      "time": "2026-07-03 14:04",
+      "date": "2026-07-03 14:04",
+      "open": 1192.38,
+      "high": 1193.07,
+      "low": 1192.13,
+      "close": 1193,
+      "volume": 98,
+      "amount": 11689254,
+      "avgPrice": 1196.669
+    },
+    {
+      "time": "2026-07-03 14:05",
+      "date": "2026-07-03 14:05",
+      "open": 1193.38,
+      "high": 1193.38,
+      "low": 1192.72,
+      "close": 1193.38,
+      "volume": 74,
+      "amount": 8827777,
+      "avgPrice": 1196.659
+    },
+    {
+      "time": "2026-07-03 14:06",
+      "date": "2026-07-03 14:06",
+      "open": 1193.4,
+      "high": 1193.54,
+      "low": 1193.02,
+      "close": 1193.47,
+      "volume": 62,
+      "amount": 7398891,
+      "avgPrice": 1196.652
+    },
+    {
+      "time": "2026-07-03 14:07",
+      "date": "2026-07-03 14:07",
+      "open": 1193.37,
+      "high": 1194.53,
+      "low": 1193.34,
+      "close": 1194.53,
+      "volume": 115,
+      "amount": 13726404,
+      "avgPrice": 1196.64
+    },
+    {
+      "time": "2026-07-03 14:08",
+      "date": "2026-07-03 14:08",
+      "open": 1194.49,
+      "high": 1194.49,
+      "low": 1193.35,
+      "close": 1193.35,
+      "volume": 63,
+      "amount": 7520912,
+      "avgPrice": 1196.634
+    },
+    {
+      "time": "2026-07-03 14:09",
+      "date": "2026-07-03 14:09",
+      "open": 1193.35,
+      "high": 1194,
+      "low": 1192.99,
+      "close": 1193.99,
+      "volume": 183,
+      "amount": 21834020,
+      "avgPrice": 1196.612
+    },
+    {
+      "time": "2026-07-03 14:10",
+      "date": "2026-07-03 14:10",
+      "open": 1194.06,
+      "high": 1194.06,
+      "low": 1193.56,
+      "close": 1193.76,
+      "volume": 68,
+      "amount": 8117324,
+      "avgPrice": 1196.605
+    },
+    {
+      "time": "2026-07-03 14:11",
+      "date": "2026-07-03 14:11",
+      "open": 1193.55,
+      "high": 1193.72,
+      "low": 1193,
+      "close": 1193.3,
+      "volume": 91,
+      "amount": 10859945,
+      "avgPrice": 1196.595
+    },
+    {
+      "time": "2026-07-03 14:12",
+      "date": "2026-07-03 14:12",
+      "open": 1193.3,
+      "high": 1193.75,
+      "low": 1193,
+      "close": 1193.23,
+      "volume": 94,
+      "amount": 11217795,
+      "avgPrice": 1196.584
+    },
+    {
+      "time": "2026-07-03 14:13",
+      "date": "2026-07-03 14:13",
+      "open": 1193.6,
+      "high": 1194.52,
+      "low": 1192.96,
+      "close": 1192.98,
+      "volume": 173,
+      "amount": 20646800,
+      "avgPrice": 1196.566
+    },
+    {
+      "time": "2026-07-03 14:14",
+      "date": "2026-07-03 14:14",
+      "open": 1192.95,
+      "high": 1194.82,
+      "low": 1192.88,
+      "close": 1193.36,
+      "volume": 166,
+      "amount": 19814485,
+      "avgPrice": 1196.549
+    },
+    {
+      "time": "2026-07-03 14:15",
+      "date": "2026-07-03 14:15",
+      "open": 1193.06,
+      "high": 1194.59,
+      "low": 1193.06,
+      "close": 1194.59,
+      "volume": 113,
+      "amount": 13489156,
+      "avgPrice": 1196.539
+    },
+    {
+      "time": "2026-07-03 14:16",
+      "date": "2026-07-03 14:16",
+      "open": 1194.02,
+      "high": 1194.66,
+      "low": 1193.8,
+      "close": 1193.8,
+      "volume": 35,
+      "amount": 4180170,
+      "avgPrice": 1196.536
+    },
+    {
+      "time": "2026-07-03 14:17",
+      "date": "2026-07-03 14:17",
+      "open": 1193.37,
+      "high": 1193.73,
+      "low": 1193,
+      "close": 1193,
+      "volume": 72,
+      "amount": 8590952,
+      "avgPrice": 1196.528
+    },
+    {
+      "time": "2026-07-03 14:18",
+      "date": "2026-07-03 14:18",
+      "open": 1193,
+      "high": 1194.6,
+      "low": 1192.99,
+      "close": 1194.05,
+      "volume": 144,
+      "amount": 17191566,
+      "avgPrice": 1196.515
+    },
+    {
+      "time": "2026-07-03 14:19",
+      "date": "2026-07-03 14:19",
+      "open": 1194.76,
+      "high": 1194.99,
+      "low": 1194.01,
+      "close": 1194.99,
+      "volume": 102,
+      "amount": 12184673,
+      "avgPrice": 1196.508
+    },
+    {
+      "time": "2026-07-03 14:20",
+      "date": "2026-07-03 14:20",
+      "open": 1194.95,
+      "high": 1194.99,
+      "low": 1194.4,
+      "close": 1194.41,
+      "volume": 56,
+      "amount": 6689309,
+      "avgPrice": 1196.505
+    },
+    {
+      "time": "2026-07-03 14:21",
+      "date": "2026-07-03 14:21",
+      "open": 1194.43,
+      "high": 1194.51,
+      "low": 1194.2,
+      "close": 1194.5,
+      "volume": 72,
+      "amount": 8599672,
+      "avgPrice": 1196.5
+    },
+    {
+      "time": "2026-07-03 14:22",
+      "date": "2026-07-03 14:22",
+      "open": 1194.5,
+      "high": 1194.99,
+      "low": 1194.5,
+      "close": 1194.98,
+      "volume": 82,
+      "amount": 9797765,
+      "avgPrice": 1196.495
+    },
+    {
+      "time": "2026-07-03 14:23",
+      "date": "2026-07-03 14:23",
+      "open": 1194.98,
+      "high": 1195,
+      "low": 1194.89,
+      "close": 1194.9,
+      "volume": 49,
+      "amount": 5855168,
+      "avgPrice": 1196.493
+    },
+    {
+      "time": "2026-07-03 14:24",
+      "date": "2026-07-03 14:24",
+      "open": 1194.95,
+      "high": 1194.95,
+      "low": 1194.01,
+      "close": 1194.01,
+      "volume": 32,
+      "amount": 3822780,
+      "avgPrice": 1196.491
+    },
+    {
+      "time": "2026-07-03 14:25",
+      "date": "2026-07-03 14:25",
+      "open": 1193.96,
+      "high": 1194.08,
+      "low": 1193,
+      "close": 1193.2,
+      "volume": 139,
+      "amount": 16539513,
+      "avgPrice": 1196.476
+    },
+    {
+      "time": "2026-07-03 14:26",
+      "date": "2026-07-03 14:26",
+      "open": 1193.2,
+      "high": 1193.74,
+      "low": 1193,
+      "close": 1193,
+      "volume": 92,
+      "amount": 10977234,
+      "avgPrice": 1196.466
+    },
+    {
+      "time": "2026-07-03 14:27",
+      "date": "2026-07-03 14:27",
+      "open": 1193.5,
+      "high": 1194.44,
+      "low": 1193,
+      "close": 1193,
+      "volume": 124,
+      "amount": 14797719,
+      "avgPrice": 1196.454
+    },
+    {
+      "time": "2026-07-03 14:28",
+      "date": "2026-07-03 14:28",
+      "open": 1193.46,
+      "high": 1194.02,
+      "low": 1193.46,
+      "close": 1193.96,
+      "volume": 37,
+      "amount": 4424735,
+      "avgPrice": 1196.451
+    },
+    {
+      "time": "2026-07-03 14:29",
+      "date": "2026-07-03 14:29",
+      "open": 1194.01,
+      "high": 1194.13,
+      "low": 1192.78,
+      "close": 1192.78,
+      "volume": 76,
+      "amount": 9072327,
+      "avgPrice": 1196.444
+    },
+    {
+      "time": "2026-07-03 14:30",
+      "date": "2026-07-03 14:30",
+      "open": 1192.78,
+      "high": 1194.49,
+      "low": 1192.78,
+      "close": 1193.8,
+      "volume": 72,
+      "amount": 8592412,
+      "avgPrice": 1196.437
+    },
+    {
+      "time": "2026-07-03 14:31",
+      "date": "2026-07-03 14:31",
+      "open": 1194.39,
+      "high": 1195,
+      "low": 1193.8,
+      "close": 1194.74,
+      "volume": 123,
+      "amount": 14693580,
+      "avgPrice": 1196.43
+    },
+    {
+      "time": "2026-07-03 14:32",
+      "date": "2026-07-03 14:32",
+      "open": 1194.24,
+      "high": 1195.57,
+      "low": 1194.1,
+      "close": 1195.08,
+      "volume": 200,
+      "amount": 23899856,
+      "avgPrice": 1196.42
+    },
+    {
+      "time": "2026-07-03 14:33",
+      "date": "2026-07-03 14:33",
+      "open": 1195.08,
+      "high": 1195.48,
+      "low": 1194.92,
+      "close": 1195.3,
+      "volume": 97,
+      "amount": 11593939,
+      "avgPrice": 1196.417
+    },
+    {
+      "time": "2026-07-03 14:34",
+      "date": "2026-07-03 14:34",
+      "open": 1195.4,
+      "high": 1195.44,
+      "low": 1195.06,
+      "close": 1195.43,
+      "volume": 88,
+      "amount": 10517913,
+      "avgPrice": 1196.413
+    },
+    {
+      "time": "2026-07-03 14:35",
+      "date": "2026-07-03 14:35",
+      "open": 1195.43,
+      "high": 1195.8,
+      "low": 1195.3,
+      "close": 1195.56,
+      "volume": 112,
+      "amount": 13390220,
+      "avgPrice": 1196.41
+    },
+    {
+      "time": "2026-07-03 14:36",
+      "date": "2026-07-03 14:36",
+      "open": 1195.89,
+      "high": 1195.89,
+      "low": 1194.7,
+      "close": 1194.85,
+      "volume": 107,
+      "amount": 12789659,
+      "avgPrice": 1196.406
+    },
+    {
+      "time": "2026-07-03 14:37",
+      "date": "2026-07-03 14:37",
+      "open": 1194.9,
+      "high": 1194.91,
+      "low": 1194.11,
+      "close": 1194.11,
+      "volume": 94,
+      "amount": 11230568,
+      "avgPrice": 1196.401
+    },
+    {
+      "time": "2026-07-03 14:38",
+      "date": "2026-07-03 14:38",
+      "open": 1194.11,
+      "high": 1194.79,
+      "low": 1194.01,
+      "close": 1194.08,
+      "volume": 124,
+      "amount": 14808440,
+      "avgPrice": 1196.393
+    },
+    {
+      "time": "2026-07-03 14:39",
+      "date": "2026-07-03 14:39",
+      "open": 1194,
+      "high": 1194,
+      "low": 1193.66,
+      "close": 1193.69,
+      "volume": 116,
+      "amount": 13849375,
+      "avgPrice": 1196.384
+    },
+    {
+      "time": "2026-07-03 14:40",
+      "date": "2026-07-03 14:40",
+      "open": 1193.65,
+      "high": 1194.17,
+      "low": 1193.65,
+      "close": 1194.17,
+      "volume": 96,
+      "amount": 11461766,
+      "avgPrice": 1196.377
+    },
+    {
+      "time": "2026-07-03 14:41",
+      "date": "2026-07-03 14:41",
+      "open": 1194.18,
+      "high": 1194.76,
+      "low": 1194.15,
+      "close": 1194.76,
+      "volume": 58,
+      "amount": 6927727,
+      "avgPrice": 1196.373
+    },
+    {
+      "time": "2026-07-03 14:42",
+      "date": "2026-07-03 14:42",
+      "open": 1194.83,
+      "high": 1195.45,
+      "low": 1194.83,
+      "close": 1195.11,
+      "volume": 74,
+      "amount": 8843733,
+      "avgPrice": 1196.37
+    },
+    {
+      "time": "2026-07-03 14:43",
+      "date": "2026-07-03 14:43",
+      "open": 1195.36,
+      "high": 1195.46,
+      "low": 1195.35,
+      "close": 1195.35,
+      "volume": 112,
+      "amount": 13388303,
+      "avgPrice": 1196.367
+    },
+    {
+      "time": "2026-07-03 14:44",
+      "date": "2026-07-03 14:44",
+      "open": 1195.36,
+      "high": 1195.37,
+      "low": 1194.2,
+      "close": 1194.7,
+      "volume": 107,
+      "amount": 12786192,
+      "avgPrice": 1196.362
+    },
+    {
+      "time": "2026-07-03 14:45",
+      "date": "2026-07-03 14:45",
+      "open": 1194.68,
+      "high": 1195.07,
+      "low": 1194.68,
+      "close": 1194.73,
+      "volume": 87,
+      "amount": 10395913,
+      "avgPrice": 1196.358
+    },
+    {
+      "time": "2026-07-03 14:46",
+      "date": "2026-07-03 14:46",
+      "open": 1194.72,
+      "high": 1195.32,
+      "low": 1194.69,
+      "close": 1195.32,
+      "volume": 116,
+      "amount": 13860176,
+      "avgPrice": 1196.353
+    },
+    {
+      "time": "2026-07-03 14:47",
+      "date": "2026-07-03 14:47",
+      "open": 1195.36,
+      "high": 1196.27,
+      "low": 1195.36,
+      "close": 1196.27,
+      "volume": 158,
+      "amount": 18893223,
+      "avgPrice": 1196.35
+    },
+    {
+      "time": "2026-07-03 14:48",
+      "date": "2026-07-03 14:48",
+      "open": 1196.33,
+      "high": 1196.7,
+      "low": 1196.3,
+      "close": 1196.34,
+      "volume": 120,
+      "amount": 14357762,
+      "avgPrice": 1196.35
+    },
+    {
+      "time": "2026-07-03 14:49",
+      "date": "2026-07-03 14:49",
+      "open": 1195.57,
+      "high": 1195.99,
+      "low": 1194,
+      "close": 1194.71,
+      "volume": 106,
+      "amount": 12667041,
+      "avgPrice": 1196.346
+    },
+    {
+      "time": "2026-07-03 14:50",
+      "date": "2026-07-03 14:50",
+      "open": 1194.72,
+      "high": 1195.22,
+      "low": 1194.68,
+      "close": 1194.68,
+      "volume": 99,
+      "amount": 11829064,
+      "avgPrice": 1196.342
+    },
+    {
+      "time": "2026-07-03 14:51",
+      "date": "2026-07-03 14:51",
+      "open": 1194.71,
+      "high": 1194.71,
+      "low": 1194,
+      "close": 1194.28,
+      "volume": 89,
+      "amount": 10629222,
+      "avgPrice": 1196.336
+    },
+    {
+      "time": "2026-07-03 14:52",
+      "date": "2026-07-03 14:52",
+      "open": 1194.52,
+      "high": 1194.52,
+      "low": 1194.11,
+      "close": 1194.3,
+      "volume": 86,
+      "amount": 10270492,
+      "avgPrice": 1196.331
+    },
+    {
+      "time": "2026-07-03 14:53",
+      "date": "2026-07-03 14:53",
+      "open": 1194.39,
+      "high": 1194.39,
+      "low": 1193.72,
+      "close": 1193.72,
+      "volume": 225,
+      "amount": 26868163,
+      "avgPrice": 1196.316
+    },
+    {
+      "time": "2026-07-03 14:54",
+      "date": "2026-07-03 14:54",
+      "open": 1194.26,
+      "high": 1194.26,
+      "low": 1193.35,
+      "close": 1193.42,
+      "volume": 142,
+      "amount": 16948512,
+      "avgPrice": 1196.304
+    },
+    {
+      "time": "2026-07-03 14:55",
+      "date": "2026-07-03 14:55",
+      "open": 1193.42,
+      "high": 1194.26,
+      "low": 1193.02,
+      "close": 1194.26,
+      "volume": 168,
+      "amount": 20052067,
+      "avgPrice": 1196.291
+    },
+    {
+      "time": "2026-07-03 14:56",
+      "date": "2026-07-03 14:56",
+      "open": 1193.26,
+      "high": 1194.25,
+      "low": 1193.25,
+      "close": 1194,
+      "volume": 141,
+      "amount": 16831689,
+      "avgPrice": 1196.279
+    },
+    {
+      "time": "2026-07-03 14:57",
+      "date": "2026-07-03 14:57",
+      "open": 1193.47,
+      "high": 1194.5,
+      "low": 1193.25,
+      "close": 1194.47,
+      "volume": 174,
+      "amount": 20775184,
+      "avgPrice": 1196.267
+    },
+    {
+      "time": "2026-07-03 14:58",
+      "date": "2026-07-03 14:58",
+      "open": 1194.24,
+      "high": 1194.24,
+      "low": 1194.24,
+      "close": 1194.24,
+      "volume": 1,
+      "amount": 119424,
+      "avgPrice": 1196.267
+    },
+    {
+      "time": "2026-07-03 14:59",
+      "date": "2026-07-03 14:59",
+      "open": 1194.24,
+      "high": 1194.24,
+      "low": 1194.24,
+      "close": 1194.24,
+      "volume": 0,
+      "amount": 0,
+      "avgPrice": 1196.267
+    },
+    {
+      "time": "2026-07-03 15:00",
+      "date": "2026-07-03 15:00",
+      "open": 1194.45,
+      "high": 1194.45,
+      "low": 1194.45,
+      "close": 1194.45,
+      "volume": 270,
+      "amount": 32215511,
+      "avgPrice": 1196.253
+    }
+  ],
   "baostock": {
     "latest": {
       "date": "2026-07-03",
@@ -53679,7 +56332,7 @@
       "cache": {
         "scope": "vercel-serverless-memory",
         "hit": false,
-        "updatedAt": "2026-07-04T06:01:48.336Z",
+        "updatedAt": "2026-07-04T06:19:35.061Z",
         "ttlSeconds": 21600
       },
       "totalMv": 1493160000000,
@@ -56816,7 +59469,7 @@
     "available": true,
     "hit": false,
     "usedFields": [],
-    "generatedAt": "2026-07-04T06:01:50.146Z",
+    "generatedAt": "2026-07-04T06:19:36.690Z",
     "generatedBy": "seed-script",
     "symbol": "600519"
   }

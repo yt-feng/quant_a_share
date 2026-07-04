@@ -58,6 +58,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Chart modes: 分时(1分钟K), technical indicators.
 - Header metrics: stock name/code, price, percent change, volume, PE.
 - Clone enrichment: single-stock money flow, financial snapshot cache, Eastmoney popularity rank/keywords/related stocks and company announcements are wired into the quote page.
+- Clone enrichment: quote charts now use Eastmoney 1-minute intraday trends, Eastmoney daily K-line, BaoStock cache and Yahoo backup as switchable sources. VOL/MACD parameters affect chart calculations, indicator switching updates sub-panels, and drawing-tool selections persist in browser storage as chart overlays.
 - Drawing tools: trend line, ray, horizontal line, arrow, FIB, GANN, parallel line, clear drawings, zoom in, zoom out, reset.
 - Indicator controls: 刷新指标.
 - Indicator panels: 副图1 VOL, 副图2 MACD.

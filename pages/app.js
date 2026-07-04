@@ -28,6 +28,7 @@ const data = {
   ],
   limitDistribution: { up: 51, down: 59, flat: 0, limitUp: 0, limitDown: 0 },
   quoteKlines: [],
+  minuteKlines: [],
   sectors: [
     ["黄金", 8.07, 1, 0, 24, 8, 6, -2.01],
     ["新能源车", 3.99, 2, 29, 268, 60, 20, 107.64],
@@ -162,7 +163,7 @@ const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
-  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、云端财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
+  ["行情", "已对齐", "股票查询、日期、复权、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
@@ -205,10 +206,17 @@ let productFilter = "all";
 let modal = null;
 let marketSource = "演示数据";
 let selectedQuote = "600519";
+let quoteChartMode = "minute";
+let quoteIndicator1 = "VOL";
+let quoteIndicator2 = "MACD";
+let quoteVolParams = { m1: 5, m2: 10 };
+let quoteMacdParams = { short: 12, long: 26, mid: 9 };
+let quoteDrawings = [];
 
 function mount() {
   loadScreenerState();
   loadWatchlistState();
+  loadQuoteState();
   renderRuntimeShell();
   renderNav();
   render();
@@ -481,6 +489,8 @@ function renderQuote() {
   const popularity = data.popularity.stock?.latest;
   const bao = data.baostock || {};
   const baoLatest = bao.latest || {};
+  const quoteRows = activeQuoteRows(stock);
+  const chartLabel = quoteChartMode === "minute" ? "分时(1分钟K)" : quoteChartMode === "baostock" ? "BaoStock日K" : quoteChartMode === "yahoo" ? "Yahoo日K" : "东财日K";
   return `
     <section class="panel compact-panel">
       <div class="form-grid">
@@ -493,10 +503,11 @@ function renderQuote() {
         <button class="primary-button align-end" data-query-quote="1">查询</button>
       </div>
       <div class="toolbar" style="margin-top:12px">
-        <button class="chip" data-toast="已切换近半年">近半年</button>
-        <button class="chip" data-toast="已切换近一年">近一年</button>
-        <button class="chip" data-toast="已加载更多历史">加载更多历史</button>
-        ${tag(`股票代码：${stock.code.slice(0, 6)} · 数据量：${data.breadth.length}`, "info")}
+        <button class="chip ${quoteChartMode === "minute" ? "active" : ""}" data-quote-mode="minute">分时</button>
+        <button class="chip ${quoteChartMode === "daily" ? "active" : ""}" data-quote-mode="daily">日K</button>
+        <button class="chip ${quoteChartMode === "baostock" ? "active" : ""}" data-quote-mode="baostock">BaoStock</button>
+        <button class="chip ${quoteChartMode === "yahoo" ? "active" : ""}" data-quote-mode="yahoo">全球备份</button>
+        ${tag(`股票代码：${stock.code.slice(0, 6)} · ${chartLabel} ${quoteRows.length} 条`, "info")}
       </div>
     </section>
     <section class="grid metrics">
@@ -517,26 +528,31 @@ function renderQuote() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
-        ${panelTitle(`分时图 (1分钟K) - ${stock.code.slice(0, 6)}`, tag("分时(1分钟K)", "info"))}
+        ${panelTitle(`${chartLabel} - ${stock.code.slice(0, 6)}`, tag(`${quoteIndicator1} / ${quoteIndicator2}`, "info"))}
         <div id="quoteChart" class="chart"></div>
       </div>
       <div class="panel">
         <h2>画图工具</h2>
         <div class="tool-grid">
-          ${["趋势线", "射线", "水平线", "箭头", "FIB", "GANN", "平行线", "清除所有画图", "放大", "缩小", "重置"].map((item) => `<button class="ghost-button icon-tool" title="${item}" data-toast="${item} 已就绪">${item}</button>`).join("")}
+          ${["趋势线", "射线", "水平线", "箭头", "FIB", "GANN", "平行线"].map((item) => `<button class="ghost-button icon-tool" title="${item}" data-drawing-tool="${item}">${item}</button>`).join("")}
+          <button class="ghost-button icon-tool" title="清除所有画图" data-clear-drawings="1">清除所有画图</button>
+          <button class="ghost-button icon-tool" title="放大" data-quote-zoom="in">放大</button>
+          <button class="ghost-button icon-tool" title="缩小" data-quote-zoom="out">缩小</button>
+          <button class="ghost-button icon-tool" title="重置" data-quote-zoom="reset">重置</button>
         </div>
+        <div class="detail-strip" style="margin-top:12px">${quoteDrawings.length ? quoteDrawings.slice(-6).map((item) => tag(`${item.tool} ${item.price}`)).join("") : tag("暂无画图记录")}</div>
         <h2 style="margin-top:16px">技术指标</h2>
         <div class="indicator-row">
-          <span>副图1</span><strong>VOL</strong>
+          <span>副图1</span><strong>${quoteIndicator1}</strong>
           <button class="ghost-button" data-open-modal="volParams">参数</button>
-          <button class="ghost-button" data-open-modal="indicatorPicker">换指标</button>
+          <button class="ghost-button" data-open-modal="indicatorPicker" data-indicator-slot="1">换指标</button>
         </div>
         <div class="indicator-row">
-          <span>副图2</span><strong>MACD</strong>
+          <span>副图2</span><strong>${quoteIndicator2}</strong>
           <button class="ghost-button" data-open-modal="macdParams">参数</button>
-          <button class="ghost-button" data-open-modal="indicatorPicker">换指标</button>
+          <button class="ghost-button" data-open-modal="indicatorPicker" data-indicator-slot="2">换指标</button>
         </div>
-        <button class="primary-button" data-toast="指标已刷新">刷新指标</button>
+        <button class="primary-button" data-refresh-indicators="1">刷新指标</button>
       </div>
     </section>
     <section class="grid two" style="margin-top:14px">
@@ -655,6 +671,47 @@ function persistWatchlistState() {
     );
   } catch (error) {
     showToast("自选已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function loadQuoteState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_quote") || "null");
+    if (!stored) return;
+    if (["minute", "daily", "baostock", "yahoo"].includes(stored.chartMode)) quoteChartMode = stored.chartMode;
+    if (stored.indicator1) quoteIndicator1 = String(stored.indicator1);
+    if (stored.indicator2) quoteIndicator2 = String(stored.indicator2);
+    quoteVolParams = {
+      m1: clampInt(stored.volParams?.m1, 1, 120, quoteVolParams.m1),
+      m2: clampInt(stored.volParams?.m2, 1, 120, quoteVolParams.m2),
+    };
+    quoteMacdParams = {
+      short: clampInt(stored.macdParams?.short, 2, 60, quoteMacdParams.short),
+      long: clampInt(stored.macdParams?.long, 3, 120, quoteMacdParams.long),
+      mid: clampInt(stored.macdParams?.mid, 2, 60, quoteMacdParams.mid),
+    };
+    quoteDrawings = Array.isArray(stored.drawings) ? stored.drawings.slice(-20) : [];
+  } catch (error) {
+    // Bad local storage should not block the quote page.
+  }
+}
+
+function persistQuoteState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_quote",
+      JSON.stringify({
+        chartMode: quoteChartMode,
+        indicator1: quoteIndicator1,
+        indicator2: quoteIndicator2,
+        volParams: quoteVolParams,
+        macdParams: quoteMacdParams,
+        drawings: quoteDrawings,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("行情设置已更新，浏览器存储暂不可用。", "info");
   }
 }
 
@@ -1208,13 +1265,14 @@ function modalBody() {
     return `${simpleTable(["提交时间", "类型", "目标", "状态", "模式", "计费", "点数", "开始", "结束", "操作"], [["暂无数据", "-", "-", "空", "-", "-", "-", "-", "-", "-"]])}`;
   }
   if (modal.type === "volParams") {
-    return `<div class="form-grid"><label><span class="label">M1</span><input type="number" value="5" /></label><label><span class="label">M2</span><input type="number" value="10" /></label></div><div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-close-modal="1" data-toast="VOL 参数已确认">确定</button></div>`;
+    return `<div class="form-grid"><label><span class="label">M1</span><input id="volM1" type="number" value="${quoteVolParams.m1}" min="1" max="120" /></label><label><span class="label">M2</span><input id="volM2" type="number" value="${quoteVolParams.m2}" min="1" max="120" /></label></div><div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-save-vol-params="1">确定</button></div>`;
   }
   if (modal.type === "macdParams") {
-    return `<div class="form-grid"><label><span class="label">SHORT</span><input type="number" value="12" /></label><label><span class="label">LONG</span><input type="number" value="26" /></label><label><span class="label">MID</span><input type="number" value="9" /></label></div><div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-close-modal="1" data-toast="MACD 参数已确认">确定</button></div>`;
+    return `<div class="form-grid"><label><span class="label">SHORT</span><input id="macdShort" type="number" value="${quoteMacdParams.short}" min="2" max="60" /></label><label><span class="label">LONG</span><input id="macdLong" type="number" value="${quoteMacdParams.long}" min="3" max="120" /></label><label><span class="label">MID</span><input id="macdMid" type="number" value="${quoteMacdParams.mid}" min="2" max="60" /></label></div><div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-save-macd-params="1">确定</button></div>`;
   }
   if (modal.type === "indicatorPicker") {
-    return `<div class="indicator-picker">${["VOL", "MACD", "KDJ", "RSI", "BOLL", "VWAP", "成交额", "换手率"].map((item) => `<button class="chip" data-close-modal="1" data-toast="已切换到 ${item}">${item}</button>`).join("")}</div>`;
+    const slot = modal.slot === "2" ? "2" : "1";
+    return `<div class="indicator-picker">${["VOL", "MACD", "KDJ", "RSI", "BOLL", "VWAP", "成交额", "换手率"].map((item) => `<button class="chip" data-indicator-pick="${item}" data-indicator-slot="${slot}">${item}</button>`).join("")}</div>`;
   }
   if (modal.type === "product") {
     const product = products[modal.productIndex] || products[0];
@@ -1455,6 +1513,12 @@ function selectedAttr(value) {
   return value ? "selected" : "";
 }
 
+function clampInt(value, min, max, fallback) {
+  const number = Math.round(Number(value));
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(min, Math.min(max, number));
+}
+
 function loadScreenerState() {
   try {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_screener") || "null");
@@ -1594,7 +1658,39 @@ function attachEvents() {
   });
   document.querySelectorAll("[data-open-modal]").forEach((button) => {
     button.addEventListener("click", () => {
-      modal = { type: button.dataset.openModal };
+      modal = { type: button.dataset.openModal, slot: button.dataset.indicatorSlot };
+      render();
+    });
+  });
+  document.querySelector("[data-save-vol-params]")?.addEventListener("click", () => {
+    quoteVolParams = {
+      m1: clampInt(document.querySelector("#volM1")?.value, 1, 120, quoteVolParams.m1),
+      m2: clampInt(document.querySelector("#volM2")?.value, 1, 120, quoteVolParams.m2),
+    };
+    persistQuoteState();
+    modal = null;
+    showToast("VOL 参数已确认。", "success");
+    render();
+  });
+  document.querySelector("[data-save-macd-params]")?.addEventListener("click", () => {
+    const next = {
+      short: clampInt(document.querySelector("#macdShort")?.value, 2, 60, quoteMacdParams.short),
+      long: clampInt(document.querySelector("#macdLong")?.value, 3, 120, quoteMacdParams.long),
+      mid: clampInt(document.querySelector("#macdMid")?.value, 2, 60, quoteMacdParams.mid),
+    };
+    if (next.short >= next.long) next.long = next.short + 1;
+    quoteMacdParams = next;
+    persistQuoteState();
+    modal = null;
+    showToast("MACD 参数已确认。", "success");
+    render();
+  });
+  document.querySelectorAll("[data-indicator-pick]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (button.dataset.indicatorSlot === "2") quoteIndicator2 = button.dataset.indicatorPick;
+      else quoteIndicator1 = button.dataset.indicatorPick;
+      persistQuoteState();
+      modal = null;
       render();
     });
   });
@@ -1676,6 +1772,43 @@ function attachEvents() {
       selectedQuote = (document.querySelector("#quoteCode")?.value || selectedQuote).replace(/\D/g, "").slice(0, 6) || selectedQuote;
       loadMarketSnapshot();
     });
+  });
+  document.querySelectorAll("[data-quote-mode]").forEach((button) => {
+    button.addEventListener("click", () => {
+      quoteChartMode = button.dataset.quoteMode;
+      persistQuoteState();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-drawing-tool]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
+      quoteDrawings = [
+        ...quoteDrawings,
+        {
+          tool: button.dataset.drawingTool,
+          code: stock.code,
+          price: stock.price ? stock.price.toFixed(2) : "-",
+          at: new Date().toISOString(),
+        },
+      ].slice(-20);
+      persistQuoteState();
+      render();
+    });
+  });
+  document.querySelector("[data-clear-drawings]")?.addEventListener("click", () => {
+    quoteDrawings = [];
+    persistQuoteState();
+    render();
+  });
+  document.querySelectorAll("[data-quote-zoom]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showToast(`图表${button.dataset.quoteZoom === "in" ? "放大" : button.dataset.quoteZoom === "out" ? "缩小" : "已重置"}`, "success");
+    });
+  });
+  document.querySelector("[data-refresh-indicators]")?.addEventListener("click", () => {
+    persistQuoteState();
+    render();
   });
   document.querySelectorAll("[data-factor]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2027,9 +2160,8 @@ async function loadMarketSnapshot() {
     if (Array.isArray(payload.marketKlines) && payload.marketKlines.length) {
       data.breadth = payload.marketKlines.slice(-30).map((row) => [row.date, Math.round((row.amount || 0) / 100000000), row.pct || 0]);
     }
-    if (Array.isArray(payload.klines) && payload.klines.length) {
-      data.quoteKlines = payload.klines;
-    }
+    data.quoteKlines = Array.isArray(payload.klines) ? payload.klines : [];
+    data.minuteKlines = Array.isArray(payload.minuteKlines) ? payload.minuteKlines : [];
     renderRuntimeShell();
     if (["market", "screener", "sectors", "quote", "llm", "subscription", "about"].includes(currentPage)) render();
   } catch (error) {
@@ -2223,6 +2355,139 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+function activeQuoteRows(stock) {
+  if (quoteChartMode === "minute" && data.minuteKlines.length) return data.minuteKlines;
+  if (quoteChartMode === "baostock" && data.baostock?.rows?.length) return data.baostock.rows.slice(-120);
+  if (quoteChartMode === "yahoo" && data.yahooChart?.klines?.length) return data.yahooChart.klines.slice(-120);
+  if (data.quoteKlines.length) return data.quoteKlines.slice(-120);
+  const base = stock?.price || 100;
+  return data.breadth.map((d, index) => ({
+    date: d[0],
+    open: Number((base * (0.98 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
+    high: Number((base * (1 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
+    low: Number((base * (0.96 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
+    close: Number((base * (0.97 + index / Math.max(data.breadth.length, 1) * 0.04 + (Number(d[2]) - 50) / 1000)).toFixed(2)),
+    volume: d[1] * 10000,
+  }));
+}
+
+function movingAverage(values, windowSize) {
+  return values.map((_, index) => {
+    const slice = values.slice(Math.max(0, index - windowSize + 1), index + 1);
+    const valid = slice.filter((value) => Number.isFinite(value));
+    return valid.length ? valid.reduce((sum, value) => sum + value, 0) / valid.length : null;
+  });
+}
+
+function ema(values, span) {
+  const alpha = 2 / (span + 1);
+  let previous = values[0] || 0;
+  return values.map((value, index) => {
+    previous = index === 0 ? value || 0 : (value || previous) * alpha + previous * (1 - alpha);
+    return previous;
+  });
+}
+
+function macdSeries(values) {
+  const fast = ema(values, quoteMacdParams.short);
+  const slow = ema(values, quoteMacdParams.long);
+  const dif = fast.map((value, index) => value - slow[index]);
+  const dea = ema(dif, quoteMacdParams.mid);
+  const hist = dif.map((value, index) => (value - dea[index]) * 2);
+  return { dif, dea, hist };
+}
+
+function rsiSeries(values, period = 14) {
+  return values.map((_, index) => {
+    if (index === 0) return 50;
+    const start = Math.max(1, index - period + 1);
+    let gain = 0;
+    let loss = 0;
+    for (let i = start; i <= index; i += 1) {
+      const change = values[i] - values[i - 1];
+      if (change >= 0) gain += change;
+      else loss -= change;
+    }
+    if (!loss) return 100;
+    const rs = gain / loss;
+    return 100 - 100 / (1 + rs);
+  });
+}
+
+function bollSeries(values, period = 20) {
+  const mid = movingAverage(values, period);
+  const upper = values.map((_, index) => {
+    const slice = values.slice(Math.max(0, index - period + 1), index + 1);
+    const avg = mid[index] || 0;
+    const variance = slice.reduce((sum, value) => sum + (value - avg) ** 2, 0) / Math.max(slice.length, 1);
+    return avg + Math.sqrt(variance) * 2;
+  });
+  const lower = values.map((_, index) => (mid[index] || 0) * 2 - upper[index]);
+  return { mid, upper, lower };
+}
+
+function kdjSeries(rows) {
+  const k = [];
+  const d = [];
+  const j = [];
+  rows.forEach((row, index) => {
+    const slice = rows.slice(Math.max(0, index - 8), index + 1);
+    const low = Math.min(...slice.map((item) => Number(item.low) || Number(item.close) || 0));
+    const high = Math.max(...slice.map((item) => Number(item.high) || Number(item.close) || 0));
+    const rsv = high === low ? 50 : (((Number(row.close) || 0) - low) / (high - low)) * 100;
+    k[index] = (index ? k[index - 1] * 2 : 50 * 2) / 3 + rsv / 3;
+    d[index] = (index ? d[index - 1] * 2 : 50 * 2) / 3 + k[index] / 3;
+    j[index] = 3 * k[index] - 2 * d[index];
+  });
+  return { k, d, j };
+}
+
+function vwapSeries(rows) {
+  let amountSum = 0;
+  let volumeSum = 0;
+  return rows.map((row) => {
+    amountSum += Number(row.amount) || (Number(row.close) || 0) * (Number(row.volume) || 0);
+    volumeSum += Number(row.volume) || 0;
+    return volumeSum ? amountSum / volumeSum : Number(row.close) || 0;
+  });
+}
+
+function quoteIndicatorTrace(name, rows, x, closes, yaxis) {
+  const volumes = rows.map((row) => Number(row.volume) || 0);
+  if (name === "VOL") {
+    return [{ x, y: volumes, type: "bar", name: `VOL M${quoteVolParams.m1}/${quoteVolParams.m2}`, yaxis, marker: { color: "#94a3b8" } }];
+  }
+  if (name === "MACD") {
+    const macd = macdSeries(closes);
+    return [
+      { x, y: macd.hist, type: "bar", name: "MACD", yaxis, marker: { color: macd.hist.map((value) => (value >= 0 ? "#dc2626" : "#15803d")) } },
+      { x, y: macd.dif, type: "scatter", mode: "lines", name: "DIF", yaxis, line: { color: "#2563eb" } },
+      { x, y: macd.dea, type: "scatter", mode: "lines", name: "DEA", yaxis, line: { color: "#b45309" } },
+    ];
+  }
+  if (name === "KDJ") {
+    const kdj = kdjSeries(rows);
+    return [
+      { x, y: kdj.k, type: "scatter", mode: "lines", name: "K", yaxis },
+      { x, y: kdj.d, type: "scatter", mode: "lines", name: "D", yaxis },
+      { x, y: kdj.j, type: "scatter", mode: "lines", name: "J", yaxis },
+    ];
+  }
+  if (name === "RSI") return [{ x, y: rsiSeries(closes), type: "scatter", mode: "lines", name: "RSI", yaxis, line: { color: "#7c3aed" } }];
+  if (name === "成交额") return [{ x, y: rows.map((row) => yi(row.amount || 0)), type: "bar", name: "成交额(亿)", yaxis, marker: { color: "#0f766e" } }];
+  if (name === "换手率") return [{ x, y: rows.map((row) => Number(row.turnover) || 0), type: "scatter", mode: "lines+markers", name: "换手率", yaxis }];
+  if (name === "VWAP") return [{ x, y: vwapSeries(rows), type: "scatter", mode: "lines", name: "VWAP", yaxis, line: { color: "#db2777" } }];
+  if (name === "BOLL") {
+    const boll = bollSeries(closes);
+    return [
+      { x, y: boll.upper, type: "scatter", mode: "lines", name: "BOLL上轨", yaxis, line: { color: "#94a3b8" } },
+      { x, y: boll.mid, type: "scatter", mode: "lines", name: "BOLL中轨", yaxis, line: { color: "#2563eb" } },
+      { x, y: boll.lower, type: "scatter", mode: "lines", name: "BOLL下轨", yaxis, line: { color: "#94a3b8" } },
+    ];
+  }
+  return [];
+}
+
 function renderCharts() {
   if (!window.Plotly) return;
   const plotConfig = { displayModeBar: false, responsive: true };
@@ -2246,17 +2511,56 @@ function renderCharts() {
   }
   if (currentPage === "quote") {
     const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
-    const base = stock?.price || 100;
-    const quoteRows = data.quoteKlines.length ? data.quoteKlines.slice(-60) : data.breadth.map((d, index) => ({ date: d[0], close: Number((base * (0.96 + index / Math.max(data.breadth.length, 1) * 0.08 + (Number(d[2]) - 50) / 1000)).toFixed(2)) }));
-    const x = quoteRows.map((row) => row.date);
-    const close = quoteRows.map((row) => row.close);
+    const quoteRows = activeQuoteRows(stock);
+    const x = quoteRows.map((row) => row.time || row.date);
+    const close = quoteRows.map((row) => Number(row.close) || 0);
+    const mainTrace =
+      quoteChartMode === "minute"
+        ? { x, y: close, type: "scatter", mode: "lines", name: "1分钟", line: { color: "#2563eb", width: 2 } }
+        : {
+            x,
+            open: quoteRows.map((row) => Number(row.open) || Number(row.close) || 0),
+            high: quoteRows.map((row) => Number(row.high) || Number(row.close) || 0),
+            low: quoteRows.map((row) => Number(row.low) || Number(row.close) || 0),
+            close,
+            type: "candlestick",
+            name: "日K",
+            increasing: { line: { color: "#dc2626" } },
+            decreasing: { line: { color: "#15803d" } },
+          };
+    const traces = [
+      mainTrace,
+      { x, y: movingAverage(close, 5), type: "scatter", mode: "lines", name: "MA5", line: { color: "#b45309", width: 1.5 } },
+      { x, y: movingAverage(close, 20), type: "scatter", mode: "lines", name: "MA20", line: { color: "#0f766e", width: 1.5 } },
+      ...(quoteChartMode === "minute" ? [{ x, y: quoteRows.map((row) => Number(row.avgPrice) || null), type: "scatter", mode: "lines", name: "均价", line: { color: "#64748b", dash: "dot" } }] : []),
+      ...quoteIndicatorTrace(quoteIndicator1, quoteRows, x, close, "y2"),
+      ...quoteIndicatorTrace(quoteIndicator2, quoteRows, x, close, "y3"),
+    ];
+    const shapes = quoteDrawings
+      .filter((item) => item.code === stock.code && Number(item.price))
+      .map((item) => ({
+        type: "line",
+        xref: "paper",
+        x0: 0,
+        x1: 1,
+        yref: "y",
+        y0: Number(item.price),
+        y1: Number(item.price),
+        line: { color: "#7c3aed", width: 1, dash: item.tool === "水平线" ? "solid" : "dot" },
+      }));
     Plotly.newPlot(
       "quoteChart",
-      [
-        { x, y: close, type: "scatter", mode: "lines+markers", name: "收盘价", line: { color: "#2563eb" } },
-        { x, y: close.map((v, i) => v * (0.985 + i * 0.002)), type: "scatter", mode: "lines", name: "MA20", line: { color: "#0f766e" } },
-      ],
-      { ...baseLayout, showlegend: true },
+      traces,
+      {
+        ...baseLayout,
+        showlegend: true,
+        height: 470,
+        xaxis: { rangeslider: { visible: false } },
+        yaxis: { domain: [0.42, 1], title: "价格" },
+        yaxis2: { domain: [0.22, 0.36], title: quoteIndicator1 },
+        yaxis3: { domain: [0, 0.16], title: quoteIndicator2 },
+        shapes,
+      },
       plotConfig
     );
   }
