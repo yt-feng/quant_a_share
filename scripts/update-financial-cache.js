@@ -7,7 +7,7 @@ const OUTPUT_PATH = path.join(ROOT, "pages", "data", "financial-cache.json");
 const BAOSTOCK_CACHE_PATH = path.join(ROOT, "pages", "data", "baostock-cache.json");
 const MARKET_CACHE_PATH = path.join(ROOT, "pages", "data", "market-cache.json");
 const DEFAULT_SYMBOLS = ["600519", "000001", "300750", "688981", "300059", "002594", "603986", "300308"];
-const MAX_SYMBOLS = Number(process.env.FINANCIAL_CACHE_MAX_SYMBOLS || 160);
+const MAX_SYMBOLS = Number(process.env.FINANCIAL_CACHE_MAX_SYMBOLS || 500);
 const CONCURRENCY = Number(process.env.FINANCIAL_CACHE_CONCURRENCY || 5);
 
 function readJson(filePath) {
@@ -86,9 +86,33 @@ async function fetchOne(symbol) {
     throw new Error("api/market adapters are not available");
   }
   const symbols = collectSymbols();
+  const previous = readJson(OUTPUT_PATH);
   const results = await mapLimit(symbols, CONCURRENCY, fetchOne);
-  const okRows = results.filter((item) => item.ok);
-  const errors = results.filter((item) => !item.ok);
+  const okRows = [];
+  const errors = [];
+  const refreshErrors = [];
+  const reusedSymbols = [];
+  results.forEach((item) => {
+    if (item.ok) {
+      okRows.push(item);
+      return;
+    }
+    const cached = previous?.symbols?.[item.symbol];
+    if (cached?.rows?.length || cached?.financials) {
+      okRows.push({
+        symbol: item.symbol,
+        ok: true,
+        data: {
+          ...cached,
+          reusedFromGeneratedAt: previous.generatedAt || "",
+        },
+      });
+      refreshErrors.push(item);
+      reusedSymbols.push(item.symbol);
+      return;
+    }
+    errors.push(item);
+  });
   const payload = {
     ok: true,
     source: "financial-cache",
@@ -97,6 +121,8 @@ async function fetchOne(symbol) {
     requestedSymbolCount: symbols.length,
     symbols: Object.fromEntries(okRows.map((item) => [item.symbol, item.data])),
     errors,
+    refreshErrors,
+    reusedSymbols,
   };
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`);
@@ -106,7 +132,9 @@ async function fetchOne(symbol) {
       {
         requested: symbols.length,
         cached: okRows.length,
+        reused: reusedSymbols.length,
         errors: errors.length,
+        refreshErrors: refreshErrors.length,
         sample: okRows.slice(0, 5).map((item) => ({
           symbol: item.symbol,
           source: item.data.source,

@@ -47,7 +47,7 @@ npm run cache:market
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。
 - `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括行业/概念板块、ETF、涨停池、人气榜、资金流、公告和财务摘要。
 - `BaoStock`：通过 GitHub Actions 批量生成 `pages/data/baostock-cache.json`，当前会从市场快照扩展到最多 80 只股票，缓存历史 K 线、换手率、PE/PB/PS/PCF、MA 和区间收益。
-- `Financial cache`：通过 GitHub Actions 批量生成 `pages/data/financial-cache.json`，默认覆盖最多 160 只股票，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。
+- `Financial cache`：通过 GitHub Actions 批量生成 `pages/data/financial-cache.json`，默认覆盖最多 500 只股票，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段，刷新失败的个股会保留上一版缓存。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
 - `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端以 8000 股票上限生成 `market-cache`、`baostock-cache` 和 `financial-cache`，并在公开端点偶发只返回半截股票池时保留更完整旧快照，必要时向线上 Vercel API 回补完整全 A 股票池和主力资金字段；Vercel 后端在公开源返回空数据时自动读这些静态快照兜底。
 - `CNInfo`：作为公司公告二源，和东财公告合并去重；同时接入调研/关系披露作为 `disclosures.relations`，当当前个股暂无记录时返回 `disclosures.samples` 展示近期公开调研样本。
