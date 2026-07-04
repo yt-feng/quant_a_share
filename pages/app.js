@@ -220,10 +220,16 @@ let llmSectorControls = { query: "", sort: "fund3", direction: "desc", columns: 
 let llmStockControls = { query: "", sort: "pct5", direction: "desc", columns: "all", pageSize: 50, page: 1 };
 let productFilter = "all";
 let sectorDataset = "sectors";
+let sectorStartDate = "2026-07-03";
+let sectorEndDate = "2026-07-03";
 let sectorPreset = "all";
 let sectorSort = { field: "pct", direction: "desc" };
 let sectorRange = { min: "", max: "" };
 let sectorChartType = "bar";
+let llmTopicDate = "2026-07-03";
+let llmPoolDate = "2026-07-03";
+let llmSectorDate = "2026-07-03";
+let llmStockDate = "2026-07-03";
 let sidebarCollapsed = false;
 let shellTheme = "light";
 let shellEventsAttached = false;
@@ -251,6 +257,7 @@ function mount() {
   loadShellState();
   loadMarketState();
   loadScreenerState();
+  loadSectorState();
   loadWatchlistState();
   loadQuoteState();
   loadLlmState();
@@ -435,6 +442,56 @@ function persistMarketState() {
   } catch (error) {
     showToast("大盘复盘条件已更新，浏览器存储暂不可用。", "info");
   }
+}
+
+function loadSectorState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_sector") || "null");
+    if (!stored) return;
+    sectorStartDate = normalizeDateValue(stored.startDate) || sectorStartDate;
+    sectorEndDate = normalizeDateValue(stored.endDate) || sectorEndDate;
+    if (["sectors", "concepts"].includes(stored.dataset)) sectorDataset = stored.dataset;
+    if (["all", "down", "up", "flat"].includes(stored.preset)) sectorPreset = stored.preset;
+    sectorSort = normalizeSectorSort(stored.sort);
+    sectorRange = {
+      min: stored.range?.min ?? sectorRange.min,
+      max: stored.range?.max ?? sectorRange.max,
+    };
+    if (["bar", "pie"].includes(stored.chartType)) sectorChartType = stored.chartType;
+  } catch (error) {
+    // Bad local storage should not block sector overview.
+  }
+}
+
+function persistSectorState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_sector",
+      JSON.stringify({
+        startDate: sectorStartDate,
+        endDate: sectorEndDate,
+        dataset: sectorDataset,
+        preset: sectorPreset,
+        sort: sectorSort,
+        range: sectorRange,
+        chartType: sectorChartType,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("板块筛选条件已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeSectorSort(sort) {
+  const field = ["pct", "fund", "rankChange", "up"].includes(sort?.field) ? sort.field : "pct";
+  const direction = sort?.direction === "asc" ? "asc" : "desc";
+  return { field, direction };
+}
+
+function syncSectorDateInputs() {
+  sectorStartDate = normalizeDateValue(document.querySelector("#sectorStartDate")?.value) || sectorStartDate;
+  sectorEndDate = normalizeDateValue(document.querySelector("#sectorEndDate")?.value) || sectorEndDate;
 }
 
 function renderMarket() {
@@ -632,12 +689,12 @@ function renderSectors() {
       <div class="toolbar">
         <label class="segmented"><input type="radio" name="sectorDataset" data-sector-dataset="sectors" ${sectorDataset === "sectors" ? "checked" : ""} />板块数据</label>
         <label class="segmented"><input type="radio" name="sectorDataset" data-sector-dataset="concepts" ${sectorDataset === "concepts" ? "checked" : ""} />概念数据</label>
-        <label><span class="label">开始日期</span><input value="2026-07-03" /></label>
-        <label><span class="label">结束日期</span><input value="2026-07-03" /></label>
+        <label><span class="label">开始日期</span><input id="sectorStartDate" type="date" value="${escapeHtml(sectorStartDate)}" /></label>
+        <label><span class="label">结束日期</span><input id="sectorEndDate" type="date" value="${escapeHtml(sectorEndDate)}" /></label>
         <button class="chip ${sectorPreset === "down" ? "active" : ""}" data-sector-preset="down">下跌(0~-5%)</button>
         <button class="chip ${sectorPreset === "up" ? "active" : ""}" data-sector-preset="up">上涨(0~5%)</button>
         <button class="chip ${sectorPreset === "flat" ? "active" : ""}" data-sector-preset="flat">震荡(-10~10%)</button>
-        <button class="primary-button" data-refresh-market="1">刷新数据</button>
+        <button class="primary-button" data-refresh-sector="1">刷新数据</button>
         <button class="ghost-button" data-reset-sector-filters="1">重置筛选</button>
       </div>
     </section>
@@ -649,6 +706,7 @@ function renderSectors() {
       ${metric("总下跌家数", totalDown, "样本聚合")}
       ${metric("总资金流向", hasSectorFund ? `${totalFund >= 0 ? "+" : ""}${totalFund.toFixed(2)}亿` : "无字段", hasSectorFund ? "公开源" : "当前板块源不含资金字段")}
       ${metric("图表模式", sectorChartType === "pie" ? "饼图" : "柱状图", sectorSortLabel())}
+      ${metric("交易区间", `${sectorStartDate} 至 ${sectorEndDate}`, "刷新时进入公开接口")}
     </section>
     <section class="panel compact-panel" style="margin-top:14px">
       <div class="form-grid">
@@ -1007,8 +1065,13 @@ function loadLlmState() {
   try {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_llm") || "null");
     if (!stored) return;
+    if (llmTabs.includes(stored.selectedTab)) selectedLlmTab = stored.selectedTab;
     if (["industry", "concept", "all"].includes(stored.topicType)) llmTopicType = stored.topicType;
     llmTopicQuery = String(stored.topicQuery || "");
+    llmTopicDate = normalizeDateValue(stored.topicDate) || llmTopicDate;
+    llmPoolDate = normalizeDateValue(stored.poolDate) || llmPoolDate;
+    llmSectorDate = normalizeDateValue(stored.sectorDate) || llmSectorDate;
+    llmStockDate = normalizeDateValue(stored.stockDate) || llmStockDate;
     llmPoolControls = normalizeLlmControls(stored.pool, llmPoolControls, ["attention", "confidence", "pct", "t5"]);
     llmSectorControls = normalizeLlmControls(stored.sector, llmSectorControls, ["fund3", "pct3", "ma20", "crowd", "top100"]);
     llmStockControls = normalizeLlmControls(stored.stock, llmStockControls, ["pct5", "fund5", "floatMv", "pct1", "hotGap"]);
@@ -1024,6 +1087,11 @@ function persistLlmState() {
       JSON.stringify({
         topicType: llmTopicType,
         topicQuery: llmTopicQuery,
+        selectedTab: selectedLlmTab,
+        topicDate: llmTopicDate,
+        poolDate: llmPoolDate,
+        sectorDate: llmSectorDate,
+        stockDate: llmStockDate,
         pool: llmPoolControls,
         sector: llmSectorControls,
         stock: llmStockControls,
@@ -1047,6 +1115,13 @@ function normalizeLlmControls(value, fallback, allowedSorts) {
   next.pageSize = clampInt(next.pageSize, 10, 100, fallback.pageSize || 50);
   next.page = clampInt(next.page, 1, 999, fallback.page || 1);
   return next;
+}
+
+function syncLlmDateInputs() {
+  llmTopicDate = normalizeDateValue(document.querySelector("#llmTopicDate")?.value) || llmTopicDate;
+  llmPoolDate = normalizeDateValue(document.querySelector("#llmPoolDate")?.value) || llmPoolDate;
+  llmSectorDate = normalizeDateValue(document.querySelector("#llmSectorDate")?.value) || llmSectorDate;
+  llmStockDate = normalizeDateValue(document.querySelector("#llmStockDate")?.value) || llmStockDate;
 }
 
 function loadQimenState() {
@@ -1666,7 +1741,7 @@ function renderLlmTab() {
         <button class="chip ${llmTopicType === "industry" ? "active" : ""}" data-llm-topic-type="industry">行业</button>
         <button class="chip ${llmTopicType === "concept" ? "active" : ""}" data-llm-topic-type="concept">概念</button>
         <button class="chip ${llmTopicType === "all" ? "active" : ""}" data-llm-topic-type="all">全部</button>
-        <input class="inline-input" value="2026-07-03" />
+        <input id="llmTopicDate" class="inline-input" type="date" value="${escapeHtml(llmTopicDate)}" />
         <input id="llmTopicQuery" class="inline-input" placeholder="筛选主题" value="${escapeHtml(llmTopicQuery)}" />
         <button class="ghost-button compact-button" data-apply-llm-topic="1">筛选</button>
       </div>
@@ -1707,7 +1782,7 @@ function renderLlmTab() {
     const page = paginateRows(poolRows, llmPoolControls.page, llmPoolControls.pageSize);
     return `
       <div class="form-grid">
-        <input placeholder="基准交易日" value="2026-07-03" />
+        <input id="llmPoolDate" type="date" placeholder="基准交易日" value="${escapeHtml(llmPoolDate)}" />
         <input id="llmPoolQuery" placeholder="筛选：代码/名称/主题" value="${escapeHtml(llmPoolControls.query)}" />
         <select id="llmPoolSource"><option value="all" ${selectedAttr(llmPoolControls.source === "all")}>来源</option><option value="规则候选" ${selectedAttr(llmPoolControls.source === "规则候选")}>规则候选</option><option value="策略候选" ${selectedAttr(llmPoolControls.source === "策略候选")}>策略候选</option></select>
         <select id="llmPoolStage"><option value="all" ${selectedAttr(llmPoolControls.stage === "all")}>策略筛选</option><option value="Entry" ${selectedAttr(llmPoolControls.stage === "Entry")}>Entry</option><option value="Watch" ${selectedAttr(llmPoolControls.stage === "Watch")}>Watch</option></select>
@@ -1716,7 +1791,7 @@ function renderLlmTab() {
         <select id="llmPoolPageSize"><option value="20" ${selectedAttr(llmPoolControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmPoolControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmPoolControls.pageSize === 100)}>100条/页</option></select>
         <button class="primary-button align-end" data-apply-llm-pool="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag("收益选择：2026-07-03")}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
+      <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`收益选择：${llmPoolDate}`)}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
       ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], page.rows.map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
       ${llmPager("pool", page)}
     `;
@@ -1727,7 +1802,7 @@ function renderLlmTab() {
     const table = llmSectorTable(page.rows);
     return `
       <div class="form-grid">
-        <input placeholder="交易日（默认最新）" value="2026-07-03" />
+        <input id="llmSectorDate" type="date" placeholder="交易日（默认最新）" value="${escapeHtml(llmSectorDate)}" />
         <input id="llmSectorQuery" placeholder="筛选：板块/ID/关键词" value="${escapeHtml(llmSectorControls.query)}" />
         <select id="llmSectorSort"><option value="fund3" ${selectedAttr(llmSectorControls.sort === "fund3")}>3日资金_亿</option><option value="pct3" ${selectedAttr(llmSectorControls.sort === "pct3")}>3日涨跌</option><option value="ma20" ${selectedAttr(llmSectorControls.sort === "ma20")}>MA20占比</option><option value="top100" ${selectedAttr(llmSectorControls.sort === "top100")}>Top100</option></select>
         <select id="llmSectorDirection"><option value="desc" ${selectedAttr(llmSectorControls.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(llmSectorControls.direction === "asc")}>升序</option></select>
@@ -1735,7 +1810,7 @@ function renderLlmTab() {
         <select id="llmSectorPageSize"><option value="20" ${selectedAttr(llmSectorControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmSectorControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmSectorControls.pageSize === 100)}>100条/页</option></select>
         <button class="primary-button align-end" data-apply-llm-sector="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag("交易日：2026-07-03")}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
+      <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`交易日：${llmSectorDate}`)}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
       ${simpleTable(table.headers, table.rows)}
       ${llmPager("sector", page)}
     `;
@@ -1746,7 +1821,7 @@ function renderLlmTab() {
     const table = llmStockTable(page.rows);
     return `
       <div class="form-grid">
-        <input placeholder="交易日（若表有日期列）" value="2026-07-03" />
+        <input id="llmStockDate" type="date" placeholder="交易日（若表有日期列）" value="${escapeHtml(llmStockDate)}" />
         <input id="llmStockQuery" placeholder="筛选：股票代码/名称/板块/关键词" value="${escapeHtml(llmStockControls.query)}" />
         <select id="llmStockSort"><option value="pct5" ${selectedAttr(llmStockControls.sort === "pct5")}>5日涨跌</option><option value="fund5" ${selectedAttr(llmStockControls.sort === "fund5")}>5日资金_亿</option><option value="floatMv" ${selectedAttr(llmStockControls.sort === "floatMv")}>流通市值</option><option value="pct1" ${selectedAttr(llmStockControls.sort === "pct1")}>1日涨跌</option><option value="hotGap" ${selectedAttr(llmStockControls.sort === "hotGap")}>收盘_早盘</option></select>
         <select id="llmStockDirection"><option value="desc" ${selectedAttr(llmStockControls.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(llmStockControls.direction === "asc")}>升序</option></select>
@@ -2776,6 +2851,7 @@ function attachEvents() {
   document.querySelectorAll("[data-llm-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedLlmTab = button.dataset.llmTab;
+      persistLlmState();
       render();
     });
   });
@@ -2789,11 +2865,14 @@ function attachEvents() {
   });
   document.querySelector("[data-apply-llm-topic]")?.addEventListener("click", () => {
     llmTopicQuery = String(document.querySelector("#llmTopicQuery")?.value || "").trim();
+    syncLlmDateInputs();
     selectedTopicName = "";
     persistLlmState();
+    loadMarketSnapshot();
     render();
   });
   document.querySelector("[data-apply-llm-pool]")?.addEventListener("click", () => {
+    syncLlmDateInputs();
     llmPoolControls = normalizeLlmControls(
       {
         query: document.querySelector("#llmPoolQuery")?.value || "",
@@ -2808,9 +2887,11 @@ function attachEvents() {
       ["attention", "confidence", "pct", "t5"]
     );
     persistLlmState();
+    loadMarketSnapshot();
     render();
   });
   document.querySelector("[data-apply-llm-sector]")?.addEventListener("click", () => {
+    syncLlmDateInputs();
     llmSectorControls = normalizeLlmControls(
       {
         query: document.querySelector("#llmSectorQuery")?.value || "",
@@ -2824,9 +2905,11 @@ function attachEvents() {
       ["fund3", "pct3", "ma20", "crowd", "top100"]
     );
     persistLlmState();
+    loadMarketSnapshot();
     render();
   });
   document.querySelector("[data-apply-llm-stock]")?.addEventListener("click", () => {
+    syncLlmDateInputs();
     llmStockControls = normalizeLlmControls(
       {
         query: document.querySelector("#llmStockQuery")?.value || "",
@@ -2840,6 +2923,7 @@ function attachEvents() {
       ["pct5", "fund5", "floatMv", "pct1", "hotGap"]
     );
     persistLlmState();
+    loadMarketSnapshot();
     render();
   });
   document.querySelectorAll("[data-llm-page]").forEach((button) => {
@@ -2924,6 +3008,10 @@ function attachEvents() {
   });
   document.querySelectorAll("[data-refresh-market]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (currentPage === "llm") {
+        syncLlmDateInputs();
+        persistLlmState();
+      }
       showToast("正在刷新公开行情。", "info");
       loadMarketSnapshot();
     });
@@ -2931,21 +3019,25 @@ function attachEvents() {
   document.querySelectorAll("[data-sector-dataset]").forEach((input) => {
     input.addEventListener("change", () => {
       sectorDataset = input.dataset.sectorDataset === "concepts" ? "concepts" : "sectors";
+      persistSectorState();
       render();
     });
   });
   document.querySelectorAll("[data-sector-preset]").forEach((button) => {
     button.addEventListener("click", () => {
       sectorPreset = sectorPreset === button.dataset.sectorPreset ? "all" : button.dataset.sectorPreset;
+      persistSectorState();
       render();
     });
   });
   document.querySelector("[data-sector-sort-field]")?.addEventListener("change", (event) => {
-    sectorSort = { ...sectorSort, field: event.currentTarget.value };
+    sectorSort = normalizeSectorSort({ ...sectorSort, field: event.currentTarget.value });
+    persistSectorState();
     render();
   });
   document.querySelector("[data-sector-sort-direction]")?.addEventListener("change", (event) => {
-    sectorSort = { ...sectorSort, direction: event.currentTarget.value === "asc" ? "asc" : "desc" };
+    sectorSort = normalizeSectorSort({ ...sectorSort, direction: event.currentTarget.value === "asc" ? "asc" : "desc" });
+    persistSectorState();
     render();
   });
   document.querySelector("[data-apply-sector-range]")?.addEventListener("click", () => {
@@ -2953,19 +3045,30 @@ function attachEvents() {
       min: document.querySelector("#sectorMin")?.value || "",
       max: document.querySelector("#sectorMax")?.value || "",
     };
+    persistSectorState();
     render();
   });
   document.querySelectorAll("[data-sector-chart-type]").forEach((input) => {
     input.addEventListener("change", () => {
       sectorChartType = input.dataset.sectorChartType === "pie" ? "pie" : "bar";
+      persistSectorState();
       render();
     });
+  });
+  document.querySelector("[data-refresh-sector]")?.addEventListener("click", () => {
+    syncSectorDateInputs();
+    persistSectorState();
+    showToast("正在按板块日期刷新公开行情。", "info");
+    loadMarketSnapshot();
   });
   document.querySelector("[data-reset-sector-filters]")?.addEventListener("click", () => {
     sectorPreset = "all";
     sectorRange = { min: "", max: "" };
     sectorSort = { field: "pct", direction: "desc" };
     sectorChartType = "bar";
+    sectorStartDate = "2026-07-03";
+    sectorEndDate = "2026-07-03";
+    persistSectorState();
     render();
   });
   document.querySelectorAll("[data-query-quote]").forEach((button) => {
@@ -3242,6 +3345,15 @@ function contextForModule(moduleName) {
       reviewUpdatedAt: marketReviewUpdatedAt,
       reviewStats: marketReviewStats(),
     },
+    sectorControls: {
+      dataset: sectorDataset,
+      startDate: sectorStartDate,
+      endDate: sectorEndDate,
+      preset: sectorPreset,
+      sort: sectorSort,
+      range: sectorRange,
+      chartType: sectorChartType,
+    },
     aiControls: {
       realtime: aiRealtime,
       mode: aiMode,
@@ -3291,6 +3403,13 @@ function contextForModule(moduleName) {
     llmControls: {
       topicType: llmTopicType,
       topicQuery: llmTopicQuery,
+      dates: {
+        topic: llmTopicDate,
+        pool: llmPoolDate,
+        sector: llmSectorDate,
+        stock: llmStockDate,
+        active: activeLlmTradeDate(),
+      },
       pool: llmPoolControls,
       sector: llmSectorControls,
       stock: llmStockControls,
@@ -3372,7 +3491,10 @@ async function checkBackendStatus() {
 async function loadMarketSnapshot() {
   if (isGithubPages() && !VERCEL_BACKEND_URL) return;
   try {
-    const response = await fetch(`${apiBase()}/api/market?symbol=${selectedQuote}`, { cache: "no-store" });
+    const params = new URLSearchParams({ symbol: selectedQuote });
+    const tradeDate = compactDateValue(activeRequestTradeDate());
+    if (tradeDate) params.set("date", tradeDate);
+    const response = await fetch(`${apiBase()}/api/market?${params.toString()}`, { cache: "no-store" });
     const payload = await response.json();
     if (!payload.ok) return;
     marketSource = payload.source || "公开源";
@@ -3444,6 +3566,21 @@ async function loadMarketSnapshot() {
   } catch (error) {
     showToast("公开行情暂未更新，继续使用内置样本。", "info");
   }
+}
+
+function activeRequestTradeDate() {
+  if (currentPage === "sectors") return sectorEndDate;
+  if (currentPage === "llm") return activeLlmTradeDate();
+  if (currentPage === "quote") return quoteEndDate;
+  if (currentPage === "market") return marketEndDate;
+  return marketEndDate || sectorEndDate || llmTopicDate;
+}
+
+function activeLlmTradeDate() {
+  if (selectedLlmTab === "选股池") return llmPoolDate;
+  if (selectedLlmTab === "板块全景看板") return llmSectorDate;
+  if (selectedLlmTab === "个股评估矩阵") return llmStockDate;
+  return llmTopicDate;
 }
 
 function buildClientStockRows(rows) {
@@ -3811,6 +3948,10 @@ function normalizeDateValue(value) {
   if (!match) return "";
   const [year, month, day] = match[0].replace(/\//g, "-").split("-").map((part) => part.padStart(2, "0"));
   return `${year}-${month}-${day}`;
+}
+
+function compactDateValue(value) {
+  return normalizeDateValue(value).replaceAll("-", "");
 }
 
 function shiftDate(days) {

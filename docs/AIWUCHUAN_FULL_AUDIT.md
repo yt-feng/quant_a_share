@@ -53,6 +53,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Metrics: 总板块数, 平均涨跌幅, 总上涨家数, 总下跌家数, 总资金流向.
 - Table columns: ID, 名称, 日期, 涨跌幅, 排名, 排名变化, 上涨家数, 下跌家数, 涨停家数, 资金流向(亿).
 - Clone enrichment: dataset switch, preset chips, range inputs, sort selectors and chart mode now update the visible table and charts instead of acting as display-only controls.
+- Clone enrichment: date range now persists and is sent as the active market date when refreshing public board data.
 
 ## 行情
 
@@ -82,6 +83,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 ## LLM分析
 
 - Tabs: 主题热点, 选股池, 板块全景看板, 个股评估矩阵, 产业链研报分析.
+- Shared enrichment: transaction-date inputs now persist per tab, refresh the market payload with the matching date parameter, and feed the chat context.
 - 主题热点:
   - Type switch: 行业 / 概念.
   - Inputs: base date, 筛选主题.

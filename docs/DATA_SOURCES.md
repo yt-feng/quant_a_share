@@ -50,6 +50,8 @@
 - Quote chart overlays
   - The 行情 page now turns trend line, ray, horizontal line, arrow, FIB, GANN and parallel-line tools into Plotly overlays on top of Eastmoney/BaoStock/Yahoo chart rows.
   - Drawing records persist in browser storage and legacy single-price records still render as horizontal overlays.
+- Date-aware controls
+  - 行业/概念 date range and LLM per-tab transaction dates persist in browser storage, enter chat context and are sent to `/api/market?date=YYYYMMDD` when refreshing.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -64,7 +66,7 @@
 
 ## Next Enrichment Targets
 
-- Persist industry/LLM date controls so the remaining date fields behave like the market and quote modules.
+- Add an explicit data freshness badge for each table section that uses a cached or live source.
 
 ## Design
 
