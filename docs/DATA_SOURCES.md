@@ -7,28 +7,30 @@
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
   - Index quotes for 上证指数、深证成指、创业板指、沪深300、中证500.
   - Single-stock quote and daily K-line.
+  - Limit-up pool, broken-board pool, strong-stock pool, seal fund, first/last seal time and streak height.
+  - Individual stock money flow day K: main/super/big/mid/small order net flow and ratios.
+  - Northbound/southbound Stock Connect quota and net buy summary.
 - Sina public market center API
   - Full A-share stock universe fallback, currently used when Eastmoney paginated lists are unavailable.
   - Provides code, name, price, pct/change, open/high/low/pre-close, volume, amount, turnover, PE, PB, total market cap and float market cap.
   - Sina industry board fallback, providing industry name, company count, pct/change, total volume, total amount and leading stock.
+  - Sina concept board fallback, providing concept name, company count, pct/change, total volume, total amount and leading stock.
+  - Sina financial report API, providing report-period financial fields such as revenue, net profit, EPS, BVPS, ROE, ROA, gross margin, net margin and debt ratio.
 - DeepSeek API
   - Server-side `/api/chat` only.
 
 ## Recommended Free / Low-Cost Sources
 
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
-- AKShare: best research/reference library for discovering Eastmoney/Sina/Tencent endpoints and validating fields. Use its documented interfaces as a map, then port hot paths to Node.
-- BaoStock: good free source for historical K-line, valuation and financial fields when a Python batch job is acceptable.
+- AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, Eastmoney money flow, Stock Connect and Sina financial reports.
+- BaoStock: good free source for historical K-line, valuation and financial fields when a Python batch/cache job is acceptable.
 - yfinance: useful for US/HK/global stocks and ETFs, not enough for A-share涨停、板块、资金流.
-- efinance: useful open-source Eastmoney wrapper; good reference when adding more Eastmoney endpoints.
+- efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
 - Tencent/Sina quote endpoints: useful as low-cost online fallbacks for current quote fields; names require GBK/GB18030 decoding for some quote APIs.
 
 ## Next Enrichment Targets
 
-- Eastmoney limit-up pool / broken-board pool.
-- Eastmoney concept boards in addition to industry boards.
-- Northbound capital and ETF flow.
-- Financial statement snapshot for PE/PB/PS validation.
+- ETF flow and popularity/attention lists.
 - Optional scheduled GitHub Action to cache slow full-market snapshots into JSON artifacts.
 - Tencent quote fallback for selected symbols and watchlists.
 

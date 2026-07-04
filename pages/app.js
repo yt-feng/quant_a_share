@@ -38,6 +38,15 @@ const data = {
     ["固废处理", 1.72, 7, 22, 106, 32, 5, 10.12],
     ["水务", 1.7, 8, 40, 37, 6, 2, 0.21],
   ],
+  concepts: [
+    ["华为汽车", 1.83, 1, 97, 718.75, "贝斯特", 20.02],
+    ["高压快充", 1.35, 2, 53, 285.97, "汉宇集团", 16.13],
+    ["黄金概念", 5.72, 3, 27, 352.85, "西部黄金", 10.02],
+  ],
+  limitPools: { date: "-", limitUp: [], broken: [], strong: [], stats: {} },
+  moneyFlow: { rows: [], latest: null, sum5MainYi: 0 },
+  northbound: { rows: [], northRows: [], northNetBuyYi: 0, northNetInYi: 0 },
+  fundamentals: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
     { code: "002594.SZ", name: "比亚迪", price: 246.7, pct: 2.9, industry: "汽车", rps: 84, fund: 9.7, pe: 24, pb: 2.8, ma20: true, macd: true },
@@ -224,6 +233,15 @@ function signed(value, digits = 2) {
   return `<span class="${cls}">${sign}${value.toFixed(digits)}</span>`;
 }
 
+function yi(value, digits = 2) {
+  return Math.round(((Number(value) || 0) / 100000000) * 10 ** digits) / 10 ** digits;
+}
+
+function plainSigned(value, digits = 2, suffix = "") {
+  const number = Number(value) || 0;
+  return `${number > 0 ? "+" : ""}${number.toFixed(digits)}${suffix}`;
+}
+
 function simpleTable(headers, rows) {
   return `
     <div class="table-wrap">
@@ -260,6 +278,16 @@ function renderMarket() {
       <div class="panel"><h2>上证涨跌趋势</h2><div id="breadthChart" class="chart"></div></div>
       <div class="panel"><h2>涨跌停板分布</h2><div id="limitChart" class="chart"></div></div>
       <div class="panel"><h2>指数涨跌幅</h2><div id="indexChart" class="chart"></div></div>
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        ${panelTitle(`涨停池 ${data.limitPools.limitUp.length} · 炸板 ${data.limitPools.broken.length}`, tag(`交易日 ${data.limitPools.date || "-"}`, "info"))}
+        ${simpleTable(["代码", "名称", "连板", "首次封板", "封板资金", "行业"], data.limitPools.limitUp.slice(0, 8).map((row) => [row.code, row.name, row.streak || "-", row.firstSealTime || "-", `${yi(row.sealFund)}亿`, row.industry || "-"]))}
+      </div>
+      <div class="panel">
+        ${panelTitle("北向资金", tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"))}
+        ${simpleTable(["通道", "方向", "净买额", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${yi(row.netBuyAmt)}亿`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
+      </div>
     </section>
     <section class="panel" style="margin-top:14px">
       ${panelTitle("复盘数据统计", `<button class="ghost-button" data-refresh-market="1">刷新</button>`)}
@@ -333,6 +361,7 @@ function renderSectors() {
   const totalDown = data.sectors.reduce((sum, row) => sum + Number(row[5] || 0), 0);
   const totalFund = data.sectors.reduce((sum, row) => sum + Number(row[7] || 0), 0);
   const hasSectorFund = !marketSource.includes("sina-industry-sectors");
+  const avgConceptPct = data.concepts.reduce((sum, row) => sum + Number(row[1] || 0), 0) / Math.max(data.concepts.length, 1);
   return `
     <section class="panel compact-panel">
       <div class="toolbar">
@@ -353,7 +382,7 @@ function renderSectors() {
       ${metric("总上涨家数", totalUp, "样本聚合")}
       ${metric("总下跌家数", totalDown, "样本聚合")}
       ${metric("总资金流向", hasSectorFund ? `${totalFund >= 0 ? "+" : ""}${totalFund.toFixed(2)}亿` : "无字段", hasSectorFund ? "公开源" : "当前板块源不含资金字段")}
-      ${metric("图表模式", "柱状图", "可切换饼图")}
+      ${metric("概念板块", data.concepts.length, `均涨跌 ${avgConceptPct.toFixed(2)}%`)}
     </section>
     <section class="panel compact-panel" style="margin-top:14px">
       <div class="form-grid">
@@ -370,7 +399,7 @@ function renderSectors() {
       <div class="panel"><h2>涨跌幅排名</h2><div id="sectorChangeChart" class="chart"></div></div>
     </section>
     <section class="panel" style="margin-top:14px">
-      <h2>板块数据</h2>
+      <h2>行业板块数据</h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>名称</th><th>涨跌幅</th><th>排名</th><th>排名变化</th><th>上涨家数</th><th>下跌家数</th><th>涨停家数</th><th>资金流向(亿)</th></tr></thead>
@@ -378,11 +407,17 @@ function renderSectors() {
         </table>
       </div>
     </section>
+    <section class="panel" style="margin-top:14px">
+      <h2>概念板块数据</h2>
+      ${simpleTable(["概念", "涨跌幅", "排名", "成分数", "成交额", "领涨股", "领涨幅"], data.concepts.slice(0, 40).map((row) => [row[0], `${signed(row[1])}%`, row[2], row[3], `${row[4].toLocaleString()}亿`, row[5], `${signed(row[6])}%`]))}
+    </section>
   `;
 }
 
 function renderQuote() {
   const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
+  const latestFlow = data.moneyFlow.latest;
+  const financials = data.fundamentals?.financials || {};
   return `
     <section class="panel compact-panel">
       <div class="form-grid">
@@ -406,8 +441,11 @@ function renderQuote() {
       ${metric("现价", stock.price.toFixed(2), `${stock.pct >= 0 ? "+" : ""}${stock.pct}%`)}
       ${metric("成交量", `${Math.round((stock.amount || 0) / Math.max(stock.price || 1, 1) / 10000)}万`, "公开源估算")}
       ${metric("RPS50", stock.rps, "强度分")}
-      ${metric("资金净流入", `${stock.fund > 0 ? "+" : ""}${stock.fund}亿`, "样本口径")}
+      ${metric("主力净流入", latestFlow ? `${plainSigned(yi(latestFlow.mainNet), 2, "亿")}` : `${stock.fund > 0 ? "+" : ""}${stock.fund}亿`, latestFlow ? "东财个股资金" : "样本口径")}
       ${metric("市盈率", stock.pe || "-", "PE")}
+      ${metric("市净率", stock.pb || data.fundamentals?.pb || "-", "PB")}
+      ${metric("5日主力", `${plainSigned(data.moneyFlow.sum5MainYi || 0, 2, "亿")}`, "近5日合计")}
+      ${metric("ROE", financials.roe ? `${financials.roe}%` : "-", data.fundamentals?.reportLabel || "财务快照")}
       ${metric("技术状态", stock.ma20 && stock.macd ? "偏强" : "观察", "MA20 / MACD")}
     </section>
     <section class="grid two" style="margin-top:14px">
@@ -432,6 +470,24 @@ function renderQuote() {
           <button class="ghost-button" data-open-modal="indicatorPicker">换指标</button>
         </div>
         <button class="primary-button" data-toast="指标已刷新">刷新指标</button>
+      </div>
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        <h2>个股资金流</h2>
+        ${simpleTable(["日期", "收盘", "涨跌幅", "主力净额", "超大单", "大单"], (data.moneyFlow.rows || []).slice(-8).map((row) => [row.date, row.close.toFixed(2), `${signed(row.pct)}%`, `${plainSigned(yi(row.mainNet), 2, "亿")}`, `${plainSigned(yi(row.superNet), 2, "亿")}`, `${plainSigned(yi(row.bigNet), 2, "亿")}`]))}
+      </div>
+      <div class="panel">
+        <h2>财务快照</h2>
+        ${simpleTable(["指标", "数值", "口径"], [
+          ["报告期", data.fundamentals?.reportLabel || "-", data.fundamentals?.source || "-"],
+          ["营业总收入", financials.revenue ? `${yi(financials.revenue).toLocaleString()}亿` : "-", "新浪财报"],
+          ["归母净利润", financials.parentNetProfit ? `${yi(financials.parentNetProfit).toLocaleString()}亿` : "-", "新浪财报"],
+          ["基本EPS", financials.epsBasic ?? "-", "新浪财报"],
+          ["每股净资产", financials.navps ?? "-", "新浪财报"],
+          ["毛利率", financials.grossMargin ? `${financials.grossMargin}%` : "-", "新浪财报"],
+          ["资产负债率", financials.debtRatio ? `${financials.debtRatio}%` : "-", "新浪财报"],
+        ])}
       </div>
     </section>
   `;
@@ -521,16 +577,17 @@ function renderLlm() {
 
 function renderLlmTab() {
   if (selectedLlmTab === "主题热点") {
-    const active = llmTopics[0];
+    const topics = liveTopics();
+    const active = topics[0];
     return `
       <div class="toolbar">
         <button class="chip active">行业</button><button class="chip">概念</button>
         <input class="inline-input" value="2026-07-03" />
         <input class="inline-input" placeholder="筛选主题" />
       </div>
-      <div class="topic-grid">${llmTopics.map((topic) => `<button class="topic-card ${topic.name === active.name ? "active" : ""}" data-toast="已选择主题 ${topic.name}"><strong>${topic.name}</strong><span>热度 ${topic.heat}</span><span>趋势 ${topic.trend}</span><span>3日资金 ${topic.fund3}</span></button>`).join("")}</div>
+      <div class="topic-grid">${topics.map((topic) => `<button class="topic-card ${topic.name === active.name ? "active" : ""}" data-toast="已选择主题 ${topic.name}"><strong>${topic.name}</strong><span>热度 ${topic.heat}</span><span>趋势 ${topic.trend}</span><span>成交额 ${topic.fund3}</span></button>`).join("")}</div>
       <section class="grid metrics" style="margin-top:14px">
-        ${metric("3日资金(亿)", active.fund3, active.name)}
+        ${metric("成交额(亿)", active.fund3, active.name)}
         ${metric("3日涨跌", `${active.pct3}%`, active.trend)}
         ${metric("站上MA20(%)", active.ma20, "主题宽度")}
         ${metric("人气集中", active.crowd, "集中度")}
@@ -588,6 +645,21 @@ function renderLlmTab() {
     `;
   }
   return `<div class="empty-state"><strong>产业链研报分析</strong><span>当前账号下暂无研报数据；已保留入口、空状态和后续表格承载区。</span></div>`;
+}
+
+function liveTopics() {
+  const concepts = data.concepts.slice(0, 12).map((row) => ({
+    name: row[0],
+    heat: Math.max(30, Math.min(99, Math.round(55 + Number(row[1] || 0) * 4 + Number(row[4] || 0) / 80))),
+    trend: Number(row[1] || 0) >= 0 ? "new" : "down",
+    fund3: row[4],
+    pct3: row[1],
+    ma20: Math.max(20, Math.min(99, Math.round(50 + Number(row[1] || 0) * 4))),
+    crowd: Math.round((Number(row[4] || 0) / 1000) * 100) / 100,
+    stage: Number(row[1] || 0) >= 3 ? "轮动加强" : Number(row[1] || 0) >= 0 ? "低吸观察" : "退潮观察",
+    score: Math.max(30, Math.min(95, Math.round(60 + Number(row[1] || 0) * 5))),
+  }));
+  return concepts.length ? concepts : llmTopics;
 }
 
 function renderQimen() {
@@ -1054,7 +1126,16 @@ function contextForModule(moduleName) {
     selectedLlmTab,
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
+    concepts: data.concepts.slice(0, 8),
     stocks: data.stocks.slice(0, 8),
+    limitPools: {
+      stats: data.limitPools.stats,
+      limitUp: data.limitPools.limitUp.slice(0, 8),
+      broken: data.limitPools.broken.slice(0, 5),
+    },
+    moneyFlow: data.moneyFlow.latest,
+    northbound: data.northbound.northRows || data.northbound.rows,
+    fundamentals: data.fundamentals,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
       itemType: document.querySelector("#itemType")?.value,
@@ -1128,7 +1209,9 @@ async function loadMarketSnapshot() {
         ["情绪温度", `${payload.market.temperature}%`, payload.market.state],
         ["成交额", `${payload.market.amountYi.toLocaleString()}亿`, marketSource],
         ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `全市场 ${payload.market.total || "-"} 只，平盘 ${payload.market.flat}`],
-        ["涨停/跌停", `${payload.market.limitUp} / ${payload.market.limitDown}`, "公开行情口径"],
+        ["涨停/跌停", `${payload.market.exactLimitUp || payload.market.limitUp} / ${payload.market.limitDown}`, `炸板 ${payload.market.brokenLimit || 0}`],
+        ["连板高度", `${payload.market.maxStreak || 0}板`, `封板资金 ${payload.market.sealFundYi || 0}亿`],
+        ["北向净买", `${plainSigned(payload.market.northNetBuyYi || 0, 2, "亿")}`, "沪股通+深股通"],
         ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
         ["资金净流入", hasSectorFund ? `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿` : "无字段", hasSectorFund ? "板块资金聚合" : "当前板块源不含资金字段"],
       ];
@@ -1150,6 +1233,21 @@ async function loadMarketSnapshot() {
         Math.round(((sector.netFund || 0) / 100000000) * 100) / 100,
       ]);
     }
+    if (Array.isArray(payload.concepts) && payload.concepts.length) {
+      data.concepts = payload.concepts.slice(0, 80).map((concept, index) => [
+        concept.name,
+        concept.pct || 0,
+        concept.rank || index + 1,
+        concept.companyCount || 0,
+        yi(concept.amount || 0),
+        concept.leader?.name || "-",
+        concept.leader?.pct || 0,
+      ]);
+    }
+    if (payload.limitPools) data.limitPools = payload.limitPools;
+    if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;
+    if (payload.northbound) data.northbound = payload.northbound;
+    if (payload.fundamentals) data.fundamentals = payload.fundamentals;
     if (Array.isArray(payload.indices) && payload.indices.length) {
       data.indices = payload.indices.map((index) => [index.name, index.pct]);
     }
