@@ -244,6 +244,9 @@ function applySnapshotFallback(payload, snapshot, symbol) {
     next.market = snapshot.market;
     usedFields.push("market");
   }
+  if (usedFields.includes("baostock")) {
+    next.source = next.source.replace("baostock-cache-miss", "baostock-history-cache");
+  }
   if (usedFields.length) {
     next.source = `${next.source}+github-action-cache`;
   }
