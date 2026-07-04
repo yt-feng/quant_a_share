@@ -131,6 +131,57 @@ const hotPrompts = [
   "Q12 分析近期大盘涨跌与成交额规律，结合行业/概念轮动、资金流向和人气榜，筛出低吸方向。",
 ];
 
+const aiScenes = [
+  {
+    id: "stock_plan",
+    title: "个股操作",
+    module: "stock",
+    mode: "专家模式",
+    scope: "行情 / 资金 / 财务 / 人气",
+    prompt: "结合实时行情，分析{stock}现在能不能买，按短线3-5天思路给我买点、止损位、仓位建议和注意点。",
+  },
+  {
+    id: "position",
+    title: "持仓处理",
+    module: "stock",
+    mode: "专家模式",
+    scope: "成本 / 量能 / 失效条件",
+    prompt: "我持有{stock}，当前成本大概{price}元。盘中该继续拿、减仓还是做T？请给我明确条件和仓位安排。",
+  },
+  {
+    id: "market",
+    title: "大盘节奏",
+    module: "market",
+    mode: "专家模式",
+    scope: "指数 / 宽度 / 北向 / 涨停池",
+    prompt: "今天大盘情绪处于什么阶段？结合成交额、涨跌结构、北向资金和涨停池，给我明天观察顺序。",
+  },
+  {
+    id: "sector",
+    title: "板块轮动",
+    module: "llm_analysis",
+    mode: "深度思考",
+    scope: "行业 / 概念 / 成分股",
+    prompt: "今天哪些行业或概念资金在持续流入？结合板块成分和主题热度，给我低吸观察方向和候选顺序。",
+  },
+  {
+    id: "screener",
+    title: "因子选股",
+    module: "ai_matrix",
+    mode: "专家模式",
+    scope: "因子 / 排名 / 自选候选",
+    prompt: "根据当前因子选股结果，帮我筛出最值得观察的股票，按强度、资金、位置和失效条件排序。",
+  },
+  {
+    id: "review",
+    title: "盘后复盘",
+    module: "market",
+    mode: "深度思考",
+    scope: "市场宽度 / 资金 / 题材",
+    prompt: "按盘后复盘格式总结今天市场：指数、情绪、资金、强势题材、弱势方向、明日计划。",
+  },
+];
+
 const DEFAULT_WALLET_LEDGER = [
   ["2026-07-03 21:48:38", "退款", 16.5, 86.5, 0, "AI决策矩阵 V2 结算退回剩余冻结"],
   ["2026-07-03 21:48:38", "消费", -13.5, 70, 16.5, "AI决策矩阵 V2 结算"],
@@ -253,6 +304,7 @@ let quoteMacdParams = { short: 12, long: 26, mid: 9 };
 let quoteDrawings = [];
 let aiRealtime = true;
 let aiMode = "快速模式";
+let activeAiScene = "stock_plan";
 let aiQuestion = "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。";
 let aiHistory = [];
 let aiCurrentAnswer = "";
@@ -2138,6 +2190,7 @@ function loadAiState() {
     if (!stored) return;
     aiRealtime = stored.realtime !== false;
     if (["快速模式", "专家模式", "深度思考"].includes(stored.mode)) aiMode = stored.mode;
+    if (aiScenes.some((scene) => scene.id === stored.scene)) activeAiScene = stored.scene;
     aiQuestion = String(stored.question || aiQuestion);
     aiHistory = Array.isArray(stored.history) ? stored.history.map(normalizeAiHistoryItem).filter(Boolean).slice(0, 30) : [];
     aiCurrentAnswer = String(stored.currentAnswer || aiHistory[0]?.answer || "");
@@ -2153,6 +2206,7 @@ function persistAiState() {
       JSON.stringify({
         realtime: aiRealtime,
         mode: aiMode,
+        scene: activeAiScene,
         question: aiQuestion,
         currentAnswer: aiCurrentAnswer,
         history: aiHistory,
@@ -2290,11 +2344,44 @@ function addWatchEntries(codes, group) {
   return Math.max(0, watchlist.length - before);
 }
 
+function currentQuoteStock() {
+  return data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0] || {};
+}
+
+function selectedAiSceneConfig() {
+  return aiScenes.find((scene) => scene.id === activeAiScene) || aiScenes[0];
+}
+
+function hydrateAiPrompt(prompt) {
+  const stock = currentQuoteStock();
+  const stockLabel = stock.name && stock.code ? `${stock.name}(${stock.code})` : selectedQuote;
+  const price = Number.isFinite(stock.price) ? stock.price.toFixed(2) : "当前价";
+  return String(prompt || "")
+    .replaceAll("{stock}", stockLabel)
+    .replaceAll("{price}", price);
+}
+
+function activeAiModule() {
+  return selectedAiSceneConfig()?.module || "ai_matrix";
+}
+
+function aiSceneGrid() {
+  return `<div class="ai-scene-grid">${aiScenes
+    .map((scene) => {
+      const active = scene.id === activeAiScene ? "active" : "";
+      return `<button class="ai-scene-card ${active}" data-ai-scene="${escapeHtml(scene.id)}"><strong>${escapeHtml(scene.title)}</strong><span>${escapeHtml(scene.scope)}</span><small>${escapeHtml(scene.mode)}</small></button>`;
+    })
+    .join("")}</div>`;
+}
+
 function renderAi() {
+  const scene = selectedAiSceneConfig();
   return `
     <section class="grid two">
       <div class="panel">
         ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-new-ai-chat="1">新对话</button><button class="ghost-button" data-goto-page="subscription">钱包</button></div>`)}
+        ${aiSceneGrid()}
+        <div class="detail-strip">${tag(`当前场景：${scene.title}`, "info")}${tag(`后端模块：${scene.module}`)}${tag(scene.scope)}</div>
         <div class="toolbar">
           <label class="toggle"><input type="checkbox" data-ai-realtime ${aiRealtime ? "checked" : ""} />实时搜索</label>
           <button class="chip ${aiMode === "快速模式" ? "active" : ""}" data-mode-pick="快速模式">快速模式</button>
@@ -2304,7 +2391,7 @@ function renderAi() {
         <label><span class="label">问题</span><textarea id="question" placeholder="请输入你的问题，AI将基于多维数据为你解答...">${escapeHtml(aiQuestion)}</textarea></label>
         <div class="toolbar" style="margin-top:12px">
           <select id="mode"><option ${selectedAttr(aiMode === "快速模式")}>快速模式</option><option ${selectedAttr(aiMode === "专家模式")}>专家模式</option><option ${selectedAttr(aiMode === "深度思考")}>深度思考</option></select>
-          <button class="primary-button" data-chat-module="ai_matrix" data-target="aiAnswer">生成回答</button>
+          <button class="primary-button" data-chat-module="${escapeHtml(activeAiModule())}" data-target="aiAnswer">生成回答</button>
         </div>
         <p class="notice">Vercel 后端会读取服务端 DEEPSEEK_API_KEY，浏览器端不保存密钥。</p>
         <div class="prompt-grid">${hotPrompts.map((prompt) => `<button class="prompt-card" data-hot-prompt="${escapeHtml(prompt)}">${prompt}</button>`).join("")}</div>
@@ -3597,6 +3684,18 @@ function attachEvents() {
       showToast("热门问题已填入输入框。", "success");
     });
   });
+  document.querySelectorAll("[data-ai-scene]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const scene = aiScenes.find((item) => item.id === button.dataset.aiScene);
+      if (!scene) return;
+      activeAiScene = scene.id;
+      aiMode = scene.mode;
+      aiQuestion = hydrateAiPrompt(scene.prompt);
+      aiCurrentAnswer = "";
+      persistAiState();
+      render();
+    });
+  });
   document.querySelectorAll("[data-mode-pick]").forEach((button) => {
     button.addEventListener("click", () => {
       aiMode = button.dataset.modePick;
@@ -3878,7 +3977,7 @@ function attachEvents() {
       const target = document.querySelector(`#${button.dataset.target}`);
       const question = document.querySelector("#question")?.value || "";
       const mode = document.querySelector("#mode")?.value || "专家模式";
-      if (button.dataset.chatModule === "ai_matrix") {
+      if (button.dataset.target === "aiAnswer") {
         aiQuestion = question;
         aiMode = mode;
         persistAiState();
@@ -3896,7 +3995,7 @@ function attachEvents() {
         });
         progress.succeed();
         target.textContent = result.answer || "后端没有返回内容。";
-        if (button.dataset.chatModule === "ai_matrix") recordAiHistory(question, mode, result.answer || "后端没有返回内容。");
+        if (button.dataset.target === "aiAnswer") recordAiHistory(question, mode, result.answer || "后端没有返回内容。");
         showToast("分析完成，结果已更新。", "success");
       } catch (error) {
         progress.fail();
@@ -4014,6 +4113,7 @@ function contextForModule(moduleName) {
     aiControls: {
       realtime: aiRealtime,
       mode: aiMode,
+      scene: selectedAiSceneConfig(),
       recentQuestions: aiHistory.slice(0, 5).map((item) => ({ at: item.at, mode: item.mode, realtime: item.realtime, question: item.question })),
     },
     dataSourceCoverage: sourceCoverageRows().map(([source, status, coverage, latest, usage]) => ({ source, status, coverage, latest, usage })),
@@ -4346,6 +4446,8 @@ function startChatProgress(moduleName, target) {
   const phases = {
     ai_matrix: ["整理行情上下文", "请求 DeepSeek", "生成操作计划", "校验触发条件"],
     llm_analysis: ["聚合主题与板块", "请求 DeepSeek", "生成研究结论", "整理观察顺序"],
+    market: ["整理市场宽度", "请求 DeepSeek", "生成复盘结论", "校验观察顺序"],
+    stock: ["读取个股画像", "请求 DeepSeek", "生成操作计划", "整理止损条件"],
     qimen: ["同步起局信息", "请求 DeepSeek", "生成解盘结论", "整理变化节点"],
   };
   const labels = phases[moduleName] || ["整理上下文", "请求模型", "生成回答", "整理结果"];

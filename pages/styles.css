@@ -536,6 +536,7 @@ p {
 }
 
 .topic-grid,
+.ai-scene-grid,
 .prompt-grid,
 .product-grid,
 .tool-grid {
@@ -545,6 +546,39 @@ p {
 
 .topic-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ai-scene-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
+.ai-scene-card {
+  display: grid;
+  gap: 5px;
+  min-height: 92px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  background: white;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ai-scene-card.active {
+  border-color: var(--teal);
+  background: #f0fdfa;
+}
+
+.ai-scene-card span {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: normal;
+}
+
+.ai-scene-card small {
+  color: var(--teal);
+  font-weight: 700;
 }
 
 .topic-card,
@@ -962,6 +996,7 @@ textarea {
   .grid.metrics,
   .grid.two,
   .grid.three,
+  .ai-scene-grid,
   .form-grid,
   .factor-grid,
   .topic-grid,
