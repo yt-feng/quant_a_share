@@ -16,7 +16,7 @@
   - Single-stock quote, daily K-line and 1-minute intraday trend lines from Eastmoney quote/trends endpoints.
   - Limit-up pool, broken-board pool, strong-stock pool, seal fund, first/last seal time and streak height.
   - Individual stock money flow day K: main/super/big/mid/small order net flow and ratios.
-  - Northbound/southbound Stock Connect quota and net buy summary.
+  - Northbound/southbound Stock Connect quota, net buy summary, KAMT turnover, month/year net-in and cumulative net-in fields.
   - ETF spot quote/fund-flow list from the same Eastmoney ETF grid endpoints used by AKShare `fund_etf_spot_em`.
   - Stock popularity rank, single-stock latest rank, hot concepts/keywords and related stocks from Eastmoney Guba rank endpoints.
   - Single-stock announcements from Eastmoney notice search.

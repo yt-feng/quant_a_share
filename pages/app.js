@@ -736,8 +736,8 @@ function renderMarket() {
         ${simpleTable(["梯队", "家数", "封板资金", "代表个股"], ladderRows.map((row) => [row.label, row.count, `${plainSigned(row.sealFundYi, 2, "亿")}`, row.leaders]))}
       </div>
       <div class="panel">
-        ${panelTitle("北向资金", actionGroup(tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"), freshnessTag("northbound"), exportButton("northbound")))}
-        ${simpleTable(["通道", "方向", "净买额", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${yi(row.netBuyAmt)}亿`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
+        ${panelTitle("北向资金", actionGroup(tag(`净买 ${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"), tag(`成交 ${plainSigned(data.northbound.northTurnoverYi || 0, 2, "亿")}`), freshnessTag("northbound"), exportButton("northbound")))}
+        ${simpleTable(["通道", "方向", "净买额", "成交额", "月净流入", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${plainSigned(yi(row.netBuyAmt), 2, "亿")}`, `${plainSigned(yi(row.turnoverAmt), 2, "亿")}`, `${plainSigned(yi(row.monthNetAmtIn), 2, "亿")}`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
       </div>
     </section>
     <section class="grid two" style="margin-top:14px">
@@ -1827,7 +1827,7 @@ function exportRowsFor(key) {
     case "limitLadder":
       return exportPayload("limit-ladder", ["交易日", "梯队", "家数", "封板资金_亿", "代表个股"], limitLadderExportRows());
     case "northbound":
-      return exportPayload("northbound", ["交易日", "通道", "方向", "板块", "指数", "指数涨跌幅", "上涨家数", "下跌家数", "平盘家数", "净买额_亿", "净流入_亿", "剩余额度_亿", "额度阈值_亿"], northboundExportRows());
+      return exportPayload("northbound", ["交易日", "通道", "方向", "板块", "指数", "指数涨跌幅", "上涨家数", "下跌家数", "平盘家数", "净买额_亿", "净流入_亿", "成交额_亿", "买入额_亿", "卖出额_亿", "月净流入_亿", "年净流入_亿", "累计净流入_亿", "剩余额度_亿", "额度阈值_亿"], northboundExportRows());
     case "etfs":
       return exportPayload("etf-flow", ["排名", "代码", "名称", "价格", "涨跌幅", "成交额_亿", "主力净额_亿", "超大单_亿", "大单_亿", "主力占比", "折价率", "日期"], etfExportRows());
     case "hotRank":
@@ -2065,6 +2065,12 @@ function northboundExportRows() {
     row.flatCount,
     yi(row.netBuyAmt),
     yi(row.dayNetAmtIn),
+    yi(row.turnoverAmt),
+    yi(row.buyAmt),
+    yi(row.sellAmt),
+    yi(row.monthNetAmtIn),
+    yi(row.yearNetAmtIn),
+    yi(row.allNetAmtIn),
     yi(row.dayAmtRemain),
     yi(row.threshold),
   ]);

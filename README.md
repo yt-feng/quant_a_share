@@ -41,7 +41,7 @@ npm run cache:market
 
 项目后续按“免费公开源优先、TuShare 作为增强源”的方式接数据：
 
-- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于全 A 股票池、全市场主力资金字段、指数、行业/概念板块、板块成分股、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、公告等；默认向前端返回最多 6000 只股票，并暴露 `stockUniverse` 覆盖元信息。
+- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于全 A 股票池、全市场主力资金字段、指数、行业/概念板块、板块成分股、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、沪深港通 KAMT 成交/累计流入、公告等；默认向前端返回最多 6000 只股票，并暴露 `stockUniverse` 覆盖元信息。
 - `Eastmoney report API`：Vercel `/api/market` 当前用于近 30 日行业研报、宏观策略研报，供 LLM 产业链研报分析 tab 和问答上下文使用。
 - `Sina public endpoint`：当前用于全 A 股票池兜底、行业/概念板块二源兜底和财务报告关键指标，沿用同一套 `stockUniverse` 覆盖统计。
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。

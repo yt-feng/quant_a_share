@@ -14,6 +14,7 @@ const SINA_INDUSTRY_URL = "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy
 const SINA_CONCEPT_URL = "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=class";
 const EASTMONEY_LIMIT_POOL_URL = "https://push2ex.eastmoney.com";
 const EASTMONEY_HSGT_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get";
+const EASTMONEY_KAMT_URL = "https://push2.eastmoney.com/api/qt/kamt/get";
 const EASTMONEY_ETF_URL = "https://push2delay.eastmoney.com/api/qt/clist/get";
 const EASTMONEY_STOCK_RANK_URL = "https://emappdata.eastmoney.com/stockrank";
 const EASTMONEY_ANNOUNCEMENT_URL = "https://np-anotice-stock.eastmoney.com/api/security/ann";
@@ -135,7 +136,7 @@ module.exports = async function handler(req, res) {
     limitPools?.source || "limit-pool-fallback",
     etfs?.rows?.length ? "eastmoney-etf-spot" : "etf-fallback",
     moneyFlow?.rows?.length ? "eastmoney-moneyflow" : "moneyflow-fallback",
-    northbound?.rows?.length ? "eastmoney-northbound" : "northbound-fallback",
+    northbound?.rows?.length ? northbound.source || "eastmoney-northbound" : "northbound-fallback",
     enrichedFundamentals?.source || "fundamentals-fallback",
     popularityRank?.items?.length ? "eastmoney-hot-rank" : "hot-rank-fallback",
     stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
@@ -504,9 +505,10 @@ function applySnapshotFallback(payload, snapshot, symbol) {
 
   const marketFields = new Set(["stocks", "sectors", "concepts", "limitPools", "etfs", "northbound", "indices", "marketKlines", "research"]);
   if (snapshot.market && usedFields.some((field) => marketFields.has(field))) {
-    next.market = snapshot.market;
+    next.market = { ...(next.market || {}), ...snapshot.market };
     usedFields.push("market");
   }
+  next.market = attachNorthboundMarketMetrics(next.market, next.northbound);
   if (usedFields.includes("baostock")) {
     next.source = next.source.replace("baostock-cache-miss", "baostock-history-cache");
   }
@@ -1498,6 +1500,23 @@ async function fetchEastmoneyMoneyFlow(secid) {
 }
 
 async function fetchEastmoneyNorthbound() {
+  const [quotaPayload, kamtPayload] = await Promise.all([fetchEastmoneyNorthboundQuota(), fetchEastmoneyKamt().catch(() => null)]);
+  const rows = mergeKamtRows((quotaPayload?.result?.data || []).map(normalizeNorthboundRow), kamtPayload?.rows || []);
+  const northRows = rows.filter((row) => row.direction === "北向");
+  return {
+    source: kamtPayload?.rows?.length ? "eastmoney-northbound+eastmoney-kamt" : "eastmoney-northbound",
+    rows,
+    northRows,
+    northNetBuyYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.netBuyAmt) || 0), 0)),
+    northNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.dayNetAmtIn) || 0), 0)),
+    northTurnoverYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.turnoverAmt) || 0), 0)),
+    northMonthNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.monthNetAmtIn) || 0), 0)),
+    northYearNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.yearNetAmtIn) || 0), 0)),
+    northAllNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.allNetAmtIn) || 0), 0)),
+  };
+}
+
+async function fetchEastmoneyNorthboundQuota() {
   const params = new URLSearchParams({
     reportName: "RPT_MUTUAL_QUOTA",
     columns: "TRADE_DATE,MUTUAL_TYPE,BOARD_TYPE,MUTUAL_TYPE_NAME,FUNDS_DIRECTION,INDEX_CODE,INDEX_NAME,BOARD_CODE",
@@ -1510,19 +1529,30 @@ async function fetchEastmoneyNorthbound() {
     source: "WEB",
     client: "WEB",
   });
-  const payload = await fetchJson(`${EASTMONEY_HSGT_URL}?${params}`, {
+  return fetchJson(`${EASTMONEY_HSGT_URL}?${params}`, {
     attempts: 2,
     timeoutMs: 4500,
     headers: { Referer: "https://data.eastmoney.com/hsgt/index.html" },
   });
-  const rows = (payload?.result?.data || []).map(normalizeNorthboundRow);
-  const northRows = rows.filter((row) => row.direction === "北向");
-  return {
-    rows,
-    northRows,
-    northNetBuyYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.netBuyAmt) || 0), 0)),
-    northNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.dayNetAmtIn) || 0), 0)),
-  };
+}
+
+async function fetchEastmoneyKamt() {
+  const params = new URLSearchParams({
+    fields1: "f1,f2,f3,f4",
+    fields2: "f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63",
+  });
+  const payload = await fetchJson(`${EASTMONEY_KAMT_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 4500,
+    headers: { Referer: "https://data.eastmoney.com/hsgt/index.html" },
+  });
+  const rows = [
+    normalizeKamtRow(payload?.data?.hk2sh, "沪股通", "沪港通", "北向"),
+    normalizeKamtRow(payload?.data?.hk2sz, "深股通", "深港通", "北向"),
+    normalizeKamtRow(payload?.data?.sh2hk, "港股通(沪)", "沪港通", "南向"),
+    normalizeKamtRow(payload?.data?.sz2hk, "港股通(深)", "深港通", "南向"),
+  ].filter(Boolean);
+  return { source: "eastmoney-kamt", rows };
 }
 
 async function fetchYahooChart(symbol) {
@@ -2004,6 +2034,51 @@ function normalizeNorthboundRow(row) {
   };
 }
 
+function normalizeKamtRow(row, type, board, direction) {
+  if (!row) return null;
+  return {
+    tradeDate: clean(row.date2) || clean(row.date),
+    type,
+    board,
+    direction,
+    status: num(row.status),
+    netBuyAmt: num(row.netBuyAmt) * 10000,
+    dayNetAmtIn: num(row.dayNetAmtIn) * 10000,
+    dayAmtRemain: num(row.dayAmtRemain) * 10000,
+    threshold: num(row.dayAmtThreshold) * 10000,
+    buyAmt: num(row.buyAmt) * 10000,
+    sellAmt: num(row.sellAmt) * 10000,
+    turnoverAmt: num(row.buySellAmt) * 10000,
+    monthNetAmtIn: num(row.monthNetAmtIn) * 10000,
+    yearNetAmtIn: num(row.yearNetAmtIn) * 10000,
+    allNetAmtIn: num(row.allNetAmtIn) * 10000,
+  };
+}
+
+function mergeKamtRows(quotaRows = [], kamtRows = []) {
+  const keyOf = (row) => `${row.type}|${row.direction}`;
+  const kamtByKey = new Map(kamtRows.map((row) => [keyOf(row), row]));
+  const merged = quotaRows.map((row) => {
+    const kamt = kamtByKey.get(keyOf(row));
+    if (!kamt) return row;
+    return {
+      ...kamt,
+      ...row,
+      tradeDate: row.tradeDate || kamt.tradeDate,
+      status: row.status || kamt.status,
+      netBuyAmt: row.netBuyAmt || kamt.netBuyAmt,
+      dayNetAmtIn: row.dayNetAmtIn || kamt.dayNetAmtIn,
+      dayAmtRemain: row.dayAmtRemain || kamt.dayAmtRemain,
+      threshold: row.threshold || kamt.threshold,
+    };
+  });
+  const existingKeys = new Set(merged.map(keyOf));
+  kamtRows.forEach((row) => {
+    if (!existingKeys.has(keyOf(row))) merged.push(row);
+  });
+  return merged;
+}
+
 function normalizeFundamentals(row, secid) {
   return {
     code: formatCode(row.f57, secid.startsWith("1.") ? 1 : 0),
@@ -2059,9 +2134,26 @@ function buildMarketMetrics(stocks, sectors = [], limitPools = null, northbound 
     sealFundYi: poolStats.sealFundYi || 0,
     northNetBuyYi: northbound?.northNetBuyYi || 0,
     northNetInYi: northbound?.northNetInYi || 0,
+    northTurnoverYi: northbound?.northTurnoverYi || 0,
+    northMonthNetInYi: northbound?.northMonthNetInYi || 0,
+    northYearNetInYi: northbound?.northYearNetInYi || 0,
+    northAllNetInYi: northbound?.northAllNetInYi || 0,
     etfMainNetYi: etfStats.mainNetYi || 0,
     etfCount: etfStats.total || etfs?.rows?.length || 0,
     limitDistribution: { up, down, flat, limitUp, limitDown },
+  };
+}
+
+function attachNorthboundMarketMetrics(market = {}, northbound = null) {
+  if (!northbound) return market || {};
+  return {
+    ...(market || {}),
+    northNetBuyYi: northbound.northNetBuyYi ?? market?.northNetBuyYi ?? 0,
+    northNetInYi: northbound.northNetInYi ?? market?.northNetInYi ?? 0,
+    northTurnoverYi: northbound.northTurnoverYi ?? market?.northTurnoverYi ?? 0,
+    northMonthNetInYi: northbound.northMonthNetInYi ?? market?.northMonthNetInYi ?? 0,
+    northYearNetInYi: northbound.northYearNetInYi ?? market?.northYearNetInYi ?? 0,
+    northAllNetInYi: northbound.northAllNetInYi ?? market?.northAllNetInYi ?? 0,
   };
 }
 
