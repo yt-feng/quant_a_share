@@ -2,6 +2,7 @@ const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18";
 const SECTOR_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106";
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
 const EASTMONEY_A_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23";
+const EASTMONEY_A_SEGMENTS = ["m:1+t:2,m:1+t:23", "m:0+t:6,m:0+t:80"];
 
 const sampleStocks = [
   { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, amount: 1420000000, volume: 820000, turnover: 3.2, pe: 28 },
@@ -83,18 +84,12 @@ function sleep(ms) {
 }
 
 async function fetchEastmoneyStockUniverse() {
-  const firstPage = await fetchEastmoneyStockPage(1);
-  const total = Number(firstPage.total || firstPage.rows.length || 100);
-  const pageCount = Math.min(60, Math.ceil(total / 100));
-  const pages = [firstPage.rows];
-  const pageNumbers = Array.from({ length: pageCount - 1 }, (_, index) => index + 2);
-  const chunkSize = 10;
-  for (let index = 0; index < pageNumbers.length; index += chunkSize) {
-    const chunk = pageNumbers.slice(index, index + chunkSize);
-    const results = await Promise.all(chunk.map((page) => fetchEastmoneyStockPage(page).catch(() => ({ rows: [] }))));
-    pages.push(...results.map((result) => result.rows));
-  }
-  const all = pages.flat().filter((row) => row.code && row.name);
+  const segments = await Promise.all(EASTMONEY_A_SEGMENTS.map((fs) => fetchEastmoneyStockSegment(fs).catch(() => [])));
+  const byCode = new Map();
+  segments.flat().forEach((row) => {
+    if (row.code && !byCode.has(row.code)) byCode.set(row.code, row);
+  });
+  const all = Array.from(byCode.values());
   const leaders = all
     .slice()
     .sort((a, b) => (b.amount || 0) - (a.amount || 0))
@@ -102,10 +97,25 @@ async function fetchEastmoneyStockUniverse() {
   return { all, leaders };
 }
 
-async function fetchEastmoneyStockPage(page) {
+async function fetchEastmoneyStockSegment(fs) {
+  const firstPage = await fetchEastmoneyStockPage(1, fs);
+  const total = Number(firstPage.total || firstPage.rows.length || 100);
+  const pageCount = Math.min(60, Math.ceil(total / 100));
+  const pages = [firstPage.rows];
+  const pageNumbers = Array.from({ length: pageCount - 1 }, (_, index) => index + 2);
+  const chunkSize = 20;
+  for (let index = 0; index < pageNumbers.length; index += chunkSize) {
+    const chunk = pageNumbers.slice(index, index + chunkSize);
+    const results = await Promise.all(chunk.map((page) => fetchEastmoneyStockPage(page, fs).catch(() => ({ rows: [] }))));
+    pages.push(...results.map((result) => result.rows));
+  }
+  return pages.flat().filter((row) => row.code && row.name);
+}
+
+async function fetchEastmoneyStockPage(page, fs = EASTMONEY_A_FS) {
   const url =
     "https://82.push2.eastmoney.com/api/qt/clist/get" +
-    `?pn=${page}&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=${EASTMONEY_A_FS}&fields=${STOCK_FIELDS}`;
+    `?pn=${page}&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=${fs}&fields=${STOCK_FIELDS}`;
   const payload = await fetchJson(url);
   const rows = payload?.data?.diff || [];
   return { total: payload?.data?.total || rows.length, rows: rows.map(normalizeStockRow) };
