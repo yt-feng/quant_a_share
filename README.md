@@ -49,7 +49,7 @@ npm run cache:market
 - `BaoStock`：通过 GitHub Actions 批量生成 `pages/data/baostock-cache.json`，当前会从市场快照扩展到最多 80 只股票，缓存历史 K 线、换手率、PE/PB/PS/PCF、MA 和区间收益。
 - `Financial cache`：通过 GitHub Actions 批量生成 `pages/data/financial-cache.json`，默认覆盖最多 500 只股票，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段，刷新失败的个股会保留上一版缓存。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
-- `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端以 8000 股票上限生成 `market-cache`、`baostock-cache` 和 `financial-cache`，并在公开端点偶发只返回半截股票池时保留更完整旧快照，必要时向线上 Vercel API 回补完整全 A 股票池和主力资金字段；Vercel 后端在公开源返回空数据时自动读这些静态快照兜底。
+- `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端以 8000 股票上限生成 `market-cache`、`baostock-cache` 和 `financial-cache`，并在公开端点偶发只返回半截股票池时保留更完整旧快照，必要时向线上 Vercel API 回补完整全 A 股票池和主力资金字段；Vercel 后端在公开源返回空数据或明显偏小股票池时会读取静态快照，并按代码合并实时价格、热榜、资金、财务和历史字段。
 - `CNInfo`：作为公司公告二源，和东财公告合并去重；同时接入调研/关系披露作为 `disclosures.relations`，当当前个股暂无记录时返回 `disclosures.samples` 展示近期公开调研样本。
 - `TuShare Pro`：保留为高一致性、标准化字段和更完整特色数据的可选增强源。
 - `演示数据`：所有在线源不可用时继续兜底，保证应用可打开、可调试。
@@ -73,7 +73,7 @@ npm run cache:market
 - 奇门遁甲：本地任务表单、同步起局扣点、钱包账单、持久化任务列表、本地解盘和 DeepSeek 增强解盘；事项类型、判断目标、阶段、国家、时区、农历/闰月、10/20/30 点档位、历法明细、局式和九宫盘面已补齐。
 - 订阅账号与点数：账号状态、有效期剩余天数、商品筛选、购买确认、开通方式、支付宝扫码、联系信息、订单后四位核对说明、待核验/已开通订单表、7000 点旗舰包和点数账本，不接真实支付。
 - 管理后台：承接原站管理员路由，包含账号管理、Ai 历史管理、奇门运营面板、订阅与充值核对、奇门任务监控和操作日志；当前实现以本地状态/只读表格为主，支持 CSV 导出和本地操作反馈。
-- 数据覆盖验收：复刻状态页显示 `/api/market` 顶层 `featureCoverage`、`limitPoolCounts`、`dataCoverage` 生产摘要，并可导出 CSV；AI/奇门问答上下文也会携带同一份覆盖摘要。
+- 数据覆盖验收：复刻状态页显示 `/api/market` 顶层 `featureCoverage`、`limitPoolCounts`、`dataCoverage` 和云缓存股票池合并摘要，并可导出 CSV；AI/奇门问答上下文也会携带同一份覆盖摘要。
 - 开源能力映射：复刻状态页展示 AKShare、BaoStock、yfinance/Yahoo、efinance 风格能力分别落到哪些 Vercel Node 适配器或 GitHub Actions 缓存，并可导出 CSV。
 
 ## 快速开始

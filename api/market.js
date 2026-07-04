@@ -474,6 +474,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   }
   const next = { ...payload };
   const usedFields = [];
+  const cacheSnapshotDetails = {};
   const sameSymbol = snapshotMatchesSymbol(snapshot, symbol);
   const fill = (field, isEmpty, isUsable, symbolScoped = false) => {
     if (!isEmpty(next[field]) || !isUsable(snapshot[field])) return;
@@ -506,6 +507,13 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   const requestedLimit = Number(next.stockUniverse?.limit) || 0;
   if (!usedFields.includes("stocks") && requestedLimit >= 1000 && snapshotStockCount >= liveStockCount + RICHER_STOCK_UNIVERSE_MIN_EXTRA) {
     next.stocks = mergeStockRowsByCode(snapshot.stocks, next.stocks);
+    cacheSnapshotDetails.mergedStockUniverse = {
+      mode: "snapshot-universe-live-fields",
+      liveStockCount,
+      snapshotStockCount,
+      finalStockCount: next.stocks.length,
+      minExtra: RICHER_STOCK_UNIVERSE_MIN_EXTRA,
+    };
     usedFields.push("stocks");
   }
 
@@ -547,6 +555,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
     usedFields,
     generatedAt: snapshot.cacheSnapshot?.generatedAt || snapshot.asOf || null,
     symbol: snapshot.cacheSnapshot?.symbol || snapshot.quote?.code || null,
+    ...cacheSnapshotDetails,
   };
   return next;
 }

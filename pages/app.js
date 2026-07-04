@@ -837,7 +837,7 @@ function sourceCoverageRows() {
     ["东财人气榜", data.popularity?.rank?.items?.length ? "核心接入" : "待返回", `${data.popularity?.rank?.items?.length || 0}只`, data.popularity?.rank?.items?.[0]?.calcTime || "-", "热度排名与排名变化"],
     ["公告/巨潮披露", data.announcements?.items?.length || disclosureRows().length ? "核心接入" : "待返回", `${data.announcements?.items?.length || 0}/${data.disclosures?.relations?.length || 0}/${data.disclosures?.samples?.length || 0}`, data.announcements?.items?.[0]?.date || disclosureRows()[0]?.date || "-", "公司公告、投资者关系、调研披露"],
     ["东财研报", data.research?.reports?.length ? "后端接入" : "待返回", `${data.research?.reports?.length || 0}篇`, data.research?.reports?.[0]?.date || "-", "产业链和行业研报证据"],
-    ["GitHub Actions缓存", data.cacheSnapshot?.available ? "云缓存接入" : "本轮实时", data.cacheSnapshot?.usedFields?.length ? data.cacheSnapshot.usedFields.join(",") : "live", data.cacheSnapshot?.generatedAt || "-", "market-cache、baostock-cache、financial-cache兜底"],
+    ["GitHub Actions缓存", data.cacheSnapshot?.available ? "云缓存接入" : "本轮实时", cacheSnapshotCoverageLabel(), data.cacheSnapshot?.generatedAt || "-", "market-cache、baostock-cache、financial-cache兜底与股票池合并"],
   ];
 }
 
@@ -846,6 +846,13 @@ function stockCoverageLabel() {
   const returned = Number(data.stockUniverse?.returned) || data.stocks.length;
   if (total && total !== returned) return `${returned}/${total}只`;
   return `${data.stocks.length}只`;
+}
+
+function cacheSnapshotCoverageLabel() {
+  const fields = data.cacheSnapshot?.usedFields?.length ? data.cacheSnapshot.usedFields.join(",") : "live";
+  const merge = data.cacheSnapshot?.mergedStockUniverse;
+  if (!merge) return fields;
+  return `${fields} · 股票池 ${merge.liveStockCount || 0}->${merge.finalStockCount || 0}`;
 }
 
 function sourceCoverageTable() {
@@ -943,7 +950,7 @@ function sourceFreshnessInfo(key) {
   if (key === "yahooChart") mode = "备用源";
   if (key === "fundamentals" && data.fundamentals?.cache?.scope === "github-actions-json") mode = "云缓存";
   if (key === "fundamentals" && data.fundamentals?.cache?.scope === "vercel-serverless-memory" && data.fundamentals?.cache?.hit) mode = "内存缓存";
-  if (key === "cacheSnapshot") mode = data.cacheSnapshot?.hit ? "快照命中" : data.cacheSnapshot?.available ? "快照待命" : "未启用";
+  if (key === "cacheSnapshot") mode = data.cacheSnapshot?.mergedStockUniverse ? "快照合并" : data.cacheSnapshot?.hit ? "快照命中" : data.cacheSnapshot?.available ? "快照待命" : "未启用";
   if (!latest && !fromSnapshot) mode = "待返回";
   return {
     key,
@@ -1997,6 +2004,7 @@ function productionCoverageRows() {
   const ratio = (value, total = stockTotal) => (total ? `${value || 0}/${total} (${Math.round(((Number(value) || 0) / total) * 100)}%)` : `${value || 0}`);
   return [
     ["股票池", coverage.stocks || data.stocks.length, `全市场 ${coverage.stockUniverseTotal || data.stockUniverse?.total || data.stocks.length}`, "生产接口返回给前端的 A 股股票池"],
+    ["云缓存合并", cacheSnapshotCoverageLabel(), data.cacheSnapshot?.hit ? "Vercel实时 + GitHub Actions快照" : "当前实时口径", data.cacheSnapshot?.mergedStockUniverse ? "实时字段按代码覆盖到更完整快照股票池" : "快照待命或未命中"],
     ["主力资金字段", ratio(feature.mainMoney), "Eastmoney clist 主/超/大/中/小单", "因子选股资金字段覆盖"],
     ["涨停/炸板/强势池", `${pools.limitUp || 0}/${pools.broken || 0}/${pools.strong || 0}`, `连板高度 ${pools.maxStreak || 0} · 封板资金 ${pools.sealFundYi || 0}亿`, "Eastmoney 三池明细"],
     ["行业/概念", `${coverage.sectors || data.sectors.length}/${coverage.concepts || data.concepts.length}`, "行业 / 概念", "板块排名、概念热度和 LLM 主题来源"],
