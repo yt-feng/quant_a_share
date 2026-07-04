@@ -32,6 +32,7 @@ const BAOSTOCK_CACHE_FILE = path.join("pages", "data", "baostock-cache.json");
 const FINANCIAL_CACHE_FILE = path.join("pages", "data", "financial-cache.json");
 const DEFAULT_CLIENT_STOCK_LIMIT = 6000;
 const MAX_CLIENT_STOCK_LIMIT = 8000;
+const RICHER_STOCK_UNIVERSE_MIN_EXTRA = Number(process.env.MARKET_CACHE_RICHER_UNIVERSE_MIN_EXTRA || 100);
 
 const memoryCache = new Map();
 
@@ -500,6 +501,14 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
   fill("baostock", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
 
+  const liveStockCount = next.stocks?.length || 0;
+  const snapshotStockCount = snapshot.stocks?.length || 0;
+  const requestedLimit = Number(next.stockUniverse?.limit) || 0;
+  if (!usedFields.includes("stocks") && requestedLimit >= 1000 && snapshotStockCount >= liveStockCount + RICHER_STOCK_UNIVERSE_MIN_EXTRA) {
+    next.stocks = mergeStockRowsByCode(snapshot.stocks, next.stocks);
+    usedFields.push("stocks");
+  }
+
   if (emptyRows(next.popularity?.rank?.items) && hasRows(snapshot.popularity?.rank?.items)) {
     next.popularity = { ...(next.popularity || {}), rank: snapshot.popularity.rank };
     usedFields.push("popularity.rank");
@@ -539,6 +548,28 @@ function applySnapshotFallback(payload, snapshot, symbol) {
     generatedAt: snapshot.cacheSnapshot?.generatedAt || snapshot.asOf || null,
     symbol: snapshot.cacheSnapshot?.symbol || snapshot.quote?.code || null,
   };
+  return next;
+}
+
+function mergeStockRowsByCode(baseRows = [], overlayRows = []) {
+  const overlayByCode = new Map();
+  overlayRows.forEach((row) => {
+    const key = stockKey(row?.code);
+    if (key) overlayByCode.set(key, row);
+  });
+  return baseRows.map((row) => mergeStockRowPreservingData(row, overlayByCode.get(stockKey(row?.code))));
+}
+
+function mergeStockRowPreservingData(base, overlay) {
+  if (!overlay) return base;
+  const next = { ...base };
+  Object.entries(overlay).forEach(([key, value]) => {
+    if (value === undefined || value === null || value === "") return;
+    if (typeof value === "number" && (!Number.isFinite(value) || value === 0)) return;
+    if (typeof value === "boolean" && value === false && next[key] === true) return;
+    if (Array.isArray(value) && !value.length) return;
+    next[key] = value;
+  });
   return next;
 }
 
