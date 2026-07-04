@@ -20,6 +20,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Clone enrichment: ETF资金排行、东财人气榜、涨停池/炸板池、北向资金 are wired into the Vercel market snapshot and LLM context.
 - Clone enrichment: date range and market-state controls now persist and update the replay-stat cards plus amount/index trend charts.
 - Clone enrichment: the market page now shows a live source-coverage table for Eastmoney, ETF, money flow, Stock Connect, financial fields, BaoStock, Yahoo backup, announcements and research feeds.
+- Clone enrichment: market tables now show live/cache freshness badges for limit pools, ETF, Stock Connect, hot rank and derived market tables.
 
 ## 量化因子选股
 
@@ -65,6 +66,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Clone enrichment: single-stock money flow, financial snapshot cache, Eastmoney popularity rank/keywords/related stocks and company announcements are wired into the quote page.
 - Clone enrichment: quote charts now use Eastmoney 1-minute intraday trends, Eastmoney daily K-line, BaoStock cache and Yahoo backup as switchable sources. VOL/MACD parameters affect chart calculations, indicator switching updates sub-panels, and drawing-tool selections persist in browser storage as Plotly chart overlays.
 - Clone enrichment: date range, adjustment selector, 近半年/近一年 and 加载更多历史 now persist and filter the active quote chart rows.
+- Clone enrichment: money-flow, financial, BaoStock, popularity, announcement and disclosure sections now expose their live/cache/backup freshness state in the table headers.
 - Drawing tools: trend line, ray, horizontal line, arrow, FIB, GANN and parallel line now create chart geometry; FIB/GANN create multi-line overlays, arrows render as annotations, and existing legacy line records still render as horizontal lines.
 - Indicator controls: 刷新指标.
 - Indicator panels: 副图1 VOL, 副图2 MACD.
@@ -140,6 +142,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Clone enrichment: the LLM 主题热点 tab now derives topic heat, trend, theme_score, tier, decision, evidence snippets, mapping rows and theme stock candidates from Eastmoney industry/concept boards, A-share industry/concept tags, popularity keywords and Eastmoney research reports. 选股池、板块全景看板 and 个股评估矩阵 now use live market-derived rows instead of fixed sample rows.
 - Clone enrichment: new conversation, realtime-search toggle, mode selection, hot prompts and recent-answer history now persist in browser storage and feed chat context.
 - Clone enrichment: data-source coverage rows now feed the chat context so answers can state which market, money-flow, financial, cache and disclosure feeds are currently populated.
+- Clone enrichment: data freshness rows now also feed the chat context so answers can distinguish live, snapshot, memory-cache, cloud-cache and backup-source data.
 
 ## 订阅账号与点数
 

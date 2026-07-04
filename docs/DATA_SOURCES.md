@@ -52,6 +52,9 @@
   - Drawing records persist in browser storage and legacy single-price records still render as horizontal overlays.
 - Date-aware controls
   - 行业/概念 date range and LLM per-tab transaction dates persist in browser storage, enter chat context and are sent to `/api/market?date=YYYYMMDD` when refreshing.
+- Freshness badges
+  - Market, sector, quote and LLM table headers now expose live/snapshot/memory-cache/cloud-cache/backup-source freshness from the same `/api/market` payload.
+  - Chat context includes normalized `dataFreshness` rows alongside the source-coverage rows.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -66,7 +69,7 @@
 
 ## Next Enrichment Targets
 
-- Add an explicit data freshness badge for each table section that uses a cached or live source.
+- Add export/download actions for selected tables and current AI/LLM reports.
 
 ## Design
 
