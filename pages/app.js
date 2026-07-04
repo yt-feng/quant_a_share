@@ -317,6 +317,7 @@ let quoteDrawings = [];
 let aiRealtime = true;
 let aiMode = "快速模式";
 let activeAiScene = "stock_plan";
+let aiComposer = { stock: "东方财富", cost: "", horizon: "短线3-5天", action: "买入/低吸", ma: "MA20" };
 let aiQuestion = "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。";
 let aiHistory = [];
 let aiCurrentAnswer = "";
@@ -1670,7 +1671,7 @@ function exportRowsFor(key) {
     case "researchReports":
       return exportPayload("research-reports", ["日期", "类型", "行业/主题", "标题", "机构", "作者", "页数", "链接"], researchReports().map((row) => [row.publishDate, row.category, row.industryName, row.title, row.orgSName || row.orgName, row.researcher, row.pages, row.url]));
     case "aiHistory":
-      return exportPayload("ai-history", ["时间", "模式", "实时", "问题", "回答"], aiHistory.map((item) => [item.at, item.mode, item.realtime ? "开" : "关", item.question, item.answer]));
+      return exportPayload("ai-history", ["时间", "模式", "实时", "点数", "场景", "问题", "回答"], aiHistory.map((item) => [item.at, item.mode, item.realtime ? "开" : "关", item.points || 0, item.scene || "-", item.question, item.answer]));
     default:
       return null;
   }
@@ -2588,6 +2589,7 @@ function loadAiState() {
     aiRealtime = stored.realtime !== false;
     if (["快速模式", "专家模式", "深度思考"].includes(stored.mode)) aiMode = stored.mode;
     if (aiScenes.some((scene) => scene.id === stored.scene)) activeAiScene = stored.scene;
+    aiComposer = normalizeAiComposer(stored.composer);
     aiQuestion = String(stored.question || aiQuestion);
     aiHistory = Array.isArray(stored.history) ? stored.history.map(normalizeAiHistoryItem).filter(Boolean).slice(0, 30) : [];
     aiCurrentAnswer = String(stored.currentAnswer || aiHistory[0]?.answer || "");
@@ -2604,6 +2606,7 @@ function persistAiState() {
         realtime: aiRealtime,
         mode: aiMode,
         scene: activeAiScene,
+        composer: aiComposer,
         question: aiQuestion,
         currentAnswer: aiCurrentAnswer,
         history: aiHistory,
@@ -2622,17 +2625,21 @@ function normalizeAiHistoryItem(item) {
     at: String(item.at || nowLabel()),
     mode: String(item.mode || aiMode),
     realtime: item.realtime !== false,
+    points: Number(item.points || 0),
+    scene: String(item.scene || activeAiScene),
     question: String(item.question || "").slice(0, 500),
     answer: String(item.answer || ""),
   };
 }
 
-function recordAiHistory(question, mode, answer) {
+function recordAiHistory(question, mode, answer, points = 0) {
   const item = normalizeAiHistoryItem({
     id: `ai_${Date.now()}`,
     at: nowLabel(),
     mode,
     realtime: aiRealtime,
+    points,
+    scene: activeAiScene,
     question,
     answer,
   });
@@ -2649,14 +2656,56 @@ function resetAiConversation() {
   persistAiState();
 }
 
+function normalizeAiComposer(value) {
+  return {
+    stock: String(value?.stock || aiComposer.stock || "东方财富").slice(0, 40),
+    cost: String(value?.cost || "").slice(0, 20),
+    horizon: ["超短1-2天", "短线3-5天", "短中期1-3周", "中线1-2个月"].includes(value?.horizon) ? value.horizon : aiComposer.horizon || "短线3-5天",
+    action: ["买入/低吸", "持仓处理", "做T", "减仓", "观察"].includes(value?.action) ? value.action : aiComposer.action || "买入/低吸",
+    ma: ["MA5", "MA10", "MA20", "MA60"].includes(value?.ma) ? value.ma : aiComposer.ma || "MA20",
+  };
+}
+
+function readAiComposer() {
+  aiComposer = normalizeAiComposer({
+    stock: document.querySelector("#aiComposerStock")?.value || aiComposer.stock,
+    cost: document.querySelector("#aiComposerCost")?.value || "",
+    horizon: document.querySelector("#aiComposerHorizon")?.value || aiComposer.horizon,
+    action: document.querySelector("#aiComposerAction")?.value || aiComposer.action,
+    ma: document.querySelector("#aiComposerMa")?.value || aiComposer.ma,
+  });
+  return aiComposer;
+}
+
+function composeAiQuestion() {
+  const composer = readAiComposer();
+  const costText = composer.cost ? `，当前成本大概${composer.cost}元` : "";
+  if (composer.action === "持仓处理") return `我持有${composer.stock}${costText}。盘中该继续拿、减仓还是做T？按${composer.horizon}思路给我操作计划、仓位控制和失效条件。`;
+  if (composer.action === "做T") return `结合实时行情，分析${composer.stock}${costText}现在能不能做T？按${composer.horizon}思路给我高抛低吸区间、触发条件和失效条件。`;
+  if (composer.action === "减仓") return `我持有${composer.stock}${costText}，如果盘中跌破${composer.ma}该不该减仓？请给我减仓条件、止损纪律和后续观察点。`;
+  if (composer.action === "观察") return `请把${composer.stock}放入观察池，按${composer.horizon}思路跟踪趋势、量能、资金和${composer.ma}附近的低吸条件。`;
+  return `结合实时行情，分析${composer.stock}现在能不能${composer.action}，按${composer.horizon}思路，重点看${composer.ma}、量能承接和资金流，给我买点、止损位、仓位建议和注意点。`;
+}
+
+function aiBillingCost(mode = aiMode, realtime = aiRealtime) {
+  const base = mode === "深度思考" ? 30 : mode === "专家模式" ? 13.5 : 8;
+  return roundPoint(base + (realtime ? 2 : 0), 1);
+}
+
+function canFreezeAiPoints(cost) {
+  const summary = walletSummary();
+  return roundPoint(summary.balance - summary.frozen) >= cost;
+}
+
 function aiHistoryTable() {
   if (!aiHistory.length) return `<div class="empty-state compact-empty"><strong>暂无对话记录</strong><span>生成回答后会保留最近 30 条。</span></div>`;
   return simpleTable(
-    ["时间", "模式", "实时", "问题", "操作"],
+    ["时间", "模式", "实时", "点数", "问题", "操作"],
     aiHistory.slice(0, 8).map((item) => [
       escapeHtml(item.at),
       escapeHtml(item.mode),
       item.realtime ? "开" : "关",
+      item.points ? `${item.points}点` : "-",
       escapeHtml(item.question.slice(0, 42)),
       `<button class="ghost-button table-action" data-load-ai-history="${escapeHtml(item.id)}">载入</button>`,
     ])
@@ -2773,12 +2822,25 @@ function aiSceneGrid() {
 
 function renderAi() {
   const scene = selectedAiSceneConfig();
+  const summary = walletSummary();
+  const estimatedCost = aiBillingCost(aiMode, aiRealtime);
   return `
     <section class="grid two">
       <div class="panel">
         ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-new-ai-chat="1">新对话</button><button class="ghost-button" data-goto-page="subscription">钱包</button></div>`)}
         ${aiSceneGrid()}
-        <div class="detail-strip">${tag(`当前场景：${scene.title}`, "info")}${tag(`后端模块：${scene.module}`)}${tag(scene.scope)}</div>
+        <div class="detail-strip">${tag(`当前场景：${scene.title}`, "info")}${tag(`后端模块：${scene.module}`)}${tag(scene.scope)}${tag(`可用 ${summary.balance}点`)}${tag(`冻结 ${summary.frozen}点`)}${tag(`预估 ${estimatedCost}点`, "info")}</div>
+        <div class="panel inset">
+          <h3>问句生成器</h3>
+          <div class="form-grid">
+            <label><span class="label">股票/板块</span><input id="aiComposerStock" placeholder="例如：东方财富 / 机器人板块" value="${escapeHtml(aiComposer.stock)}" /></label>
+            <label><span class="label">成本价</span><input id="aiComposerCost" placeholder="可选，例如：18.60" value="${escapeHtml(aiComposer.cost)}" /></label>
+            <label><span class="label">周期</span><select id="aiComposerHorizon"><option ${selectedAttr(aiComposer.horizon === "超短1-2天")}>超短1-2天</option><option ${selectedAttr(aiComposer.horizon === "短线3-5天")}>短线3-5天</option><option ${selectedAttr(aiComposer.horizon === "短中期1-3周")}>短中期1-3周</option><option ${selectedAttr(aiComposer.horizon === "中线1-2个月")}>中线1-2个月</option></select></label>
+            <label><span class="label">操作方向</span><select id="aiComposerAction"><option ${selectedAttr(aiComposer.action === "买入/低吸")}>买入/低吸</option><option ${selectedAttr(aiComposer.action === "持仓处理")}>持仓处理</option><option ${selectedAttr(aiComposer.action === "做T")}>做T</option><option ${selectedAttr(aiComposer.action === "减仓")}>减仓</option><option ${selectedAttr(aiComposer.action === "观察")}>观察</option></select></label>
+            <label><span class="label">关键均线</span><select id="aiComposerMa"><option ${selectedAttr(aiComposer.ma === "MA5")}>MA5</option><option ${selectedAttr(aiComposer.ma === "MA10")}>MA10</option><option ${selectedAttr(aiComposer.ma === "MA20")}>MA20</option><option ${selectedAttr(aiComposer.ma === "MA60")}>MA60</option></select></label>
+            <button class="ghost-button align-end" data-compose-ai-prompt="1">生成问句</button>
+          </div>
+        </div>
         <div class="toolbar">
           <label class="toggle"><input type="checkbox" data-ai-realtime ${aiRealtime ? "checked" : ""} />实时搜索</label>
           <button class="chip ${aiMode === "快速模式" ? "active" : ""}" data-mode-pick="快速模式">快速模式</button>
@@ -4131,6 +4193,12 @@ function attachEvents() {
       render();
     });
   });
+  document.querySelector("[data-compose-ai-prompt]")?.addEventListener("click", () => {
+    aiQuestion = composeAiQuestion();
+    persistAiState();
+    showToast("问句已生成。", "success");
+    render();
+  });
   document.querySelectorAll("[data-mode-pick]").forEach((button) => {
     button.addEventListener("click", () => {
       aiMode = button.dataset.modePick;
@@ -4487,16 +4555,29 @@ function attachEvents() {
       const target = document.querySelector(`#${button.dataset.target}`);
       const question = document.querySelector("#question")?.value || "";
       const mode = document.querySelector("#mode")?.value || "专家模式";
+      const isAiAnswer = button.dataset.target === "aiAnswer";
+      const billingCost = isAiAnswer ? aiBillingCost(mode, aiRealtime) : 0;
       if (button.dataset.target === "aiAnswer") {
+        readAiComposer();
         aiQuestion = question;
         aiMode = mode;
         persistAiState();
+      }
+      if (isAiAnswer && !canFreezeAiPoints(billingCost)) {
+        showToast(`点数不足：本次至少需要 ${billingCost} 点。`, "info");
+        modal = { type: "wallet" };
+        render();
+        return;
       }
       const defaultText = button.dataset.defaultText || button.textContent;
       button.dataset.defaultText = defaultText;
       const progress = startChatProgress(button.dataset.chatModule, target);
       setButtonLoading(button, true);
       try {
+        if (isAiAnswer) {
+          appendWalletLedger("冻结", 0, `AI决策矩阵 ${mode} 预冻结`, billingCost);
+          persistSubscriptionState();
+        }
         const result = await askBackend({
           module: button.dataset.chatModule,
           question,
@@ -4505,9 +4586,17 @@ function attachEvents() {
         });
         progress.succeed();
         target.textContent = result.answer || "后端没有返回内容。";
-        if (button.dataset.target === "aiAnswer") recordAiHistory(question, mode, result.answer || "后端没有返回内容。");
+        if (isAiAnswer) {
+          appendWalletLedger("消费", -billingCost, `AI决策矩阵 ${mode} 结算`, -billingCost);
+          recordAiHistory(question, mode, result.answer || "后端没有返回内容。", billingCost);
+          persistSubscriptionState();
+        }
         showToast("分析完成，结果已更新。", "success");
       } catch (error) {
+        if (isAiAnswer) {
+          appendWalletLedger("退款", 0, `AI决策矩阵 ${mode} 退回冻结`, -billingCost);
+          persistSubscriptionState();
+        }
         progress.fail();
         target.innerHTML = errorState(error.message || "后端调用失败。");
         showToast(error.message || "后端调用失败。", "error");
@@ -4624,6 +4713,8 @@ function contextForModule(moduleName) {
       realtime: aiRealtime,
       mode: aiMode,
       scene: selectedAiSceneConfig(),
+      composer: aiComposer,
+      estimatedCost: aiBillingCost(aiMode, aiRealtime),
       recentQuestions: aiHistory.slice(0, 5).map((item) => ({ at: item.at, mode: item.mode, realtime: item.realtime, question: item.question })),
     },
     dataSourceCoverage: sourceCoverageRows().map(([source, status, coverage, latest, usage]) => ({ source, status, coverage, latest, usage })),
