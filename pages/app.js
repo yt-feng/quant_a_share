@@ -170,7 +170,7 @@ const coverageRows = [
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表；筛选条件会实时影响表格与图表。"],
   ["行情", "已对齐", "股票查询、日期、复权、近半年/近一年、加载更多历史、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
-  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
+  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题类型、关键词、来源、策略、排序、列集、页大小和翻页会联动表格并进入问答上下文。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通、7000点旗舰包和钱包账单。"],
@@ -207,6 +207,11 @@ let toastTimer = 0;
 let progressTimers = [];
 let selectedLlmTab = "主题热点";
 let selectedTopicName = "";
+let llmTopicType = "industry";
+let llmTopicQuery = "";
+let llmPoolControls = { query: "", source: "all", stage: "all", themeType: "all", sort: "attention", pageSize: 50, page: 1 };
+let llmSectorControls = { query: "", sort: "fund3", direction: "desc", columns: "all", pageSize: 50, page: 1 };
+let llmStockControls = { query: "", sort: "pct5", direction: "desc", columns: "all", pageSize: 50, page: 1 };
 let productFilter = "all";
 let sectorDataset = "sectors";
 let sectorPreset = "all";
@@ -236,6 +241,7 @@ function mount() {
   loadScreenerState();
   loadWatchlistState();
   loadQuoteState();
+  loadLlmState();
   loadQimenState();
   loadSubscriptionState();
   applyShellState();
@@ -894,6 +900,52 @@ function persistQuoteState() {
   }
 }
 
+function loadLlmState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_llm") || "null");
+    if (!stored) return;
+    if (["industry", "concept", "all"].includes(stored.topicType)) llmTopicType = stored.topicType;
+    llmTopicQuery = String(stored.topicQuery || "");
+    llmPoolControls = normalizeLlmControls(stored.pool, llmPoolControls, ["attention", "confidence", "pct", "t5"]);
+    llmSectorControls = normalizeLlmControls(stored.sector, llmSectorControls, ["fund3", "pct3", "ma20", "crowd", "top100"]);
+    llmStockControls = normalizeLlmControls(stored.stock, llmStockControls, ["pct5", "fund5", "floatMv", "pct1", "hotGap"]);
+  } catch (error) {
+    // Bad local storage should not block LLM analysis.
+  }
+}
+
+function persistLlmState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_llm",
+      JSON.stringify({
+        topicType: llmTopicType,
+        topicQuery: llmTopicQuery,
+        pool: llmPoolControls,
+        sector: llmSectorControls,
+        stock: llmStockControls,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("LLM筛选条件已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeLlmControls(value, fallback, allowedSorts) {
+  const next = { ...fallback, ...(value && typeof value === "object" ? value : {}) };
+  next.query = String(next.query || "").slice(0, 40);
+  next.source = next.source || fallback.source || "all";
+  next.stage = next.stage || fallback.stage || "all";
+  next.themeType = next.themeType || fallback.themeType || "all";
+  next.columns = ["core", "all"].includes(next.columns) ? next.columns : fallback.columns || "all";
+  next.sort = allowedSorts.includes(next.sort) ? next.sort : fallback.sort;
+  next.direction = next.direction === "asc" ? "asc" : "desc";
+  next.pageSize = clampInt(next.pageSize, 10, 100, fallback.pageSize || 50);
+  next.page = clampInt(next.page, 1, 999, fallback.page || 1);
+  return next;
+}
+
 function loadQimenState() {
   try {
     const stored = JSON.parse(localStorage.getItem(QIMEN_STORAGE_KEY) || "null");
@@ -1417,17 +1469,21 @@ function renderLlm() {
 
 function renderLlmTab() {
   if (selectedLlmTab === "主题热点") {
-    const topics = liveTopics();
-    const active = topics.find((topic) => topic.name === selectedTopicName) || topics[0];
+    const topics = activeLlmTopics();
+    const active = topics.find((topic) => topic.name === selectedTopicName) || topics[0] || liveTopics()[0];
     selectedTopicName = active?.name || "";
+    if (!active) return `<div class="empty-state"><strong>暂无主题热度数据</strong><span>可以切换主题类型或清空筛选关键词。</span></div>`;
     const topicStocks = topicStockRows(active).slice(0, 12);
     const topicNews = topicEvidence(active).slice(0, 3);
     const fieldRows = topicFieldRows(active);
     return `
       <div class="toolbar">
-        <button class="chip active">行业</button><button class="chip">概念</button>
+        <button class="chip ${llmTopicType === "industry" ? "active" : ""}" data-llm-topic-type="industry">行业</button>
+        <button class="chip ${llmTopicType === "concept" ? "active" : ""}" data-llm-topic-type="concept">概念</button>
+        <button class="chip ${llmTopicType === "all" ? "active" : ""}" data-llm-topic-type="all">全部</button>
         <input class="inline-input" value="2026-07-03" />
-        <input class="inline-input" placeholder="筛选主题" />
+        <input id="llmTopicQuery" class="inline-input" placeholder="筛选主题" value="${escapeHtml(llmTopicQuery)}" />
+        <button class="ghost-button compact-button" data-apply-llm-topic="1">筛选</button>
       </div>
       <div class="topic-grid">${topics.map((topic) => `<button class="topic-card ${topic.name === active.name ? "active" : ""}" data-topic-name="${escapeHtml(topic.name)}"><strong>${escapeHtml(topic.name)}</strong><span>热度 ${topic.heat}</span><span>趋势 ${topic.trend}</span><span>3日资金 ${plainSigned(topic.fund3, 2)}</span></button>`).join("")}</div>
       <section class="grid metrics" style="margin-top:14px">
@@ -1462,43 +1518,60 @@ function renderLlmTab() {
     `;
   }
   if (selectedLlmTab === "选股池") {
-    const poolRows = livePoolRows();
+    const poolRows = filteredPoolRows(livePoolRows());
+    const page = paginateRows(poolRows, llmPoolControls.page, llmPoolControls.pageSize);
     return `
       <div class="form-grid">
-        <input placeholder="基准交易日" value="2026-07-03" /><input placeholder="筛选：代码/名称/主题" />
-        <select><option>来源</option><option>规则候选</option><option>策略候选</option></select>
-        <select><option>策略筛选</option><option>Entry</option><option>Watch</option></select>
-        <select><option>主题类型</option><option>行业</option><option>概念</option></select>
-        <select><option>默认（关注优先）</option><option>置信度</option><option>仓位</option></select>
+        <input placeholder="基准交易日" value="2026-07-03" />
+        <input id="llmPoolQuery" placeholder="筛选：代码/名称/主题" value="${escapeHtml(llmPoolControls.query)}" />
+        <select id="llmPoolSource"><option value="all" ${selectedAttr(llmPoolControls.source === "all")}>来源</option><option value="规则候选" ${selectedAttr(llmPoolControls.source === "规则候选")}>规则候选</option><option value="策略候选" ${selectedAttr(llmPoolControls.source === "策略候选")}>策略候选</option></select>
+        <select id="llmPoolStage"><option value="all" ${selectedAttr(llmPoolControls.stage === "all")}>策略筛选</option><option value="Entry" ${selectedAttr(llmPoolControls.stage === "Entry")}>Entry</option><option value="Watch" ${selectedAttr(llmPoolControls.stage === "Watch")}>Watch</option></select>
+        <select id="llmPoolThemeType"><option value="all" ${selectedAttr(llmPoolControls.themeType === "all")}>主题类型</option><option value="industry" ${selectedAttr(llmPoolControls.themeType === "industry")}>行业</option><option value="concept" ${selectedAttr(llmPoolControls.themeType === "concept")}>概念</option></select>
+        <select id="llmPoolSort"><option value="attention" ${selectedAttr(llmPoolControls.sort === "attention")}>默认（关注优先）</option><option value="confidence" ${selectedAttr(llmPoolControls.sort === "confidence")}>置信度</option><option value="pct" ${selectedAttr(llmPoolControls.sort === "pct")}>盘中涨跌</option><option value="t5" ${selectedAttr(llmPoolControls.sort === "t5")}>T+5</option></select>
+        <select id="llmPoolPageSize"><option value="20" ${selectedAttr(llmPoolControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmPoolControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmPoolControls.pageSize === 100)}>100条/页</option></select>
+        <button class="primary-button align-end" data-apply-llm-pool="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag("收益选择：2026-07-03")}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
-      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], poolRows.slice(0, 50).map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
+      <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag("收益选择：2026-07-03")}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}</div>
+      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], page.rows.map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
+      ${llmPager("pool", page)}
     `;
   }
   if (selectedLlmTab === "板块全景看板") {
-    const sectorRows = liveLlmSectorRows();
+    const sectorRows = filteredLlmSectorRows(liveLlmSectorRows());
+    const page = paginateRows(sectorRows, llmSectorControls.page, llmSectorControls.pageSize);
+    const table = llmSectorTable(page.rows);
     return `
       <div class="form-grid">
-        <input placeholder="交易日（默认最新）" /><input placeholder="筛选：板块/ID/关键词" />
-        <select><option>当日资金_亿</option><option>3日涨跌</option><option>MA20占比</option></select>
-        <select><option>降序</option><option>升序</option></select>
-        <select><option>展示列（可多选）</option></select><select><option>50条/页</option></select>
+        <input placeholder="交易日（默认最新）" value="2026-07-03" />
+        <input id="llmSectorQuery" placeholder="筛选：板块/ID/关键词" value="${escapeHtml(llmSectorControls.query)}" />
+        <select id="llmSectorSort"><option value="fund3" ${selectedAttr(llmSectorControls.sort === "fund3")}>3日资金_亿</option><option value="pct3" ${selectedAttr(llmSectorControls.sort === "pct3")}>3日涨跌</option><option value="ma20" ${selectedAttr(llmSectorControls.sort === "ma20")}>MA20占比</option><option value="top100" ${selectedAttr(llmSectorControls.sort === "top100")}>Top100</option></select>
+        <select id="llmSectorDirection"><option value="desc" ${selectedAttr(llmSectorControls.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(llmSectorControls.direction === "asc")}>升序</option></select>
+        <select id="llmSectorColumns"><option value="all" ${selectedAttr(llmSectorControls.columns === "all")}>展示列：全部</option><option value="core" ${selectedAttr(llmSectorControls.columns === "core")}>展示列：核心</option></select>
+        <select id="llmSectorPageSize"><option value="20" ${selectedAttr(llmSectorControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmSectorControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmSectorControls.pageSize === 100)}>100条/页</option></select>
+        <button class="primary-button align-end" data-apply-llm-sector="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag("交易日：2026-07-03")}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
-      ${simpleTable(["信号", "日期", "板块", "1日涨跌", "3日涨跌", "当日资金_亿", "3日资金_亿", "Top100", "5日资金_亿", "5日涨跌", "7日涨跌", "MA20占比", "集中度", "3日资金_norm_亿"], sectorRows.slice(0, 80).map((row) => [row.signal, row.date, row.name, signed(row.pct1), signed(row.pct3), signed(row.fund1), signed(row.fund3), `${row.top100}%`, signed(row.fund5), signed(row.pct5), signed(row.pct7), `${row.ma20}%`, `${row.crowd}%`, signed(row.fundNorm)]))}
+      <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag("交易日：2026-07-03")}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}</div>
+      ${simpleTable(table.headers, table.rows)}
+      ${llmPager("sector", page)}
     `;
   }
   if (selectedLlmTab === "个股评估矩阵") {
-    const matrixRows = liveStockMatrixRows();
+    const matrixRows = filteredLlmStockRows(liveStockMatrixRows());
+    const page = paginateRows(matrixRows, llmStockControls.page, llmStockControls.pageSize);
+    const table = llmStockTable(page.rows);
     return `
       <div class="form-grid">
-        <input placeholder="交易日（若表有日期列）" /><input placeholder="筛选：股票代码/名称/板块/关键词" />
-        <select><option>3天累积涨跌幅</option><option>当日资金_亿</option><option>流通市值</option></select>
-        <select><option>降序</option><option>升序</option></select>
-        <select><option>展示列（可多选）</option></select><select><option>50条/页</option></select>
+        <input placeholder="交易日（若表有日期列）" value="2026-07-03" />
+        <input id="llmStockQuery" placeholder="筛选：股票代码/名称/板块/关键词" value="${escapeHtml(llmStockControls.query)}" />
+        <select id="llmStockSort"><option value="pct5" ${selectedAttr(llmStockControls.sort === "pct5")}>5日涨跌</option><option value="fund5" ${selectedAttr(llmStockControls.sort === "fund5")}>5日资金_亿</option><option value="floatMv" ${selectedAttr(llmStockControls.sort === "floatMv")}>流通市值</option><option value="pct1" ${selectedAttr(llmStockControls.sort === "pct1")}>1日涨跌</option><option value="hotGap" ${selectedAttr(llmStockControls.sort === "hotGap")}>收盘_早盘</option></select>
+        <select id="llmStockDirection"><option value="desc" ${selectedAttr(llmStockControls.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(llmStockControls.direction === "asc")}>升序</option></select>
+        <select id="llmStockColumns"><option value="all" ${selectedAttr(llmStockControls.columns === "all")}>展示列：全部</option><option value="core" ${selectedAttr(llmStockControls.columns === "core")}>展示列：核心</option></select>
+        <select id="llmStockPageSize"><option value="20" ${selectedAttr(llmStockControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmStockControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmStockControls.pageSize === 100)}>100条/页</option></select>
+        <button class="primary-button align-end" data-apply-llm-stock="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`股票池 ${data.stocks.length} 只`)}</div>
-      ${simpleTable(["代码", "名称", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"], matrixRows.slice(0, 120).map((row) => [row.code, row.name, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]))}
+      <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`股票池 ${data.stocks.length} 只`)}</div>
+      ${simpleTable(table.headers, table.rows)}
+      ${llmPager("stock", page)}
     `;
   }
   const reports = researchReports();
@@ -1538,6 +1611,102 @@ function renderLlmTab() {
       ])
     )}
   `;
+}
+
+function activeLlmTopics() {
+  const query = normalizeTopicName(llmTopicQuery);
+  return liveTopics().filter((topic) => {
+    if (llmTopicType !== "all" && topic.type !== llmTopicType) return false;
+    if (query && !normalizeTopicName(topic.name).includes(query)) return false;
+    return true;
+  });
+}
+
+function filteredPoolRows(rows) {
+  const query = normalizeTopicName(llmPoolControls.query);
+  const topicTypes = new Map(liveTopics().map((topic) => [topic.name, topic.type]));
+  return rows
+    .filter((row) => {
+      if (query && ![row.code, row.name, row.theme, row.source, row.stage].some((value) => normalizeTopicName(value).includes(query))) return false;
+      if (llmPoolControls.source !== "all" && row.strategy !== llmPoolControls.source && row.source !== llmPoolControls.source) return false;
+      if (llmPoolControls.stage !== "all" && row.stage !== llmPoolControls.stage) return false;
+      if (llmPoolControls.themeType !== "all" && topicTypes.get(row.theme) !== llmPoolControls.themeType) return false;
+      return true;
+    })
+    .sort((a, b) => sortLlmPoolRow(a, b));
+}
+
+function sortLlmPoolRow(a, b) {
+  if (llmPoolControls.sort === "confidence") return Number(b.confidence) - Number(a.confidence);
+  if (llmPoolControls.sort === "pct") return Number(b.pct) - Number(a.pct);
+  if (llmPoolControls.sort === "t5") return Number(b.t5) - Number(a.t5);
+  const aw = a.watch === "是" ? 1 : 0;
+  const bw = b.watch === "是" ? 1 : 0;
+  return bw - aw || Number(b.confidence) - Number(a.confidence) || Number(b.pct) - Number(a.pct);
+}
+
+function filteredLlmSectorRows(rows) {
+  const query = normalizeTopicName(llmSectorControls.query);
+  return rows
+    .filter((row) => !query || [row.name, row.signal].some((value) => normalizeTopicName(value).includes(query)))
+    .sort((a, b) => sortNumericField(a, b, llmSectorControls.sort, llmSectorControls.direction));
+}
+
+function filteredLlmStockRows(rows) {
+  const query = normalizeTopicName(llmStockControls.query);
+  return rows
+    .filter((row) => !query || [row.code, row.name, row.industry].some((value) => normalizeTopicName(value).includes(query)))
+    .sort((a, b) => sortNumericField(a, b, llmStockControls.sort, llmStockControls.direction));
+}
+
+function sortNumericField(a, b, field, direction = "desc") {
+  const av = Number(a[field]) || 0;
+  const bv = Number(b[field]) || 0;
+  return direction === "asc" ? av - bv : bv - av;
+}
+
+function paginateRows(rows, page, pageSize) {
+  const size = clampInt(pageSize, 10, 100, 50);
+  const pages = Math.max(1, Math.ceil(rows.length / size));
+  const safePage = Math.max(1, Math.min(pages, Number(page) || 1));
+  const start = (safePage - 1) * size;
+  return { rows: rows.slice(start, start + size), page: safePage, pages, pageSize: size, total: rows.length };
+}
+
+function llmPager(kind, page) {
+  return `
+    <div class="toolbar table-pager">
+      <button class="ghost-button compact-button" data-llm-page="${kind}" data-llm-page-delta="-1" ${page.page <= 1 ? "disabled" : ""}>上一页</button>
+      ${tag(`${page.page}/${page.pages}`)}
+      <button class="ghost-button compact-button" data-llm-page="${kind}" data-llm-page-delta="1" ${page.page >= page.pages ? "disabled" : ""}>下一页</button>
+    </div>
+  `;
+}
+
+function llmSectorTable(rows) {
+  if (llmSectorControls.columns === "core") {
+    return {
+      headers: ["信号", "板块", "3日涨跌", "3日资金_亿", "Top100", "MA20占比", "集中度"],
+      rows: rows.map((row) => [row.signal, row.name, signed(row.pct3), signed(row.fund3), `${row.top100}%`, `${row.ma20}%`, `${row.crowd}%`]),
+    };
+  }
+  return {
+    headers: ["信号", "日期", "板块", "1日涨跌", "3日涨跌", "当日资金_亿", "3日资金_亿", "Top100", "5日资金_亿", "5日涨跌", "7日涨跌", "MA20占比", "集中度", "3日资金_norm_亿"],
+    rows: rows.map((row) => [row.signal, row.date, row.name, signed(row.pct1), signed(row.pct3), signed(row.fund1), signed(row.fund3), `${row.top100}%`, signed(row.fund5), signed(row.pct5), signed(row.pct7), `${row.ma20}%`, `${row.crowd}%`, signed(row.fundNorm)]),
+  };
+}
+
+function llmStockTable(rows) {
+  if (llmStockControls.columns === "core") {
+    return {
+      headers: ["代码", "名称", "行业", "5日资金_亿", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"],
+      rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund5), row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]),
+    };
+  }
+  return {
+    headers: ["代码", "名称", "行业", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"],
+    rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]),
+  };
 }
 
 function liveTopics() {
@@ -1711,6 +1880,7 @@ function liveStockMatrixRows() {
       return {
         code: stock.code.slice(0, 6),
         name: stock.name,
+        industry: stock.industry || "A股",
         fund1: Math.round((Number(stock.fund || 0)) * 100) / 100,
         fund5: Math.round((Number(stock.fund || 0) * 2.6) * 100) / 100,
         hotGap: Math.round(((Number(stock.pct) || 0) - (Number(stock.rps) || 50) / 20) * 100) / 100,
@@ -2412,6 +2582,79 @@ function attachEvents() {
       render();
     });
   });
+  document.querySelectorAll("[data-llm-topic-type]").forEach((button) => {
+    button.addEventListener("click", () => {
+      llmTopicType = button.dataset.llmTopicType;
+      selectedTopicName = "";
+      persistLlmState();
+      render();
+    });
+  });
+  document.querySelector("[data-apply-llm-topic]")?.addEventListener("click", () => {
+    llmTopicQuery = String(document.querySelector("#llmTopicQuery")?.value || "").trim();
+    selectedTopicName = "";
+    persistLlmState();
+    render();
+  });
+  document.querySelector("[data-apply-llm-pool]")?.addEventListener("click", () => {
+    llmPoolControls = normalizeLlmControls(
+      {
+        query: document.querySelector("#llmPoolQuery")?.value || "",
+        source: document.querySelector("#llmPoolSource")?.value || "all",
+        stage: document.querySelector("#llmPoolStage")?.value || "all",
+        themeType: document.querySelector("#llmPoolThemeType")?.value || "all",
+        sort: document.querySelector("#llmPoolSort")?.value || "attention",
+        pageSize: Number(document.querySelector("#llmPoolPageSize")?.value || 50),
+        page: 1,
+      },
+      llmPoolControls,
+      ["attention", "confidence", "pct", "t5"]
+    );
+    persistLlmState();
+    render();
+  });
+  document.querySelector("[data-apply-llm-sector]")?.addEventListener("click", () => {
+    llmSectorControls = normalizeLlmControls(
+      {
+        query: document.querySelector("#llmSectorQuery")?.value || "",
+        sort: document.querySelector("#llmSectorSort")?.value || "fund3",
+        direction: document.querySelector("#llmSectorDirection")?.value || "desc",
+        columns: document.querySelector("#llmSectorColumns")?.value || "all",
+        pageSize: Number(document.querySelector("#llmSectorPageSize")?.value || 50),
+        page: 1,
+      },
+      llmSectorControls,
+      ["fund3", "pct3", "ma20", "crowd", "top100"]
+    );
+    persistLlmState();
+    render();
+  });
+  document.querySelector("[data-apply-llm-stock]")?.addEventListener("click", () => {
+    llmStockControls = normalizeLlmControls(
+      {
+        query: document.querySelector("#llmStockQuery")?.value || "",
+        sort: document.querySelector("#llmStockSort")?.value || "pct5",
+        direction: document.querySelector("#llmStockDirection")?.value || "desc",
+        columns: document.querySelector("#llmStockColumns")?.value || "all",
+        pageSize: Number(document.querySelector("#llmStockPageSize")?.value || 50),
+        page: 1,
+      },
+      llmStockControls,
+      ["pct5", "fund5", "floatMv", "pct1", "hotGap"]
+    );
+    persistLlmState();
+    render();
+  });
+  document.querySelectorAll("[data-llm-page]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const delta = Number(button.dataset.llmPageDelta) || 0;
+      if (button.dataset.llmPage === "pool") llmPoolControls = { ...llmPoolControls, page: Math.max(1, llmPoolControls.page + delta) };
+      if (button.dataset.llmPage === "sector") llmSectorControls = { ...llmSectorControls, page: Math.max(1, llmSectorControls.page + delta) };
+      if (button.dataset.llmPage === "stock") llmStockControls = { ...llmStockControls, page: Math.max(1, llmStockControls.page + delta) };
+      persistLlmState();
+      render();
+    });
+  });
   document.querySelectorAll("[data-topic-name]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedTopicName = button.dataset.topicName;
@@ -2794,6 +3037,13 @@ function contextForModule(moduleName) {
     research: {
       stats: data.research.stats || {},
       reports: data.research.reports?.slice(0, 12) || [],
+    },
+    llmControls: {
+      topicType: llmTopicType,
+      topicQuery: llmTopicQuery,
+      pool: llmPoolControls,
+      sector: llmSectorControls,
+      stock: llmStockControls,
     },
     yahooChart: data.yahooChart,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),

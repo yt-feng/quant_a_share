@@ -89,18 +89,22 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - Theme detail tags: market stage, confidence, as_of, news snippets, tier, decision, score, reason, invalidation, raw fields.
   - Mapping table: 原始主题, 标准主题, 方法, 匹配, 得分, 最终类型.
   - Candidate table: 代码, 名称, 来源, 阶段, 置信度, 操作.
+- Clone enrichment: topic type and keyword filters now update the topic cards and active detail panel.
 - 选股池:
   - Inputs: 基准交易日, 筛选:代码/名称/主题, 来源, 策略筛选, 主题类型, sort, page size.
   - Summary tags: 总数, 关注, 收益选择, 收益基准.
   - Table: 代码, 名称, 实时价, 盘中涨跌, 主题, 来源, 策略, 阶段, 仓位, 置信度, 买点价, T+1, T+3, T+5, 关注.
+- Clone enrichment: query/source/stage/theme-type/sort/page-size filters now update the pool table and pagination.
 - 板块全景看板:
   - Inputs: 交易日, 筛选:板块/ID/关键词, sort metric, sort direction, display columns, page size.
   - Tags: 总数, 交易日, 轮动, 高位, 低吸.
   - Table: 信号, 日期, 板块, 1日涨跌, 3日涨跌, 当日资金_亿, 3日资金_亿, Top100, 5日资金_亿, 5日涨跌, 7日涨跌, MA20占比, 集中度, 3日资金_norm_亿.
+- Clone enrichment: query/sort/direction/column-set/page-size filters now update the sector panorama table and pager.
 - 个股评估矩阵:
   - Inputs: 交易日, 筛选:股票代码/名称/板块/关键词, sort metric, sort direction, display columns, page size.
   - Table: 代码, 名称, 当日资金_亿, 5日资金_亿, 收盘_早盘(负数=更热), 大于等于5日线, 大于等于90日线, 大于等于144日线, 流通市值（亿）, 5日涨跌, 1日涨跌, 行情.
   - Row action: 查看.
+- Clone enrichment: stock query/sort/direction/column-set/page-size filters now update the stock matrix table and pager.
 - 产业链研报分析:
   - Empty state visible in the audited account.
   - Clone enrichment: Eastmoney research-report metadata now fills this tab with recent industry/macro report titles, institutions, authors, dates, industries and links, and adds the same context to LLM prompts.
