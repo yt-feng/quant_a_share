@@ -56,6 +56,7 @@
   - The factor screener diagnosis strip now reports stock-pool size plus PE/PB, market-cap, quote/volume, industry/concept, main-money, limit-pool, financial-cache and historical-cache coverage.
   - LLM 主题热点/选股池/板块全景/个股矩阵 now reuse the same market payload: Eastmoney board data, stock industry/concept tags, popularity keywords and research metadata.
   - 行业/概念 page can request Eastmoney board constituent stocks, display the current board table, export it to CSV and pass the selected board constituents into chat context.
+  - Board constituent payloads now infer a missing board name from shared industry/concept labels in the returned constituents, so direct `boardCode=BKxxxx` requests keep a readable board name in the UI, CSV export and chat context.
 - Quote chart overlays
   - The 行情 page now turns trend line, ray, horizontal line, arrow, FIB, GANN and parallel-line tools into Plotly overlays on top of Eastmoney/BaoStock/Yahoo chart rows.
   - Drawing records persist in browser storage and legacy single-price records still render as horizontal overlays.

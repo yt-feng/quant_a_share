@@ -572,15 +572,38 @@ function annotateBoardConstituents(payload, boardCode, sectors = [], concepts = 
   if (!boardCode) return { code: "", name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
   const board = [...sectors, ...concepts].find((row) => row.code === boardCode);
   const rows = payload?.rows || [];
+  const inferred = board || inferBoardMetaFromConstituents(rows);
   return {
     source: payload?.source || (rows.length ? "eastmoney-board-constituents" : ""),
     code: boardCode,
-    name: board?.name || "",
-    type: board?.type || "",
+    name: inferred?.name || "",
+    type: inferred?.type || "",
     total: payload?.total || rows.length,
     returned: payload?.returned || rows.length,
     rows,
   };
+}
+
+function inferBoardMetaFromConstituents(rows = []) {
+  const industryCounts = new Map();
+  const conceptCounts = new Map();
+  const addCount = (map, value) => {
+    const key = clean(value);
+    if (!key || key === "-") return;
+    map.set(key, (map.get(key) || 0) + 1);
+  };
+  rows.forEach((row) => {
+    addCount(industryCounts, row.industry);
+    String(row.concepts || "")
+      .split(/[,，、/]/)
+      .forEach((item) => addCount(conceptCounts, item));
+  });
+  const top = (map) => Array.from(map.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0];
+  const concept = top(conceptCounts);
+  if (concept && concept[1] >= Math.max(3, rows.length * 0.2)) return { name: concept[0], type: "concept" };
+  const industry = top(industryCounts);
+  if (industry) return { name: industry[0], type: "industry" };
+  return null;
 }
 
 function selectClientStocks(stockUniverse, limit) {
