@@ -51,6 +51,7 @@ const data = {
   popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
   announcements: { items: [] },
   yahooChart: null,
+  baostock: { rows: [], latest: null },
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
     { code: "002594.SZ", name: "比亚迪", price: 246.7, pct: 2.9, industry: "汽车", rps: 84, fund: 9.7, pe: 24, pb: 2.8, ma20: true, macd: true },
@@ -159,7 +160,7 @@ const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存和自定义条件。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
-  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、人气关键词、相关股和公司公告。"],
+  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表和操作列。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
@@ -433,6 +434,8 @@ function renderQuote() {
   const latestFlow = data.moneyFlow.latest;
   const financials = data.fundamentals?.financials || {};
   const popularity = data.popularity.stock?.latest;
+  const bao = data.baostock || {};
+  const baoLatest = bao.latest || {};
   return `
     <section class="panel compact-panel">
       <div class="form-grid">
@@ -462,6 +465,8 @@ function renderQuote() {
       ${metric("5日主力", `${plainSigned(data.moneyFlow.sum5MainYi || 0, 2, "亿")}`, "近5日合计")}
       ${metric("ROE", financials.roe ? `${financials.roe}%` : "-", data.fundamentals?.reportLabel || "财务快照")}
       ${metric("人气排名", popularity?.rank ? `#${popularity.rank}` : "-", popularity?.calcTime || "东财人气")}
+      ${metric("Bao PE", baoLatest.peTTM ? baoLatest.peTTM.toFixed(2) : "-", bao.generatedAt ? `缓存 ${bao.generatedAt.slice(0, 10)}` : "BaoStock")}
+      ${metric("MA20", bao.ma20 ? bao.ma20.toFixed(2) : "-", bao.pct20 != null ? `20日 ${plainSigned(bao.pct20, 2, "%")}` : "历史日线")}
       ${metric("全球备份", data.yahooChart?.price ? data.yahooChart.price.toFixed(2) : "-", data.yahooChart?.symbol || "Yahoo chart")}
       ${metric("技术状态", stock.ma20 && stock.macd ? "偏强" : "观察", "MA20 / MACD")}
     </section>
@@ -505,6 +510,15 @@ function renderQuote() {
           ["毛利率", financials.grossMargin ? `${financials.grossMargin}%` : "-", "新浪财报"],
           ["资产负债率", financials.debtRatio ? `${financials.debtRatio}%` : "-", "新浪财报"],
         ])}
+        <h2 style="margin-top:16px">BaoStock历史估值</h2>
+        ${simpleTable(["指标", "数值", "口径"], [
+          ["PE(TTM)", baoLatest.peTTM ? baoLatest.peTTM.toFixed(2) : "-", "BaoStock日线"],
+          ["PB(MRQ)", baoLatest.pbMRQ ? baoLatest.pbMRQ.toFixed(2) : "-", "BaoStock日线"],
+          ["PS(TTM)", baoLatest.psTTM ? baoLatest.psTTM.toFixed(2) : "-", "BaoStock日线"],
+          ["换手率", baoLatest.turnover ? `${baoLatest.turnover.toFixed(2)}%` : "-", "BaoStock日线"],
+          ["MA5 / MA20 / MA60", [bao.ma5, bao.ma20, bao.ma60].map((value) => (value ? value.toFixed(2) : "-")).join(" / "), "后复权日线"],
+          ["60日高低", bao.high60 && bao.low60 ? `${bao.low60.toFixed(2)} ~ ${bao.high60.toFixed(2)}` : "-", "后复权区间"],
+        ])}
       </div>
     </section>
     <section class="grid two" style="margin-top:14px">
@@ -515,7 +529,7 @@ function renderQuote() {
       </div>
       <div class="panel">
         <h2>公司公告</h2>
-        ${simpleTable(["日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
+        ${simpleTable(["来源", "日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.provider === "cninfo" ? "巨潮" : "东财", row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
       </div>
     </section>
   `;
@@ -1168,6 +1182,7 @@ function contextForModule(moduleName) {
     moneyFlow: data.moneyFlow.latest,
     northbound: data.northbound.northRows || data.northbound.rows,
     fundamentals: data.fundamentals,
+    baostock: data.baostock,
     popularity: {
       rank: data.popularity.rank?.items?.slice(0, 10) || [],
       stock: data.popularity.stock,
@@ -1291,6 +1306,7 @@ async function loadMarketSnapshot() {
     if (payload.popularity) data.popularity = payload.popularity;
     if (payload.announcements) data.announcements = payload.announcements;
     if (payload.yahooChart) data.yahooChart = payload.yahooChart;
+    if (payload.baostock) data.baostock = payload.baostock;
     if (Array.isArray(payload.indices) && payload.indices.length) {
       data.indices = payload.indices.map((index) => [index.name, index.pct]);
     }

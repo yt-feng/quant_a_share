@@ -26,6 +26,11 @@
 - GitHub Actions market snapshot
   - `.github/workflows/market-cache.yml` runs the same Node adapters in the cloud and writes `pages/data/market-cache.json`.
   - `/api/market` reads this bundled snapshot when live public endpoints return empty data, preserving market breadth, concept, limit-pool, ETF, popularity, announcement and financial fields.
+- CNInfo announcements
+  - Secondary announcement source using `www.cninfo.com.cn/new/hisAnnouncement/query`; merged with Eastmoney announcements and deduplicated by date/title.
+- BaoStock cache
+  - `scripts/update_baostock_cache.py` queries historical daily K-line, turnover, PE/PB/PS/PCF fields and writes `pages/data/baostock-cache.json`.
+  - `/api/market` exposes the matching symbol cache as `baostock` for quote, LLM and factor context.
 - DeepSeek API
   - Server-side `/api/chat` only.
 
@@ -33,15 +38,15 @@
 
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
-- BaoStock: good free source for historical K-line, valuation and financial fields when a Python batch/cache job is acceptable; current Vercel runtime uses serverless memory cache plus GitHub Actions JSON snapshots for financial/market fallback.
+- BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries.
 - yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.
 - efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
 - Tencent/Sina quote endpoints: useful as low-cost online fallbacks for current quote fields; names require GBK/GB18030 decoding for some quote APIs.
 
 ## Next Enrichment Targets
 
-- BaoStock batch cache for historical valuation/financial backfill if a Python worker is later acceptable.
-- CNInfo disclosure feed as a second announcement source.
+- Expand BaoStock symbol universe beyond the default core watchlist.
+- CNInfo relation/调研 feed as another disclosure channel.
 
 ## Design
 

@@ -45,9 +45,10 @@ npm run cache:market
 - `Sina public endpoint`：当前用于全 A 股票池兜底、行业板块、概念板块和财务报告关键指标。
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。
 - `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括 ETF、涨停池、人气榜、资金流、公告和财务摘要。
-- `BaoStock`：作为免费历史 K 线、估值、换手率、财务字段的稳定补位，适合后续 GitHub Action 批量缓存；当前线上财务快照已做 Vercel warm instance 内存缓存和 GitHub Actions JSON 快照兜底。
+- `BaoStock`：通过 GitHub Actions 批量生成 `pages/data/baostock-cache.json`，当前缓存默认核心股票的历史 K 线、换手率、PE/PB/PS/PCF、MA 和区间收益。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
 - `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端生成 `pages/data/market-cache.json`，Vercel 后端在公开源返回空数据时自动读这个快照兜底。
+- `CNInfo`：作为公司公告二源，和东财公告合并去重。
 - `TuShare Pro`：保留为高一致性、标准化字段和更完整特色数据的可选增强源。
 - `演示数据`：所有在线源不可用时继续兜底，保证应用可打开、可调试。
 
@@ -60,7 +61,7 @@ npm run cache:market
 - 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、真实涨停池/炸板池、连板高度、封板资金、北向资金、ETF 资金、人气榜、指数涨跌、趋势图。
 - 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选；公开行情股票池会派生 RPS/均线/资金代理字段，避免默认筛选空表。
 - 板块与概念：行业/概念聚合、涨跌幅、排名变化、上涨/下跌家数、涨停家数、成交额、领涨股。
-- 行情：股票检索、日 K/分钟 K 数据入口、复权、均线、MACD、RSI、KDJ、画线工具入口、自选股、个股资金流、财务快照、人气关键词、相关股票和公司公告。
+- 行情：股票检索、日 K/分钟 K 数据入口、复权、均线、MACD、RSI、KDJ、画线工具入口、自选股、个股资金流、财务快照、BaoStock 历史估值、人气关键词、相关股票和公司公告。
 - 自选：本地分组、自选表、删除与分组管理。
 - LLM 分析：主题热度、选股池、板块看板、个股评估矩阵、产业链分析的本地研究版。
 - AI 决策矩阵：基于多源公开行情、资金流、板块、ETF、人气榜、公告和财务快照生成操作计划、触发条件、失效条件、仓位区间和观察点。

@@ -15,6 +15,8 @@ const EASTMONEY_HSGT_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get
 const EASTMONEY_ETF_URL = "https://push2delay.eastmoney.com/api/qt/clist/get";
 const EASTMONEY_STOCK_RANK_URL = "https://emappdata.eastmoney.com/stockrank";
 const EASTMONEY_ANNOUNCEMENT_URL = "https://np-anotice-stock.eastmoney.com/api/security/ann";
+const CNINFO_STOCK_URL = "http://www.cninfo.com.cn/new/data/szse_stock.json";
+const CNINFO_ANNOUNCEMENT_URL = "http://www.cninfo.com.cn/new/hisAnnouncement/query";
 const TENCENT_QUOTE_URL = "https://qt.gtimg.cn/q=";
 const SINA_PAGE_SIZE = 80;
 const SINA_MAX_PAGES = 90;
@@ -22,6 +24,7 @@ const SHORT_CACHE_MS = 90 * 1000;
 const BOARD_CACHE_MS = 8 * 60 * 1000;
 const FINANCIAL_CACHE_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_CACHE_FILE = path.join("pages", "data", "market-cache.json");
+const BAOSTOCK_CACHE_FILE = path.join("pages", "data", "baostock-cache.json");
 
 const memoryCache = new Map();
 
@@ -59,7 +62,8 @@ module.exports = async function handler(req, res) {
     fundamentals,
     popularityRank,
     stockPopularity,
-    announcements,
+    eastmoneyAnnouncements,
+    cninfoAnnouncements,
     yahooChart,
     klines,
     marketKlines,
@@ -80,6 +84,7 @@ module.exports = async function handler(req, res) {
     fetchCached("eastmoney:hot-rank", SHORT_CACHE_MS, fetchEastmoneyHotRank).catch(() => null),
     fetchCached(`eastmoney:stock-popularity:${symbol}`, SHORT_CACHE_MS, () => fetchEastmoneyStockPopularity(symbol)).catch(() => null),
     fetchCached(`eastmoney:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchEastmoneyAnnouncements(symbol)).catch(() => null),
+    fetchCached(`cninfo:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchCninfoAnnouncements(symbol)).catch(() => null),
     fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
@@ -93,6 +98,8 @@ module.exports = async function handler(req, res) {
   const indices = indexResult?.length ? indexResult : [];
   const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
   const enrichedFundamentals = enrichFundamentalsFromQuote(fundamentals, selectedQuote);
+  const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
+  const baostock = readBaoStockCache(symbol);
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
@@ -104,8 +111,9 @@ module.exports = async function handler(req, res) {
     enrichedFundamentals?.source || "fundamentals-fallback",
     popularityRank?.items?.length ? "eastmoney-hot-rank" : "hot-rank-fallback",
     stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
-    announcements?.items?.length ? "eastmoney-announcements" : "announcement-fallback",
+    announcements?.items?.length ? announcements.source : "announcement-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
+    baostock?.rows?.length ? "baostock-history-cache" : "baostock-cache-miss",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
     quote ? "eastmoney-quote" : tencentQuote ? "tencent-quote" : "quote-fallback",
   ].join("+");
@@ -131,6 +139,7 @@ module.exports = async function handler(req, res) {
     },
     announcements: announcements || { items: [], source: "" },
     yahooChart,
+    baostock,
     indices,
     quote: mergeQuoteFundamentals(selectedQuote, enrichedFundamentals),
     klines,
@@ -156,6 +165,33 @@ function readMarketSnapshot() {
       if (payload?.ok) return payload;
     } catch (error) {
       // Snapshot fallback is optional; live sources should continue without it.
+    }
+  }
+  return null;
+}
+
+function readBaoStockCache(symbol) {
+  const payload = readBundledJson(BAOSTOCK_CACHE_FILE);
+  const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
+  const item = payload?.symbols?.[key];
+  if (!item?.rows?.length) {
+    return { source: "baostock-cache-miss", symbol: key, rows: [], latest: null };
+  }
+  return {
+    ...item,
+    generatedAt: payload.generatedAt,
+    lookbackDays: payload.lookbackDays,
+  };
+}
+
+function readBundledJson(relativePath) {
+  const candidates = [path.join(process.cwd(), relativePath), path.join(__dirname, "..", relativePath)];
+  for (const filePath of candidates) {
+    try {
+      if (!fs.existsSync(filePath)) continue;
+      return JSON.parse(fs.readFileSync(filePath, "utf8"));
+    } catch (error) {
+      // Optional bundled caches should never prevent live requests.
     }
   }
   return null;
@@ -192,6 +228,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
   fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
   fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
+  fill("baostock", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
 
   if (emptyRows(next.popularity?.rank?.items) && hasRows(snapshot.popularity?.rank?.items)) {
     next.popularity = { ...(next.popularity || {}), rank: snapshot.popularity.rank };
@@ -725,6 +762,75 @@ async function fetchEastmoneyAnnouncements(symbol) {
   };
 }
 
+async function fetchCninfoAnnouncements(symbol) {
+  const stockMap = await fetchCached("cninfo:stock-map", FINANCIAL_CACHE_MS, fetchCninfoStockMap).catch(() => ({}));
+  const orgId = stockMap[symbol];
+  if (!orgId) return { source: "cninfo-announcements", items: [] };
+  const endDate = compactChinaDate();
+  const startDate = compactChinaDate(-370);
+  const body = new URLSearchParams({
+    pageNum: "1",
+    pageSize: "30",
+    column: "szse",
+    tabName: "fulltext",
+    plate: "",
+    stock: `${symbol},${orgId}`,
+    searchkey: "",
+    secid: "",
+    category: "",
+    trade: "",
+    seDate: `${formatCompactDate(startDate)}~${formatCompactDate(endDate)}`,
+    sortName: "",
+    sortType: "",
+    isHLtitle: "true",
+  });
+  const payload = await fetchJson(CNINFO_ANNOUNCEMENT_URL, {
+    method: "POST",
+    body: body.toString(),
+    attempts: 2,
+    timeoutMs: 5000,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Referer: "http://www.cninfo.com.cn/new/commonUrl/pageOfSearch?url=disclosure/list/search",
+    },
+  });
+  return {
+    source: "cninfo-announcements",
+    items: (payload?.announcements || []).slice(0, 20).map(normalizeCninfoAnnouncement),
+  };
+}
+
+async function fetchCninfoStockMap() {
+  const payload = await fetchJson(CNINFO_STOCK_URL, {
+    attempts: 2,
+    timeoutMs: 5000,
+    headers: { Referer: "http://www.cninfo.com.cn/new/commonUrl/pageOfSearch?url=disclosure/list/search" },
+  });
+  const entries = payload?.stockList || [];
+  return Object.fromEntries(entries.map((row) => [clean(row.code), clean(row.orgId)]).filter(([code, orgId]) => code && orgId));
+}
+
+function mergeAnnouncementSources(eastmoney, cninfo) {
+  const items = [];
+  const seen = new Set();
+  [eastmoney, cninfo].forEach((source) => {
+    (source?.items || []).forEach((item) => {
+      const key = `${item.date || ""}:${normalizeAnnouncementTitle(item.title || "")}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      items.push(item);
+    });
+  });
+  items.sort((a, b) => String(b.sortDate || b.date || "").localeCompare(String(a.sortDate || a.date || "")));
+  const sources = [eastmoney, cninfo].filter((source) => source?.items?.length).map((source) => source.source);
+  return {
+    source: sources.length ? sources.join("+") : "",
+    items: items.slice(0, 20),
+    eastmoneyItems: eastmoney?.items || [],
+    cninfoItems: cninfo?.items || [],
+  };
+}
+
 async function fetchEastmoneyKlines(secid) {
   const url =
     "https://push2his.eastmoney.com/api/qt/stock/kline/get" +
@@ -1173,6 +1279,7 @@ function normalizeAnnouncement(row) {
   const column = row.columns?.[0] || {};
   const code = clean(stock.stock_code);
   return {
+    provider: "eastmoney",
     title: clean(row.title_ch || row.title),
     date: clean(row.notice_date).slice(0, 10),
     sortDate: clean(row.sort_date),
@@ -1182,6 +1289,40 @@ function normalizeAnnouncement(row) {
     artCode: clean(row.art_code),
     url: code && row.art_code ? `https://data.eastmoney.com/notices/detail/${code}/${row.art_code}.html` : "",
   };
+}
+
+function normalizeCninfoAnnouncement(row) {
+  const time = cninfoTime(row.announcementTime);
+  const code = clean(row.secCode);
+  const url =
+    code && row.announcementId && row.orgId
+      ? `http://www.cninfo.com.cn/new/disclosure/detail?stockCode=${code}&announcementId=${row.announcementId}&orgId=${row.orgId}&announcementTime=${encodeURIComponent(time)}`
+      : "";
+  return {
+    provider: "cninfo",
+    title: clean(row.announcementTitle).replace(/<[^>]+>/g, ""),
+    date: time.slice(0, 10),
+    sortDate: time,
+    code: code ? formatCode(code, code.startsWith("6") ? 1 : 0) : "",
+    name: clean(row.secName),
+    category: clean(row.announcementTypeName || row.announcementType || "信息披露"),
+    artCode: clean(row.announcementId),
+    url,
+    pdfUrl: row.adjunctUrl ? `http://static.cninfo.com.cn/${row.adjunctUrl}` : "",
+  };
+}
+
+function cninfoTime(value) {
+  const timestamp = Number(value);
+  if (!Number.isFinite(timestamp)) return "";
+  return new Date(timestamp).toLocaleString("sv-SE", { timeZone: "Asia/Shanghai", hour12: false });
+}
+
+function normalizeAnnouncementTitle(title) {
+  return clean(title)
+    .replace(/<[^>]+>/g, "")
+    .replace(/^(.*?:)/, "")
+    .replace(/\s+/g, "");
 }
 
 function normalizeMoneyFlowLine(line) {
@@ -1319,6 +1460,21 @@ function defaultTradeDate() {
   const month = String(china.getMonth() + 1).padStart(2, "0");
   const dayOfMonth = String(china.getDate()).padStart(2, "0");
   return `${year}${month}${dayOfMonth}`;
+}
+
+function compactChinaDate(offsetDays = 0) {
+  const date = new Date();
+  const china = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Shanghai" }));
+  china.setDate(china.getDate() + offsetDays);
+  const year = china.getFullYear();
+  const month = String(china.getMonth() + 1).padStart(2, "0");
+  const day = String(china.getDate()).padStart(2, "0");
+  return `${year}${month}${day}`;
+}
+
+function formatCompactDate(value) {
+  const raw = String(value || "").replace(/\D/g, "").padEnd(8, "0").slice(0, 8);
+  return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
 }
 
 function yahooSymbolFromAshare(symbol) {

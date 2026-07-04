@@ -4,4 +4,5 @@ plotly>=5.22
 python-dotenv>=1.0
 streamlit>=1.36
 tushare>=1.4.0
+baostock>=0.8.9
 pytest>=8.2
