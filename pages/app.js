@@ -499,6 +499,10 @@ function actionGroup(...items) {
   return `<div class="top-actions">${items.filter(Boolean).join("")}</div>`;
 }
 
+function optionTags(items, selected = "") {
+  return items.map((item) => `<option ${selectedAttr(item === selected)}>${escapeHtml(item)}</option>`).join("");
+}
+
 function watchActionButton(code, label = "自选") {
   const normalized = normalizeWatchCode(code);
   if (!normalized) return "-";
@@ -2413,6 +2417,9 @@ function normalizeQimenTask(task) {
     calendar: String(task.calendar || "公历"),
     time: String(task.time || qimenDefaultTime()),
     city: String(task.city || "上海"),
+    country: String(task.country || "中国"),
+    timezone: String(task.timezone || "北京时间（UTC+8）"),
+    isLeapMonth: Boolean(task.isLeapMonth),
     output: String(task.output || "直接结论"),
     mode: String(task.mode || "深入分析（20点）"),
     billing: String(task.billing || "点数"),
@@ -2424,6 +2431,8 @@ function normalizeQimenTask(task) {
     syncAt: String(task.syncAt || qimenLastSync?.at || ""),
     answer: String(task.answer || ""),
     backendNote: String(task.backendNote || ""),
+    solarTerm: String(task.solarTerm || "小暑前后"),
+    juNumber: String(task.juNumber || ""),
     localResult: task.localResult && typeof task.localResult === "object" ? task.localResult : null,
   };
 }
@@ -2476,6 +2485,9 @@ function qimenFormState() {
     calendar: document.querySelector("#qimenCalendar")?.value || "公历",
     time: document.querySelector("#qimenTime")?.value || qimenDefaultTime(),
     city: document.querySelector("#city")?.value || "上海",
+    country: document.querySelector("#qimenCountry")?.value || "中国",
+    timezone: document.querySelector("#qimenTimezone")?.value || "北京时间（UTC+8）",
+    isLeapMonth: Boolean(document.querySelector("#qimenLeapMonth")?.checked),
     output: document.querySelector("#qimenOutput")?.value || "直接结论",
     mode: document.querySelector("#mode")?.value || "深入分析（20点）",
     question: document.querySelector("#question")?.value || "",
@@ -2483,7 +2495,10 @@ function qimenFormState() {
 }
 
 function qimenCostFromMode(mode) {
-  return String(mode || "").includes("深入") ? 20 : 8;
+  const text = String(mode || "");
+  if (text.includes("专家")) return 30;
+  if (text.includes("深入")) return 20;
+  return 10;
 }
 
 function qimenSyncCost() {
@@ -2514,7 +2529,7 @@ function qimenTaskTable(tasks) {
 }
 
 function qimenTaskResult(task) {
-  const result = task.localResult || qimenLocalAnalysis(task);
+  const result = { ...qimenLocalAnalysis(task), ...(task.localResult || {}) };
   const aiBlock = task.answer
     ? `<div class="answer-section"><strong>DeepSeek 增强解盘</strong><p>${answerHtml(task.answer)}</p></div>`
     : task.status === "处理中"
@@ -2529,13 +2544,25 @@ function qimenTaskResult(task) {
     </div>
     ${simpleTable(["项目", "内容"], [
       ["判断对象", escapeHtml(result.subject)],
-      ["起局信息", escapeHtml(`${task.calendar} ${task.time} ${task.city}`)],
-      ["盘面结构", escapeHtml(`${result.palace} / ${result.door} / ${result.star} / ${result.god}`)],
+      ["起局信息", escapeHtml(`${task.calendar} ${task.time} ${task.country || "中国"} ${task.city} ${task.timezone || "北京时间（UTC+8）"}`)],
+      ["局式", escapeHtml(`${result.juNumber || task.juNumber || "阳遁三局"} / ${result.palace} / ${result.door} / ${result.star} / ${result.god}`)],
+      ["节气", escapeHtml(result.solarTerm || task.solarTerm || "小暑前后")],
       ["直接结论", escapeHtml(result.conclusion)],
       ["执行条件", escapeHtml(result.action)],
       ["时间节点", escapeHtml(result.timing)],
       ["失效线", escapeHtml(result.invalidation)],
     ])}
+    ${simpleTable(["输入与历法明细", "当前值"], [
+      ["事项类型", escapeHtml(task.itemType)],
+      ["当前阶段", escapeHtml(task.stage)],
+      ["输出偏好", escapeHtml(task.output)],
+      ["是否闰月", task.isLeapMonth ? "是" : "否"],
+      ["年/月/日/时", escapeHtml(result.pillars)],
+      ["请求规则", "明清古法奇门通行口径"],
+      ["实际规则", "本地盘面推演 + DeepSeek 增强解读"],
+    ])}
+    ${simpleTable(["九宫盘面", "门 / 星 / 神 / 提示"], (result.plate || []).map((row) => [escapeHtml(row.name), escapeHtml(`${row.door} / ${row.star} / ${row.god} / ${row.note}`)]))}
+    <div class="answer-section"><strong>系统说明</strong><p>底层遵循明清古法奇门通行口径，AI 负责结果整理与输出；这份结果适合作为方向参考，关键执行仍结合实时行情和现实约束。</p></div>
     ${aiBlock}
   `;
 }
@@ -2547,7 +2574,10 @@ function qimenSyncResult(sync) {
       ["同步时间", escapeHtml(sync.at)],
       ["历法", escapeHtml(sync.calendar)],
       ["起局时间", escapeHtml(sync.time)],
+      ["所在国家", escapeHtml(sync.country || "中国")],
       ["城市", escapeHtml(sync.city)],
+      ["时区", escapeHtml(sync.timezone || "北京时间（UTC+8）")],
+      ["是否闰月", sync.isLeapMonth ? "是" : "否"],
     ])}
   `;
 }
@@ -2578,10 +2608,14 @@ function qimenLocalAnalysis(form) {
   }
   return {
     subject,
+    juNumber: signals.juNumber,
+    solarTerm: signals.solarTerm,
+    pillars: signals.pillars,
     palace: signals.palace,
     door: signals.door,
     star: signals.star,
     god: signals.god,
+    plate: signals.plate,
     conclusion,
     action,
     timing: `${signals.timing}，若指数和板块同步转强，可把执行窗口前移一档。`,
@@ -2606,11 +2640,25 @@ function qimenSignalDeck(form, stock) {
   const stars = ["天辅", "天英", "天芮", "天柱", "天心", "天蓬", "天任", "天冲"];
   const gods = ["值符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"];
   const timings = ["上午盘先看承接", "午后看资金回流", "收盘前确认强弱", "隔日开盘看延续"];
+  const solarTerms = ["小暑前后", "夏至后", "芒种后", "立秋前", "处暑前"];
+  const juNumbers = ["阳遁一局", "阳遁三局", "阳遁六局", "阴遁二局", "阴遁五局", "阴遁八局"];
+  const stems = ["甲子", "乙丑", "丙寅", "丁卯", "戊辰", "己巳", "庚午", "辛未", "壬申", "癸酉"];
+  const plate = ["坎一宫", "坤二宫", "震三宫", "巽四宫", "中五宫", "乾六宫", "兑七宫", "艮八宫", "离九宫"].map((name, index) => ({
+    name,
+    door: doors[(seed + index) % doors.length],
+    star: stars[(seed + index * 2) % stars.length],
+    god: gods[(seed + index * 3) % gods.length],
+    note: index === seed % 9 ? "当前问题落点" : index === (seed + 3) % 9 ? "行动观察位" : "辅助参考",
+  }));
   return {
+    juNumber: juNumbers[Math.floor(seed / 13) % juNumbers.length],
+    solarTerm: solarTerms[Math.floor(seed / 17) % solarTerms.length],
+    pillars: ["年柱", "月柱", "日柱", "时柱"].map((label, index) => `${label}${stems[(seed + index * 2) % stems.length]}`).join(" / "),
     palace: palaces[seed % palaces.length],
     door: doors[Math.floor(seed / 3) % doors.length],
     star: stars[Math.floor(seed / 5) % stars.length],
     god: gods[Math.floor(seed / 7) % gods.length],
+    plate,
     timing: timings[Math.floor(seed / 11) % timings.length],
   };
 }
@@ -2635,6 +2683,7 @@ async function handleQimenSubmit(button) {
   if (!target) return;
   const form = qimenFormState();
   const points = qimenCostFromMode(form.mode);
+  const localResult = qimenLocalAnalysis(form);
   const task = normalizeQimenTask({
     id: `qm_${Date.now()}`,
     submittedAt: nowLabel(),
@@ -2644,6 +2693,9 @@ async function handleQimenSubmit(button) {
     calendar: form.calendar,
     time: form.time,
     city: form.city,
+    country: form.country,
+    timezone: form.timezone,
+    isLeapMonth: form.isLeapMonth,
     output: form.output,
     mode: form.mode,
     billing: "点数",
@@ -2653,7 +2705,9 @@ async function handleQimenSubmit(button) {
     endedAt: "-",
     question: form.question,
     syncAt: qimenLastSync?.at || "",
-    localResult: qimenLocalAnalysis(form),
+    solarTerm: localResult.solarTerm,
+    juNumber: localResult.juNumber,
+    localResult,
   });
   qimenTasks = [task, ...qimenTasks.filter((item) => item.id !== task.id)].slice(0, 60);
   selectedQimenTaskId = task.id;
@@ -2698,6 +2752,9 @@ function handleQimenSync() {
     calendar: form.calendar,
     time: form.time,
     city: form.city,
+    country: form.country,
+    timezone: form.timezone,
+    isLeapMonth: form.isLeapMonth,
   };
   appendWalletLedger("消费", -qimenSyncCost(), `同步起局 ${form.city}`);
   persistQimenState();
@@ -3708,6 +3765,12 @@ function renderQimen() {
   const summary = walletSummary();
   const selectedTask = qimenTasks.find((task) => task.id === selectedQimenTaskId) || qimenTasks[0];
   const lastSyncText = qimenLastSync ? `${qimenLastSync.at} ${qimenLastSync.city}` : "未同步";
+  const itemTypes = ["事业", "财运", "感情", "合作", "求职", "金融", "出行", "健康", "其他"];
+  const targets = ["能不能成", "该不该做", "现在适不适合进场", "什么时候行动更合适", "要不要继续推进", "短期会怎么发展", "有没有明显风险", "值不值得长期做", "对方真实意图是什么", "这次合作能不能谈成", "现在买入是否合适", "该加仓还是减仓", "现在应不应该继续观望", "其他，自己填写"];
+  const stages = ["在考虑阶段", "刚开始接触", "已经推进中", "沟通谈判中", "等待结果中", "准备马上行动", "已经行动一部分", "遇到卡点了", "想复盘要不要调整"];
+  const outputs = ["直接结论", "详细讲解"];
+  const calendars = ["公历", "农历", "此刻"];
+  const modes = ["标准解盘（10点）", "深入分析（20点）", "专家深研（30点）"];
   const historyRows = qimenTasks.slice(0, 6).map((task) => [
     escapeHtml(task.submittedAt),
     escapeHtml(task.itemType),
@@ -3728,14 +3791,17 @@ function renderQimen() {
         ${panelTitle("奇门遁甲", `<div class="toolbar"><button class="ghost-button" data-open-modal="wallet">钱包账单</button><button class="ghost-button" data-open-modal="tasks">任务列表</button></div>`)}
         <p>把专业解盘转成你能直接看懂、能马上行动的建议。</p>
         <div class="form-grid">
-          <label><span class="label">事项类型</span><select id="itemType"><option>金融</option><option>工作</option><option>合作</option></select></label>
-          <label><span class="label">判断目标</span><select id="qimenTarget"><option>现在适不适合进场</option><option>是否继续持有</option><option>能否低吸</option><option>是否减仓</option></select></label>
-          <label><span class="label">当前阶段</span><select id="stage"><option>在考虑阶段</option><option>已持有/已开始</option><option>准备执行</option></select></label>
-          <label><span class="label">历法类型</span><select id="qimenCalendar"><option ${selectedAttr(qimenLastSync?.calendar === "公历")}>公历</option><option ${selectedAttr(qimenLastSync?.calendar === "此刻")}>此刻</option></select></label>
+          <label><span class="label">事项类型</span><select id="itemType">${optionTags(itemTypes, "金融")}</select></label>
+          <label><span class="label">判断目标</span><select id="qimenTarget">${optionTags(targets, "现在适不适合进场")}</select></label>
+          <label><span class="label">当前阶段</span><select id="stage">${optionTags(stages, "在考虑阶段")}</select></label>
+          <label><span class="label">历法类型</span><select id="qimenCalendar">${optionTags(calendars, qimenLastSync?.calendar || "公历")}</select></label>
           <label><span class="label">时间输入</span><input id="qimenTime" value="${escapeHtml(qimenLastSync?.time || qimenDefaultTime())}" /></label>
           <label><span class="label">城市</span><input id="city" value="${escapeHtml(qimenLastSync?.city || "上海")}" /></label>
-          <label><span class="label">输出偏好</span><select id="qimenOutput"><option>直接结论</option><option>过程展开</option></select></label>
-          <label><span class="label">解盘档位</span><select id="mode"><option>深入分析（20点）</option><option>快速结论（8点）</option></select></label>
+          <label><span class="label">所在国家</span><input id="qimenCountry" value="${escapeHtml(qimenLastSync?.country || "中国")}" /></label>
+          <label><span class="label">时区</span><input id="qimenTimezone" value="${escapeHtml(qimenLastSync?.timezone || "北京时间（UTC+8）")}" /></label>
+          <label class="segmented"><input id="qimenLeapMonth" type="checkbox" ${qimenLastSync?.isLeapMonth ? "checked" : ""} />是否闰月</label>
+          <label><span class="label">输出偏好</span><select id="qimenOutput">${optionTags(outputs, "直接结论")}</select></label>
+          <label><span class="label">解盘档位</span><select id="mode">${optionTags(modes, "深入分析（20点）")}</select></label>
         </div>
         <label style="margin-top:12px"><span class="label">事情摘要</span><textarea id="question">我最近在看一只科技股，已经涨了一段时间，现在担心追高，但又怕错过后面的上涨，想判断现在适不适合进场。</textarea></label>
         <div class="toolbar" style="margin-top:12px">

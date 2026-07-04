@@ -152,7 +152,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Page title: 奇门遁甲.
 - Description: 把专业解盘转成你能直接看懂、能马上行动的建议。
 - Actions: 钱包账单, 任务列表, 同步起局（1点）, 提交解盘任务, 重置.
-- Form controls: 事项类型, 判断目标, 当前阶段, 历法类型(公历/此刻), 时间输入, 城市, 输出偏好, 解盘档位, 事情摘要.
+- Form controls: 事项类型(事业/财运/感情/合作/求职/金融/出行/健康/其他), 判断目标, 当前阶段, 历法类型(公历/农历/此刻), 时间输入, 城市, 所在国家, 时区, 是否闰月, 输出偏好, 解盘档位(标准10点/深入20点/专家30点), 事情摘要.
 - Wallet bill view:
   - Metrics: 可用点数, 冻结点数, 累计充值, 累计消费.
   - Recharge code input.
@@ -161,6 +161,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - Columns: 提交时间, 类型, 目标, 状态, 模式, 计费, 点数, 开始, 结束, 操作.
   - Empty state supported.
 - Clone enrichment: sync 起局 deducts local points, wallet and task records persist in browser storage, submissions create task detail rows immediately, and DeepSeek responses are saved back into the selected task.
+- Clone enrichment: 奇门详情 now includes 输入与历法明细, 节气, 局式, 年/月/日/时柱, 九宫盘面, 系统说明 and a local old-history fallback for previously saved tasks.
 
 ## Ai决策矩阵
 
