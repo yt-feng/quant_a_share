@@ -9,8 +9,17 @@ const SINA_INDUSTRY_URL = "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy
 const SINA_CONCEPT_URL = "http://money.finance.sina.com.cn/q/view/newFLJK.php?param=class";
 const EASTMONEY_LIMIT_POOL_URL = "https://push2ex.eastmoney.com";
 const EASTMONEY_HSGT_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get";
+const EASTMONEY_ETF_URL = "https://push2delay.eastmoney.com/api/qt/clist/get";
+const EASTMONEY_STOCK_RANK_URL = "https://emappdata.eastmoney.com/stockrank";
+const EASTMONEY_ANNOUNCEMENT_URL = "https://np-anotice-stock.eastmoney.com/api/security/ann";
+const TENCENT_QUOTE_URL = "https://qt.gtimg.cn/q=";
 const SINA_PAGE_SIZE = 80;
 const SINA_MAX_PAGES = 90;
+const SHORT_CACHE_MS = 90 * 1000;
+const BOARD_CACHE_MS = 8 * 60 * 1000;
+const FINANCIAL_CACHE_MS = 6 * 60 * 60 * 1000;
+
+const memoryCache = new Map();
 
 const sampleStocks = [
   { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, amount: 1420000000, volume: 820000, turnover: 3.2, pe: 28 },
@@ -40,50 +49,64 @@ module.exports = async function handler(req, res) {
     sinaSectorResult,
     conceptResult,
     limitPools,
+    etfs,
     moneyFlow,
     northbound,
     fundamentals,
+    popularityRank,
+    stockPopularity,
+    announcements,
     yahooChart,
     klines,
     marketKlines,
     quote,
+    tencentQuote,
     indexResult,
   ] = await Promise.all([
     fetchEastmoneyStockUniverse().catch(() => null),
     fetchSinaStockUniverse().catch(() => null),
     fetchEastmoneySectors().catch(() => null),
     fetchSinaSectors().catch(() => null),
-    fetchSinaConcepts().catch(() => null),
-    fetchEastmoneyLimitPools(tradeDate).catch(() => null),
+    fetchCached("sina:concepts", BOARD_CACHE_MS, fetchSinaConcepts).catch(() => null),
+    fetchCached(`eastmoney:limit:${tradeDate}`, SHORT_CACHE_MS, () => fetchEastmoneyLimitPools(tradeDate)).catch(() => null),
+    fetchCached("eastmoney:etfs", BOARD_CACHE_MS, fetchEastmoneyEtfs).catch(() => null),
     fetchEastmoneyMoneyFlow(secid).catch(() => null),
     fetchEastmoneyNorthbound().catch(() => null),
-    fetchFundamentals(symbol, secid).catch(() => null),
+    fetchCached(`fundamentals:${symbol}`, FINANCIAL_CACHE_MS, () => fetchFundamentals(symbol, secid), withCacheMeta).catch(() => null),
+    fetchCached("eastmoney:hot-rank", SHORT_CACHE_MS, fetchEastmoneyHotRank).catch(() => null),
+    fetchCached(`eastmoney:stock-popularity:${symbol}`, SHORT_CACHE_MS, () => fetchEastmoneyStockPopularity(symbol)).catch(() => null),
+    fetchCached(`eastmoney:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchEastmoneyAnnouncements(symbol)).catch(() => null),
     fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
     fetchEastmoneyQuote(secid).catch(() => null),
+    fetchTencentQuote(symbol).catch(() => null),
     fetchEastmoneyIndices().catch(() => null),
   ]);
   const stockUniverse = pickStockUniverse(eastmoneyStockResult, sinaStockResult);
   const sectorUniverse = pickSectorUniverse(eastmoneySectorResult, sinaSectorResult);
   const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
-  const selectedQuote = quote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
+  const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
   const enrichedFundamentals = enrichFundamentalsFromQuote(fundamentals, selectedQuote);
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
     conceptResult?.length ? "sina-concept-boards" : "concept-fallback",
     limitPools?.source || "limit-pool-fallback",
+    etfs?.rows?.length ? "eastmoney-etf-spot" : "etf-fallback",
     moneyFlow?.rows?.length ? "eastmoney-moneyflow" : "moneyflow-fallback",
     northbound?.rows?.length ? "eastmoney-northbound" : "northbound-fallback",
     enrichedFundamentals?.source || "fundamentals-fallback",
+    popularityRank?.items?.length ? "eastmoney-hot-rank" : "hot-rank-fallback",
+    stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
+    announcements?.items?.length ? "eastmoney-announcements" : "announcement-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
-    quote ? "eastmoney-quote" : "quote-fallback",
+    quote ? "eastmoney-quote" : tencentQuote ? "tencent-quote" : "quote-fallback",
   ].join("+");
 
-  const market = buildMarketMetrics(stockUniverse.all, sectors, limitPools, northbound);
+  const market = buildMarketMetrics(stockUniverse.all, sectors, limitPools, northbound, etfs);
   return res.status(200).json({
     ok: true,
     source,
@@ -94,9 +117,15 @@ module.exports = async function handler(req, res) {
     sectors,
     concepts: conceptResult?.length ? conceptResult : [],
     limitPools: limitPools || { date: tradeDate, limitUp: [], broken: [], strong: [], stats: {} },
+    etfs: etfs || { rows: [], stats: {} },
     moneyFlow: moneyFlow || { rows: [], latest: null, sum5MainYi: 0 },
     northbound: northbound || { rows: [], northNetBuyYi: 0, northNetInYi: 0 },
     fundamentals: enrichedFundamentals,
+    popularity: {
+      rank: popularityRank || { items: [], source: "" },
+      stock: stockPopularity || { latest: null, keywords: [], related: [], realtime: [] },
+    },
+    announcements: announcements || { items: [], source: "" },
     yahooChart,
     indices,
     quote: mergeQuoteFundamentals(selectedQuote, enrichedFundamentals),
@@ -139,6 +168,32 @@ async function fetchJson(url, options = {}) {
   return JSON.parse(text);
 }
 
+async function postJson(url, payload, options = {}) {
+  return fetchJson(url, {
+    ...options,
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+  });
+}
+
+async function fetchCached(key, ttlMs, loader, annotate) {
+  const now = Date.now();
+  const hit = memoryCache.get(key);
+  if (hit && hit.expiresAt > now) {
+    return annotate ? annotate(hit.value, { hit: true, updatedAt: hit.updatedAt, ttlSeconds: Math.round(ttlMs / 1000) }) : hit.value;
+  }
+  const value = await loader();
+  const updatedAt = new Date().toISOString();
+  memoryCache.set(key, { value, updatedAt, expiresAt: now + ttlMs });
+  return annotate ? annotate(value, { hit: false, updatedAt, ttlSeconds: Math.round(ttlMs / 1000) }) : value;
+}
+
+function withCacheMeta(value, meta) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return value;
+  return { ...value, cache: { scope: "vercel-serverless-memory", ...meta } };
+}
+
 async function fetchDecodedText(url, encoding, options = {}) {
   const attempts = options.attempts || 3;
   const timeoutMs = options.timeoutMs || 5000;
@@ -149,6 +204,8 @@ async function fetchDecodedText(url, encoding, options = {}) {
     try {
       const response = await fetch(url, {
         headers: { "User-Agent": "Mozilla/5.0", ...(options.headers || {}) },
+        method: options.method || "GET",
+        body: options.body,
         signal: controller.signal,
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -178,7 +235,12 @@ async function fetchText(url, options = {}) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, { headers, signal: controller.signal });
+      const response = await fetch(url, {
+        headers,
+        method: options.method || "GET",
+        body: options.body,
+        signal: controller.signal,
+      });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return await response.text();
     } catch (error) {
@@ -383,6 +445,183 @@ async function fetchEastmoneyPool(type, path, date, sort) {
   });
   const rows = payload?.data?.pool || [];
   return rows.map((row, index) => normalizeLimitPoolRow(row, type, index + 1));
+}
+
+async function fetchEastmoneyEtfs() {
+  const fields = [
+    "f2",
+    "f3",
+    "f4",
+    "f5",
+    "f6",
+    "f7",
+    "f8",
+    "f10",
+    "f12",
+    "f13",
+    "f14",
+    "f15",
+    "f16",
+    "f17",
+    "f18",
+    "f20",
+    "f21",
+    "f62",
+    "f66",
+    "f72",
+    "f78",
+    "f84",
+    "f184",
+    "f297",
+    "f402",
+    "f441",
+  ].join(",");
+  const params = new URLSearchParams({
+    pn: "1",
+    pz: "160",
+    po: "1",
+    np: "1",
+    ut: "bd1d9ddb04089700cf9c27f6f7426281",
+    fltt: "2",
+    invt: "2",
+    wbp2u: "|0|0|0|web",
+    fid: "f6",
+    fs: "b:MK0021,b:MK0022,b:MK0023,b:MK0024,b:MK0827",
+    fields,
+  });
+  const payload = await fetchJson(`${EASTMONEY_ETF_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 5000,
+    headers: { Referer: "https://quote.eastmoney.com/center/gridlist.html#fund_etf" },
+  });
+  const rows = (payload?.data?.diff || []).map((row, index) => normalizeEtfRow(row, index + 1));
+  const mainNetYi = roundYi(rows.reduce((sum, row) => sum + (Number(row.mainNet) || 0), 0));
+  return {
+    source: "eastmoney-etf-spot",
+    rows,
+    stats: {
+      total: payload?.data?.total || rows.length,
+      sample: rows.length,
+      mainNetYi,
+      topAmountName: rows[0]?.name || "",
+      topMainNetName: rows.slice().sort((a, b) => (b.mainNet || 0) - (a.mainNet || 0))[0]?.name || "",
+    },
+  };
+}
+
+async function fetchEastmoneyHotRank() {
+  const payload = await postJson(
+    `${EASTMONEY_STOCK_RANK_URL}/getAllCurrentList`,
+    {
+      appId: "appId01",
+      globalId: "786e4c21-70dc-435a-93bb-38",
+      marketType: "",
+      pageNo: 1,
+      pageSize: 100,
+    },
+    { attempts: 2, timeoutMs: 4500, headers: { Referer: "https://guba.eastmoney.com/rank/" } }
+  );
+  const rankRows = payload?.data || [];
+  const secids = rankRows.map((row) => emPrefixedToSecid(row.sc)).filter(Boolean);
+  const quoteMap = new Map();
+  if (secids.length) {
+    const params = new URLSearchParams({
+      ut: "f057cbcbce2a86e2866ab8877db1d059",
+      fltt: "2",
+      invt: "2",
+      fields: "f14,f3,f12,f2,f13",
+      secids: secids.join(","),
+    });
+    const quotePayload = await fetchJson(`https://push2.eastmoney.com/api/qt/ulist.np/get?${params}`, {
+      attempts: 1,
+      timeoutMs: 3500,
+      headers: { Referer: "https://guba.eastmoney.com/rank/" },
+    }).catch(() => null);
+    (quotePayload?.data?.diff || []).forEach((row) => {
+      quoteMap.set(formatCode(row.f12, row.f13), {
+        name: clean(row.f14),
+        price: num(row.f2),
+        pct: num(row.f3),
+      });
+    });
+  }
+  return {
+    source: "eastmoney-hot-rank",
+    items: rankRows.map((row) => {
+      const code = emPrefixedToCode(row.sc);
+      const quote = quoteMap.get(code) || {};
+      return {
+        rank: num(row.rk),
+        code,
+        name: quote.name || "",
+        price: quote.price || 0,
+        pct: quote.pct || 0,
+        rankChange: num(row.rc),
+        historyRankChange: num(row.hisRc),
+      };
+    }),
+  };
+}
+
+async function fetchEastmoneyStockPopularity(symbol) {
+  const sourceCode = emPrefixedFromSymbol(symbol);
+  const basePayload = {
+    appId: "appId01",
+    globalId: "786e4c21-70dc-435a-93bb-38",
+    marketType: "",
+    srcSecurityCode: sourceCode,
+  };
+  const [latestPayload, keywordsPayload, relatedPayload, realtimePayload] = await Promise.all([
+    postJson(`${EASTMONEY_STOCK_RANK_URL}/getCurrentLatest`, basePayload, {
+      attempts: 2,
+      timeoutMs: 4000,
+      headers: { Referer: "https://guba.eastmoney.com/rank/" },
+    }).catch(() => null),
+    postJson(`${EASTMONEY_STOCK_RANK_URL}/getHotStockRankList`, basePayload, {
+      attempts: 2,
+      timeoutMs: 4000,
+      headers: { Referer: "https://guba.eastmoney.com/rank/" },
+    }).catch(() => null),
+    postJson(`${EASTMONEY_STOCK_RANK_URL}/getFollowStockRankList`, basePayload, {
+      attempts: 2,
+      timeoutMs: 4000,
+      headers: { Referer: "https://guba.eastmoney.com/rank/" },
+    }).catch(() => null),
+    postJson(`${EASTMONEY_STOCK_RANK_URL}/getCurrentList`, basePayload, {
+      attempts: 2,
+      timeoutMs: 4000,
+      headers: { Referer: "https://guba.eastmoney.com/rank/" },
+    }).catch(() => null),
+  ]);
+  return {
+    source: "eastmoney-stock-popularity",
+    latest: normalizePopularityLatest(latestPayload?.data, symbol),
+    keywords: (keywordsPayload?.data || []).slice(0, 12).map(normalizeHotKeyword),
+    related: (relatedPayload?.data || []).slice(0, 12).map(normalizeRelatedStock),
+    realtime: (realtimePayload?.data || []).slice(-36).map((row) => ({ time: clean(row.calcTime), rank: num(row.rank) })),
+  };
+}
+
+async function fetchEastmoneyAnnouncements(symbol) {
+  const params = new URLSearchParams({
+    sr: "-1",
+    page_size: "12",
+    page_index: "1",
+    ann_type: "A",
+    client_source: "web",
+    stock_list: symbol,
+    f_node: "0",
+    s_node: "0",
+  });
+  const payload = await fetchJson(`${EASTMONEY_ANNOUNCEMENT_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 4500,
+    headers: { Referer: "https://data.eastmoney.com/notices/" },
+  });
+  return {
+    source: "eastmoney-announcements",
+    items: (payload?.data?.list || []).map(normalizeAnnouncement),
+  };
 }
 
 async function fetchEastmoneyKlines(secid) {
@@ -636,6 +875,38 @@ async function fetchEastmoneyQuote(secid) {
   };
 }
 
+async function fetchTencentQuote(symbol) {
+  const prefix = symbol.startsWith("6") ? "sh" : "sz";
+  const text = await fetchDecodedText(`${TENCENT_QUOTE_URL}${prefix}${symbol}`, "gb18030", {
+    attempts: 2,
+    timeoutMs: 3500,
+    headers: { Referer: "https://stockapp.finance.qq.com/" },
+  });
+  const raw = text.split('"')[1] || "";
+  const parts = raw.split("~");
+  if (parts.length < 35 || !parts[2]) return null;
+  const amount = num((parts[35] || "").split("/")[2]) || num(parts[57]) * 10000;
+  return {
+    code: formatSinaCode(`${prefix}${parts[2]}`, parts[2]),
+    name: clean(parts[1]),
+    price: num(parts[3]),
+    high: num(parts[33]),
+    low: num(parts[34]),
+    open: num(parts[5]),
+    volume: num(parts[36]),
+    amount,
+    preClose: num(parts[4]),
+    turnover: num(parts[38]),
+    change: num(parts[31]),
+    pct: num(parts[32]),
+    totalMv: num(parts[44]) * 100000000,
+    circMv: num(parts[45]) * 100000000,
+    pe: num(parts[52]) || num(parts[39]),
+    pb: num(parts[46]),
+    ticktime: clean(parts[30]),
+  };
+}
+
 function normalizeStockRow(row) {
   return {
     code: formatCode(row.f12, row.f13),
@@ -733,6 +1004,85 @@ function normalizeLimitPoolRow(row, type, rank) {
   };
 }
 
+function normalizeEtfRow(row, rank) {
+  return {
+    rank,
+    code: formatCode(row.f12, row.f13),
+    name: clean(row.f14),
+    price: num(row.f2),
+    pct: num(row.f3),
+    change: num(row.f4),
+    volume: num(row.f5),
+    amount: num(row.f6),
+    amplitude: num(row.f7),
+    turnover: num(row.f8),
+    volumeRatio: num(row.f10),
+    high: num(row.f15),
+    low: num(row.f16),
+    open: num(row.f17),
+    preClose: num(row.f18),
+    totalMv: num(row.f20),
+    circMv: num(row.f21),
+    mainNet: num(row.f62),
+    superNet: num(row.f66),
+    bigNet: num(row.f72),
+    midNet: num(row.f78),
+    smallNet: num(row.f84),
+    mainRatio: num(row.f184),
+    dataDate: clean(row.f297),
+    discount: num(row.f402),
+    iopv: num(row.f441),
+  };
+}
+
+function normalizePopularityLatest(row, symbol) {
+  if (!row) return null;
+  return {
+    code: emPrefixedToCode(row.srcSecurityCode) || formatCode(symbol, symbol.startsWith("6") ? 1 : 0),
+    rank: num(row.rank),
+    rankChange: num(row.rankChange),
+    historyRankChange: num(row.hisRankChange),
+    historyRank: num(row.hisRankChange_rank),
+    total: num(row.marketAllCount),
+    calcTime: clean(row.calcTime),
+  };
+}
+
+function normalizeHotKeyword(row) {
+  return {
+    time: clean(row.calcTime),
+    code: emPrefixedToCode(row.srcSecurityCode),
+    concept: clean(row.conceptName),
+    conceptId: clean(row.conceptId),
+    heat: num(row.hitCount),
+  };
+}
+
+function normalizeRelatedStock(row) {
+  return {
+    time: clean(row.calcTime),
+    code: emPrefixedToCode(row.srcSecurityCode),
+    relatedCode: emPrefixedToCode(row.followSrcSecurityCode),
+    pct: num(String(row.rate || "").replace("%", "")),
+  };
+}
+
+function normalizeAnnouncement(row) {
+  const stock = row.codes?.[0] || {};
+  const column = row.columns?.[0] || {};
+  const code = clean(stock.stock_code);
+  return {
+    title: clean(row.title_ch || row.title),
+    date: clean(row.notice_date).slice(0, 10),
+    sortDate: clean(row.sort_date),
+    code: code ? formatCode(code, stock.market_code) : "",
+    name: clean(stock.short_name),
+    category: clean(column.column_name),
+    artCode: clean(row.art_code),
+    url: code && row.art_code ? `https://data.eastmoney.com/notices/detail/${code}/${row.art_code}.html` : "",
+  };
+}
+
 function normalizeMoneyFlowLine(line) {
   const [date, mainNet, smallNet, midNet, bigNet, superNet, mainRatio, smallRatio, midRatio, bigRatio, superRatio, close, pct] = String(line).split(",");
   return {
@@ -795,7 +1145,7 @@ function normalizeFundamentals(row, secid) {
   };
 }
 
-function buildMarketMetrics(stocks, sectors = [], limitPools = null, northbound = null) {
+function buildMarketMetrics(stocks, sectors = [], limitPools = null, northbound = null, etfs = null) {
   const rows = stocks.length ? stocks : sampleStocks;
   const up = rows.filter((row) => row.pct > 0).length;
   const down = rows.filter((row) => row.pct < 0).length;
@@ -806,6 +1156,7 @@ function buildMarketMetrics(stocks, sectors = [], limitPools = null, northbound 
   const aboveMa5 = Math.round((up / Math.max(rows.length, 1)) * 1000) / 10;
   const netFundYi = Math.round((sectors.reduce((sum, row) => sum + (Number(row.netFund) || 0), 0) / 100000000) * 100) / 100;
   const poolStats = limitPools?.stats || {};
+  const etfStats = etfs?.stats || {};
   return {
     temperature: Math.round(((up / Math.max(up + down, 1)) * 70 + Math.min(amount / 200000000000, 1) * 30) * 10) / 10,
     state: up >= down * 1.5 ? "强势行情" : up > down ? "震荡偏强" : up === down ? "震荡行情" : "弱势整理",
@@ -825,6 +1176,8 @@ function buildMarketMetrics(stocks, sectors = [], limitPools = null, northbound 
     sealFundYi: poolStats.sealFundYi || 0,
     northNetBuyYi: northbound?.northNetBuyYi || 0,
     northNetInYi: northbound?.northNetInYi || 0,
+    etfMainNetYi: etfStats.mainNetYi || 0,
+    etfCount: etfStats.total || etfs?.rows?.length || 0,
     limitDistribution: { up, down, flat, limitUp, limitDown },
   };
 }
@@ -872,6 +1225,26 @@ function yahooSymbolFromAshare(symbol) {
   if (symbol.startsWith("6")) return `${symbol}.SS`;
   if (symbol.startsWith("0") || symbol.startsWith("3")) return `${symbol}.SZ`;
   return symbol;
+}
+
+function emPrefixedFromSymbol(symbol) {
+  return `${symbol.startsWith("6") ? "SH" : "SZ"}${symbol}`;
+}
+
+function emPrefixedToCode(value) {
+  const raw = clean(value);
+  if (!raw) return "";
+  const code = raw.replace(/\D/g, "").padStart(6, "0");
+  if (raw.startsWith("SH")) return `${code}.SH`;
+  if (raw.startsWith("BJ")) return `${code}.BJ`;
+  return `${code}.SZ`;
+}
+
+function emPrefixedToSecid(value) {
+  const raw = clean(value);
+  const code = raw.replace(/\D/g, "").padStart(6, "0");
+  if (!code) return "";
+  return `${raw.startsWith("SH") ? 1 : 0}.${code}`;
 }
 
 function roundYi(value) {

@@ -44,9 +44,12 @@ const data = {
     ["黄金概念", 5.72, 3, 27, 352.85, "西部黄金", 10.02],
   ],
   limitPools: { date: "-", limitUp: [], broken: [], strong: [], stats: {} },
+  etfs: { rows: [], stats: {} },
   moneyFlow: { rows: [], latest: null, sum5MainYi: 0 },
   northbound: { rows: [], northRows: [], northNetBuyYi: 0, northNetInYi: 0 },
   fundamentals: null,
+  popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
+  announcements: { items: [] },
   yahooChart: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
@@ -153,14 +156,14 @@ const pages = [
 ];
 
 const coverageRows = [
-  ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布。"],
+  ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存和自定义条件。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
-  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、换指标入口。"],
+  ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、人气关键词、相关股和公司公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表和操作列。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
-  ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答。"],
+  ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
 ];
 
@@ -288,6 +291,16 @@ function renderMarket() {
       <div class="panel">
         ${panelTitle("北向资金", tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"))}
         ${simpleTable(["通道", "方向", "净买额", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${yi(row.netBuyAmt)}亿`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
+      </div>
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        ${panelTitle("ETF资金排行", tag(`合计 ${plainSigned(data.etfs.stats?.mainNetYi || 0, 2, "亿")}`, "info"))}
+        ${simpleTable(["代码", "名称", "涨跌幅", "成交额", "主力净额", "折价率"], (data.etfs.rows || []).slice(0, 8).map((row) => [row.code, row.name, `${signed(row.pct)}%`, `${yi(row.amount)}亿`, `${plainSigned(yi(row.mainNet), 2, "亿")}`, `${plainSigned(row.discount || 0, 2, "%")}`]))}
+      </div>
+      <div class="panel">
+        ${panelTitle("东财人气榜", tag(`${data.popularity.rank?.items?.length || 0} 只`, "info"))}
+        ${simpleTable(["排名", "代码", "名称", "最新价", "涨跌幅", "排名变化"], (data.popularity.rank?.items || []).slice(0, 8).map((row) => [row.rank, row.code, row.name || "-", row.price ? row.price.toFixed(2) : "-", `${signed(row.pct)}%`, plainSigned(row.rankChange || 0, 0)]))}
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
@@ -419,6 +432,7 @@ function renderQuote() {
   const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
   const latestFlow = data.moneyFlow.latest;
   const financials = data.fundamentals?.financials || {};
+  const popularity = data.popularity.stock?.latest;
   return `
     <section class="panel compact-panel">
       <div class="form-grid">
@@ -447,6 +461,7 @@ function renderQuote() {
       ${metric("市净率", stock.pb || data.fundamentals?.pb || "-", "PB")}
       ${metric("5日主力", `${plainSigned(data.moneyFlow.sum5MainYi || 0, 2, "亿")}`, "近5日合计")}
       ${metric("ROE", financials.roe ? `${financials.roe}%` : "-", data.fundamentals?.reportLabel || "财务快照")}
+      ${metric("人气排名", popularity?.rank ? `#${popularity.rank}` : "-", popularity?.calcTime || "东财人气")}
       ${metric("全球备份", data.yahooChart?.price ? data.yahooChart.price.toFixed(2) : "-", data.yahooChart?.symbol || "Yahoo chart")}
       ${metric("技术状态", stock.ma20 && stock.macd ? "偏强" : "观察", "MA20 / MACD")}
     </section>
@@ -490,6 +505,17 @@ function renderQuote() {
           ["毛利率", financials.grossMargin ? `${financials.grossMargin}%` : "-", "新浪财报"],
           ["资产负债率", financials.debtRatio ? `${financials.debtRatio}%` : "-", "新浪财报"],
         ])}
+      </div>
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        <h2>人气关键词与相关股</h2>
+        ${simpleTable(["关键词", "热度", "时间"], (data.popularity.stock?.keywords || []).slice(0, 6).map((row) => [row.concept, row.heat.toLocaleString(), row.time]))}
+        ${simpleTable(["相关股票", "涨跌幅", "时间"], (data.popularity.stock?.related || []).slice(0, 6).map((row) => [row.relatedCode, `${signed(row.pct)}%`, row.time]))}
+      </div>
+      <div class="panel">
+        <h2>公司公告</h2>
+        ${simpleTable(["日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
       </div>
     </section>
   `;
@@ -709,7 +735,7 @@ function renderSubscription() {
   const visibleProducts = products.filter((product) => productFilter === "all" || product[0] === productFilter);
   return `
     <section class="grid metrics">
-      ${metric("当前账号", "u_dtfrwm", "登录账号")}
+      ${metric("当前账号", "演示账号", "登录状态")}
       ${metric("账号状态", "正常", "订阅与点数可用")}
       ${metric("可用点数", "86.5", "钱包余额")}
       ${metric("冻结点数", "0", "结算占用")}
@@ -1135,9 +1161,18 @@ function contextForModule(moduleName) {
       limitUp: data.limitPools.limitUp.slice(0, 8),
       broken: data.limitPools.broken.slice(0, 5),
     },
+    etfs: {
+      stats: data.etfs.stats,
+      rows: data.etfs.rows.slice(0, 8),
+    },
     moneyFlow: data.moneyFlow.latest,
     northbound: data.northbound.northRows || data.northbound.rows,
     fundamentals: data.fundamentals,
+    popularity: {
+      rank: data.popularity.rank?.items?.slice(0, 10) || [],
+      stock: data.popularity.stock,
+    },
+    announcements: data.announcements.items?.slice(0, 8) || [],
     yahooChart: data.yahooChart,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
@@ -1215,6 +1250,7 @@ async function loadMarketSnapshot() {
         ["涨停/跌停", `${payload.market.exactLimitUp || payload.market.limitUp} / ${payload.market.limitDown}`, `炸板 ${payload.market.brokenLimit || 0}`],
         ["连板高度", `${payload.market.maxStreak || 0}板`, `封板资金 ${payload.market.sealFundYi || 0}亿`],
         ["北向净买", `${plainSigned(payload.market.northNetBuyYi || 0, 2, "亿")}`, "沪股通+深股通"],
+        ["ETF主力", `${plainSigned(payload.market.etfMainNetYi || 0, 2, "亿")}`, `ETF样本 ${payload.market.etfCount || 0}`],
         ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
         ["资金净流入", hasSectorFund ? `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿` : "无字段", hasSectorFund ? "板块资金聚合" : "当前板块源不含资金字段"],
       ];
@@ -1248,9 +1284,12 @@ async function loadMarketSnapshot() {
       ]);
     }
     if (payload.limitPools) data.limitPools = payload.limitPools;
+    if (payload.etfs) data.etfs = payload.etfs;
     if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;
     if (payload.northbound) data.northbound = payload.northbound;
     if (payload.fundamentals) data.fundamentals = payload.fundamentals;
+    if (payload.popularity) data.popularity = payload.popularity;
+    if (payload.announcements) data.announcements = payload.announcements;
     if (payload.yahooChart) data.yahooChart = payload.yahooChart;
     if (Array.isArray(payload.indices) && payload.indices.length) {
       data.indices = payload.indices.map((index) => [index.name, index.pct]);

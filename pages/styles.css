@@ -599,6 +599,15 @@ th {
   font-weight: 650;
 }
 
+td a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+td a:hover {
+  text-decoration: underline;
+}
+
 .up {
   color: var(--red);
 }

@@ -16,6 +16,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - State selector / display: 震荡行情.
 - Action: 加载复盘数据统计.
 - Expected output: market emotion metrics and replay statistics.
+- Clone enrichment: ETF资金排行、东财人气榜、涨停池/炸板池、北向资金 are wired into the Vercel market snapshot and LLM context.
 
 ## 量化因子选股
 
@@ -54,6 +55,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Actions: 加自选, 查询, 近半年, 近一年, 加载更多历史.
 - Chart modes: 分时(1分钟K), technical indicators.
 - Header metrics: stock name/code, price, percent change, volume, PE.
+- Clone enrichment: single-stock money flow, financial snapshot cache, Eastmoney popularity rank/keywords/related stocks and company announcements are wired into the quote page.
 - Drawing tools: trend line, ray, horizontal line, arrow, FIB, GANN, parallel line, clear drawings, zoom in, zoom out, reset.
 - Indicator controls: 刷新指标.
 - Indicator panels: 副图1 VOL, 副图2 MACD.
@@ -117,6 +119,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - Buy/hold/low-absorb/do-T prompts by stock/sector and horizon.
   - Market, volume, sector rotation, fund flow, popularity list prompts.
 - Wallet entry routes to 订阅账号与点数.
+- Clone enrichment: live prompt context includes ETF flow, hot rank, stock popularity, announcements, fundamentals and Yahoo/yfinance-compatible backup quotes.
 
 ## 订阅账号与点数
 
