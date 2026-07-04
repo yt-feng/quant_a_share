@@ -90,6 +90,6 @@
 - Cache slow financial and board/popularity endpoints in Vercel serverless memory while the function instance is warm.
 - Refresh a compact market snapshot on GitHub Actions during trading days, then use it as bundled read-only fallback in Vercel.
 - Refresh market once with `MARKET_CACHE_STOCK_LIMIT=8000` to collect the current live universe, then refresh compact BaoStock and financial snapshots, then refresh market again so the final `market-cache` includes the newly generated cache coverage.
-- If a public endpoint returns a much smaller A-share universe than the existing snapshot, the cache script preserves the richer previous market universe instead of shrinking the bundled fallback; if the current repository snapshot is already small, it can also pull the deployed Vercel `/api/market` payload as a richer full-market recovery source.
+- If a public endpoint returns a much smaller A-share universe than the existing snapshot, the cache script preserves the richer previous market universe instead of shrinking the bundled fallback; if the current repository snapshot is already small or has weak main-money coverage, it can also pull the deployed Vercel `/api/market` payload as a richer full-market and stock-feature recovery source.
 - Return compact normalized JSON to the frontend.
 - Use sample data only when every online source fails.

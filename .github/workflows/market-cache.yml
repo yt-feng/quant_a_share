@@ -23,6 +23,7 @@ jobs:
       MARKET_CACHE_STOCK_LIMIT: "8000"
       MARKET_CACHE_REMOTE_FALLBACK_URL: "https://quant-a-share.vercel.app/api/market"
       MARKET_CACHE_REMOTE_FALLBACK_MIN_STOCKS: "4000"
+      MARKET_CACHE_REMOTE_MONEY_MIN_RATIO: "0.7"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

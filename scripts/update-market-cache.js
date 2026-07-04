@@ -7,6 +7,10 @@ const outputPath = path.join(__dirname, "..", "pages", "data", "market-cache.jso
 const stockLimit = process.env.MARKET_CACHE_STOCK_LIMIT || "8000";
 const remoteFallbackUrl = process.env.MARKET_CACHE_REMOTE_FALLBACK_URL || "https://quant-a-share.vercel.app/api/market";
 const remoteFallbackMinStocks = Number(process.env.MARKET_CACHE_REMOTE_FALLBACK_MIN_STOCKS || 4000);
+const remoteMoneyCoverageMinRatio = Number(process.env.MARKET_CACHE_REMOTE_MONEY_MIN_RATIO || 0.7);
+const MONEY_FIELDS = ["mainNet", "mainRatio", "superNet", "superRatio", "bigNet", "bigRatio", "midNet", "midRatio", "smallNet", "smallRatio"];
+const FINANCIAL_FIELDS = ["financialCached", "roe", "revenue", "netProfit", "grossMargin", "debtRatio", "reportDate"];
+const HISTORY_FIELDS = ["baostockCached", "ma5Price", "ma20Price", "ma60Price", "pct20", "pct60", "high60", "low60", "historyDate"];
 
 function readExistingSnapshot() {
   try {
@@ -85,39 +89,174 @@ function preserveRicherMarketUniverse(snapshot, previous) {
   };
 }
 
+function stockKey(row) {
+  return String(row?.code || "").replace(/\D/g, "").slice(0, 6);
+}
+
+function hasMainMoney(row) {
+  return MONEY_FIELDS.some((field) => Number(row?.[field]) !== 0);
+}
+
+function hasPositive(row, field) {
+  return Number(row?.[field]) > 0;
+}
+
+function stockFeatureCoverage(rows = []) {
+  const count = (predicate) => rows.filter(predicate).length;
+  return {
+    total: rows.length,
+    mainMoney: count(hasMainMoney),
+    limitPool: count((row) => row.limitPool),
+    hotRank: count((row) => Number(row.hotRank) > 0),
+    financialCache: count((row) => row.financialCached),
+    baostockCache: count((row) => row.baostockCached),
+  };
+}
+
+function copyIfEmpty(target, source, field) {
+  if (target[field] === undefined || target[field] === null || target[field] === "" || Number(target[field]) === 0) {
+    if (source[field] !== undefined && source[field] !== null && source[field] !== "") target[field] = source[field];
+  }
+}
+
+function mergeStockFeatureRow(local, remote) {
+  if (!remote) return local;
+  const next = { ...local };
+  ["industry", "area", "concepts", "limitPool", "firstSealTime"].forEach((field) => copyIfEmpty(next, remote, field));
+  ["price", "pct", "change", "volume", "amount", "amplitude", "turnover", "pe", "pb", "volumeRatio", "totalMv", "circMv", "high", "low", "open", "preClose"].forEach((field) =>
+    copyIfEmpty(next, remote, field)
+  );
+  if (!hasMainMoney(next) && hasMainMoney(remote)) MONEY_FIELDS.forEach((field) => copyIfEmpty(next, remote, field));
+  if (!hasPositive(next, "hotRank") && hasPositive(remote, "hotRank")) {
+    next.hotRank = remote.hotRank;
+    next.hotRankChange = remote.hotRankChange;
+  }
+  if (!next.financialCached && remote.financialCached) FINANCIAL_FIELDS.forEach((field) => copyIfEmpty(next, remote, field));
+  if (!next.baostockCached && remote.baostockCached) HISTORY_FIELDS.forEach((field) => copyIfEmpty(next, remote, field));
+  if (!next.isLimitUp && remote.isLimitUp) next.isLimitUp = true;
+  if (!next.limitStreak && remote.limitStreak) next.limitStreak = remote.limitStreak;
+  if (!next.sealFund && remote.sealFund) next.sealFund = remote.sealFund;
+  return next;
+}
+
+function mergeRemoteStockFeatures(stocks = [], remoteStocks = []) {
+  const remoteByCode = new Map();
+  remoteStocks.forEach((row) => {
+    const key = stockKey(row);
+    if (key) remoteByCode.set(key, row);
+  });
+  return stocks.map((row) => mergeStockFeatureRow(row, remoteByCode.get(stockKey(row))));
+}
+
+function rebuildMarketMetrics(snapshot) {
+  const rows = snapshot.stocks || [];
+  if (!rows.length) return snapshot;
+  const up = rows.filter((row) => Number(row.pct) > 0).length;
+  const down = rows.filter((row) => Number(row.pct) < 0).length;
+  const flat = rows.length - up - down;
+  const amount = rows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+  const limitUp = rows.filter((row) => Number(row.pct) >= 9.8).length;
+  const limitDown = rows.filter((row) => Number(row.pct) <= -9.8).length;
+  const netFund = (snapshot.sectors || []).reduce((sum, row) => sum + (Number(row.netFund) || 0), 0);
+  const poolStats = snapshot.limitPools?.stats || {};
+  const etfStats = snapshot.etfs?.stats || {};
+  const featureCoverage = stockFeatureCoverage(rows);
+  return {
+    ...snapshot,
+    market: {
+      ...(snapshot.market || {}),
+      temperature: Math.round(((up / Math.max(up + down, 1)) * 70 + Math.min(amount / 200000000000, 1) * 30) * 10) / 10,
+      state: up >= down * 1.5 ? "强势行情" : up > down ? "震荡偏强" : up === down ? "震荡行情" : "弱势整理",
+      amountYi: Math.round((amount / 100000000) * 100) / 100,
+      netFundYi: Math.round((netFund / 100000000) * 100) / 100,
+      aboveMa5: Math.round((up / Math.max(rows.length, 1)) * 1000) / 10,
+      total: rows.length,
+      up,
+      down,
+      flat,
+      limitUp,
+      limitDown,
+      exactLimitUp: poolStats.limitUpCount || 0,
+      brokenLimit: poolStats.brokenCount || 0,
+      strongPool: poolStats.strongCount || 0,
+      maxStreak: poolStats.maxStreak || 0,
+      sealFundYi: poolStats.sealFundYi || 0,
+      northNetBuyYi: snapshot.northbound?.northNetBuyYi || 0,
+      northNetInYi: snapshot.northbound?.northNetInYi || 0,
+      etfMainNetYi: etfStats.mainNetYi || 0,
+      etfCount: etfStats.total || snapshot.etfs?.rows?.length || 0,
+      limitDistribution: { up, down, flat, limitUp, limitDown },
+    },
+    stockUniverse: {
+      ...(snapshot.stockUniverse || {}),
+      total: rows.length,
+      returned: rows.length,
+      limit: Number(stockLimit) || rows.length,
+      featureCoverage,
+    },
+    featureCoverage,
+    dataCoverage: {
+      ...(snapshot.dataCoverage || {}),
+      stocks: rows.length,
+      stockUniverseTotal: rows.length,
+    },
+  };
+}
+
 async function preserveRemoteMarketUniverse(snapshot) {
   const currentCount = snapshot.stocks?.length || 0;
-  if (currentCount >= remoteFallbackMinStocks) return snapshot;
+  const currentCoverage = stockFeatureCoverage(snapshot.stocks || []);
+  const shouldCheckRemote = currentCount < remoteFallbackMinStocks || (currentCount > 1000 && currentCoverage.mainMoney / currentCount < remoteMoneyCoverageMinRatio);
+  if (!shouldCheckRemote) return rebuildMarketMetrics(snapshot);
   try {
     const remote = await fetchRemoteFallback();
     const remoteCount = remote?.stocks?.length || 0;
-    if (!remote?.ok || remoteCount <= currentCount * 1.25) return snapshot;
-    return {
-      ...snapshot,
-      source: `${snapshot.source}+remote-market-universe-preserved`,
-      stocks: remote.stocks,
-      stockUniverse: remote.stockUniverse,
-      featureCoverage: remote.featureCoverage || remote.stockUniverse?.featureCoverage || snapshot.featureCoverage,
-      dataCoverage: {
-        ...(snapshot.dataCoverage || {}),
-        stocks: remoteCount,
-        stockUniverseTotal: remote.stockUniverse?.total || remoteCount,
-      },
-      cacheSnapshot: {
-        ...(snapshot.cacheSnapshot || {}),
-        preservedMarketUniverseFromRemote: remote.cacheSnapshot?.generatedAt || remote.asOf || "",
-        preservedRemoteStockCount: remoteCount,
-        replacedStockCount: currentCount,
-      },
-    };
+    if (!remote?.ok) return rebuildMarketMetrics(snapshot);
+    if (remoteCount > currentCount * 1.25) {
+      return rebuildMarketMetrics({
+        ...snapshot,
+        source: `${snapshot.source}+remote-market-universe-preserved`,
+        market: remote.market || snapshot.market,
+        stocks: remote.stocks,
+        stockUniverse: remote.stockUniverse,
+        featureCoverage: remote.featureCoverage || remote.stockUniverse?.featureCoverage || snapshot.featureCoverage,
+        limitPoolCounts: remote.limitPoolCounts || snapshot.limitPoolCounts,
+        dataCoverage: {
+          ...(snapshot.dataCoverage || {}),
+          stocks: remoteCount,
+          stockUniverseTotal: remote.stockUniverse?.total || remoteCount,
+        },
+        cacheSnapshot: {
+          ...(snapshot.cacheSnapshot || {}),
+          preservedMarketUniverseFromRemote: remote.cacheSnapshot?.generatedAt || remote.asOf || "",
+          preservedRemoteStockCount: remoteCount,
+          replacedStockCount: currentCount,
+        },
+      });
+    }
+    const remoteCoverage = stockFeatureCoverage(remote.stocks || []);
+    if (remoteCoverage.mainMoney > currentCoverage.mainMoney * 1.25) {
+      const mergedStocks = mergeRemoteStockFeatures(snapshot.stocks || [], remote.stocks || []);
+      return rebuildMarketMetrics({
+        ...snapshot,
+        source: `${snapshot.source}+remote-stock-features-merged`,
+        stocks: mergedStocks,
+        cacheSnapshot: {
+          ...(snapshot.cacheSnapshot || {}),
+          mergedRemoteFeatureCount: remoteCoverage.mainMoney,
+          previousMainMoneyCount: currentCoverage.mainMoney,
+        },
+      });
+    }
+    return rebuildMarketMetrics(snapshot);
   } catch (error) {
-    return {
+    return rebuildMarketMetrics({
       ...snapshot,
       cacheSnapshot: {
         ...(snapshot.cacheSnapshot || {}),
         remoteFallbackError: error.message,
       },
-    };
+    });
   }
 }
 
