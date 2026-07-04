@@ -44,6 +44,7 @@ const data = {
     ["高压快充", 1.35, 2, 53, 285.97, "汉宇集团", 16.13],
     ["黄金概念", 5.72, 3, 27, 352.85, "西部黄金", 10.02],
   ],
+  boardConstituents: { code: "", name: "", type: "", total: 0, returned: 0, rows: [], source: "" },
   limitPools: { date: "-", limitUp: [], broken: [], strong: [], stats: {} },
   etfs: { rows: [], stats: {} },
   moneyFlow: { rows: [], latest: null, sum5MainYi: 0 },
@@ -228,6 +229,7 @@ let sectorPreset = "all";
 let sectorSort = { field: "pct", direction: "desc" };
 let sectorRange = { min: "", max: "" };
 let sectorChartType = "bar";
+let selectedBoardCode = "";
 let llmTopicDate = "2026-07-03";
 let llmPoolDate = "2026-07-03";
 let llmSectorDate = "2026-07-03";
@@ -468,6 +470,7 @@ function loadSectorState() {
       max: stored.range?.max ?? sectorRange.max,
     };
     if (["bar", "pie"].includes(stored.chartType)) sectorChartType = stored.chartType;
+    selectedBoardCode = String(stored.selectedBoardCode || "").toUpperCase();
   } catch (error) {
     // Bad local storage should not block sector overview.
   }
@@ -485,6 +488,7 @@ function persistSectorState() {
         sort: sectorSort,
         range: sectorRange,
         chartType: sectorChartType,
+        selectedBoardCode,
         updatedAt: new Date().toISOString(),
       })
     );
@@ -592,6 +596,7 @@ function sourceCoverageRows() {
     ["东方财富A股池", data.stocks.length ? "核心接入" : "待返回", stockCoverageLabel(), data.asOf || data.cacheSnapshot?.generatedAt || "-", "实时股票池、估值、成交额、行业/概念标签"],
     ["东方财富行业", data.sectors.length ? "核心接入" : "待返回", `${data.sectors.length}个`, data.asOf || "-", "行业涨跌、上涨/下跌家数、资金流向"],
     ["东方财富概念", data.concepts.length ? "核心接入" : "待返回", `${data.concepts.length}个`, data.asOf || "-", "概念排名、领涨股、成交额"],
+    ["东财板块成分", data.boardConstituents?.rows?.length ? "核心接入" : "待选择", `${data.boardConstituents?.returned || data.boardConstituents?.rows?.length || 0}/${data.boardConstituents?.total || 0}`, data.boardConstituents?.code || "-", "行业/概念成分股、涨跌幅、成交额、行业与概念标签"],
     ["涨停池/炸板池", data.limitPools?.limitUp?.length ? "核心接入" : "待返回", `${data.limitPools?.limitUp?.length || 0}/${data.limitPools?.broken?.length || 0}/${data.limitPools?.strong?.length || 0}`, data.limitPools?.date || "-", "涨停、炸板、强势股三池"],
     ["ETF资金", data.etfs?.rows?.length ? "核心接入" : "待返回", `${data.etfs?.rows?.length || 0}只`, data.etfs?.stats?.updatedAt || data.asOf || "-", "ETF主力净额、成交额、折溢价"],
     ["个股资金流", flowRows.length ? "核心接入" : "待返回", `${flowRows.length}日`, latestFlow?.date || "-", "主力、超大单、大单分日资金"],
@@ -619,6 +624,7 @@ function sourceCoverageTable() {
     东方财富A股池: "stocks",
     东方财富行业: "sectors",
     东方财富概念: "concepts",
+    东财板块成分: "boardConstituents",
     "涨停池/炸板池": "limitPools",
     ETF资金: "etfs",
     个股资金流: "moneyFlow",
@@ -645,6 +651,7 @@ function sourceFreshnessRows() {
     sourceFreshnessInfo("stocks"),
     sourceFreshnessInfo("sectors"),
     sourceFreshnessInfo("concepts"),
+    sourceFreshnessInfo("boardConstituents"),
     sourceFreshnessInfo("limitPools"),
     sourceFreshnessInfo("etfs"),
     sourceFreshnessInfo("moneyFlow"),
@@ -667,6 +674,7 @@ function sourceFreshnessInfo(key) {
     stocks: "A股池",
     sectors: "行业",
     concepts: "概念",
+    boardConstituents: "板块成分",
     limitPools: "涨停池",
     etfs: "ETF资金",
     moneyFlow: "个股资金",
@@ -685,6 +693,7 @@ function sourceFreshnessInfo(key) {
     stocks: data.asOf || data.tradeDate,
     sectors: data.asOf || data.tradeDate,
     concepts: data.asOf || data.tradeDate,
+    boardConstituents: data.boardConstituents?.code || selectedBoardCode,
     limitPools: data.limitPools?.date || data.tradeDate,
     etfs: data.etfs?.stats?.updatedAt || data.asOf || data.tradeDate,
     moneyFlow: data.moneyFlow?.latest?.date || data.moneyFlow?.rows?.at?.(-1)?.date,
@@ -719,6 +728,7 @@ function freshnessSourceName(key) {
   if (key === "baostock") return "BaoStock";
   if (key === "yahooChart") return "Yahoo";
   if (key === "announcements") return "东财+巨潮";
+  if (key === "boardConstituents") return "东方财富";
   if (key === "disclosures") return "巨潮";
   if (key === "research") return "东财研报";
   if (key === "fundamentals") return data.fundamentals?.source || "东财+新浪";
@@ -867,6 +877,10 @@ function renderSectors() {
     <section class="panel" style="margin-top:14px">
       ${panelTitle(sectorDataset === "concepts" ? "概念板块数据" : "行业板块数据", actionGroup(freshnessTag(sectorDataset === "concepts" ? "concepts" : "sectors"), exportButton("sectors")))}
       ${sectorBoardTable(rows)}
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("板块成分股", actionGroup(boardConstituentBadge(), exportButton("boardConstituents")))}
+      ${boardConstituentTable()}
     </section>
   `;
 }
@@ -1023,6 +1037,7 @@ function industryBoardRows() {
     down: Number(row[5]) || 0,
     limit: Number(row[6]) || 0,
     fund: Number(row[7]) || 0,
+    code: row[8] || "",
     companies: Number(row[4] || 0) + Number(row[5] || 0) + Number(row[6] || 0),
     leader: "-",
     leaderPct: 0,
@@ -1040,6 +1055,7 @@ function conceptBoardRows() {
     down: 0,
     limit: 0,
     fund: Number(row[4]) || 0,
+    code: row[7] || "",
     companies: Number(row[3]) || 0,
     leader: row[5] || "-",
     leaderPct: Number(row[6]) || 0,
@@ -1067,14 +1083,55 @@ function sectorBoardTable(rows) {
   if (!rows.length) return `<div class="empty-state compact-empty"><strong>当前筛选没有数据</strong><span>可以放宽涨跌幅预设或范围条件。</span></div>`;
   if (sectorDataset === "concepts") {
     return simpleTable(
-      ["概念", "涨跌幅", "排名", "成分数", "成交额", "领涨股", "领涨幅"],
-      rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, row.companies, `${row.fund.toLocaleString()}亿`, escapeHtml(row.leader), `${signed(row.leaderPct)}%`])
+      ["概念", "涨跌幅", "排名", "成分数", "成交额", "领涨股", "领涨幅", "操作"],
+      rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, row.companies, `${row.fund.toLocaleString()}亿`, escapeHtml(row.leader), `${signed(row.leaderPct)}%`, boardActionButton(row)])
     );
   }
   return simpleTable(
-    ["名称", "涨跌幅", "排名", "排名变化", "上涨家数", "下跌家数", "涨停家数", "资金流向(亿)"],
-    rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, signed(row.rankChange, 0), row.up, row.down, row.limit, signed(row.fund)])
+    ["名称", "涨跌幅", "排名", "排名变化", "上涨家数", "下跌家数", "涨停家数", "资金流向(亿)", "操作"],
+    rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, signed(row.rankChange, 0), row.up, row.down, row.limit, signed(row.fund), boardActionButton(row)])
   );
+}
+
+function boardActionButton(row) {
+  if (!row.code) return "-";
+  return `<button class="ghost-button table-action" data-open-board="${escapeHtml(row.code)}">${selectedBoardCode === row.code ? "已选" : "成分"}</button>`;
+}
+
+function boardConstituentBadge() {
+  const board = selectedBoardRow();
+  const payload = data.boardConstituents || {};
+  if (!selectedBoardCode) return tag("先在板块表选择成分");
+  const total = Number(payload.total) || Number(board?.companies) || payload.rows?.length || 0;
+  const returned = Number(payload.returned) || payload.rows?.length || 0;
+  return tag(`${board?.name || payload.name || selectedBoardCode} ${returned || 0}/${total || 0}`, "info");
+}
+
+function boardConstituentTable() {
+  const rows = data.boardConstituents?.rows || [];
+  if (!selectedBoardCode) return `<div class="empty-state compact-empty"><strong>选择一个行业或概念</strong><span>点击上方表格里的“成分”即可拉取东财板块成分股。</span></div>`;
+  if (!rows.length) return `<div class="empty-state compact-empty"><strong>成分股暂未返回</strong><span>可以点刷新重新拉取公开行情。</span></div>`;
+  return simpleTable(
+    ["排名", "代码", "名称", "最新价", "涨跌幅", "成交额", "换手率", "主力净额", "行业", "概念", "行情"],
+    rows.slice(0, 120).map((row) => [
+      row.rank,
+      row.code,
+      row.name,
+      row.price ? row.price.toFixed(2) : "-",
+      `${signed(row.pct)}%`,
+      `${yi(row.amount)}亿`,
+      `${plainSigned(row.turnover || 0, 2, "%")}`,
+      `${plainSigned(yi(row.netFund), 2, "亿")}`,
+      row.industry || "-",
+      row.concepts || "-",
+      `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`,
+    ])
+  );
+}
+
+function selectedBoardRow() {
+  const rows = [...industryBoardRows(), ...conceptBoardRows()];
+  return rows.find((row) => row.code === selectedBoardCode) || null;
 }
 
 function exportCsv(key) {
@@ -1104,6 +1161,8 @@ function exportRowsFor(key) {
       return exportPayload("factor-screener", screenerExportHeaders(), screenerExportRows());
     case "sectors":
       return sectorExportPayload();
+    case "boardConstituents":
+      return exportPayload(`board-constituents-${selectedBoardCode || "board"}`, ["排名", "板块代码", "板块名称", "代码", "名称", "最新价", "涨跌幅", "成交额_亿", "换手率", "主力净额_亿", "行业", "地域", "概念"], boardConstituentExportRows());
     case "moneyFlow":
       return exportPayload(`money-flow-${selectedQuote}`, ["日期", "收盘", "涨跌幅", "主力净额_亿", "超大单_亿", "大单_亿", "中单_亿", "小单_亿", "主力占比", "超大单占比", "大单占比"], (data.moneyFlow.rows || []).map((row) => [row.date, row.close, row.pct, yi(row.mainNet), yi(row.superNet), yi(row.bigNet), yi(row.midNet), yi(row.smallNet), row.mainRatio, row.superRatio, row.bigRatio]));
     case "fundamentals":
@@ -1146,6 +1205,25 @@ function exportRowsFor(key) {
   }
 }
 
+function boardConstituentExportRows() {
+  const board = selectedBoardRow();
+  return (data.boardConstituents?.rows || []).map((row) => [
+    row.rank,
+    selectedBoardCode,
+    board?.name || data.boardConstituents?.name || "",
+    row.code,
+    row.name,
+    row.price,
+    row.pct,
+    yi(row.amount),
+    row.turnover,
+    yi(row.netFund),
+    row.industry,
+    row.area,
+    row.concepts,
+  ]);
+}
+
 function exportPayload(label, headers, rows) {
   const date = compactDateValue(activeRequestTradeDate()) || compactDateValue(new Date().toISOString().slice(0, 10));
   return {
@@ -1172,6 +1250,7 @@ function sourceCoverageExportRows() {
     东方财富A股池: "stocks",
     东方财富行业: "sectors",
     东方财富概念: "concepts",
+    东财板块成分: "boardConstituents",
     "涨停池/炸板池": "limitPools",
     ETF资金: "etfs",
     个股资金流: "moneyFlow",
@@ -3487,8 +3566,18 @@ function attachEvents() {
   document.querySelectorAll("[data-sector-dataset]").forEach((input) => {
     input.addEventListener("change", () => {
       sectorDataset = input.dataset.sectorDataset === "concepts" ? "concepts" : "sectors";
+      selectedBoardCode = "";
+      data.boardConstituents = { code: "", name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
       persistSectorState();
       render();
+    });
+  });
+  document.querySelectorAll("[data-open-board]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedBoardCode = String(button.dataset.openBoard || "").toUpperCase();
+      persistSectorState();
+      showToast("正在加载板块成分股。", "info");
+      loadMarketSnapshot();
     });
   });
   document.querySelectorAll("[data-sector-preset]").forEach((button) => {
@@ -3536,6 +3625,8 @@ function attachEvents() {
     sectorChartType = "bar";
     sectorStartDate = "2026-07-03";
     sectorEndDate = "2026-07-03";
+    selectedBoardCode = "";
+    data.boardConstituents = { code: "", name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
     persistSectorState();
     render();
   });
@@ -3821,6 +3912,7 @@ function contextForModule(moduleName) {
       sort: sectorSort,
       range: sectorRange,
       chartType: sectorChartType,
+      selectedBoardCode,
     },
     aiControls: {
       realtime: aiRealtime,
@@ -3833,6 +3925,12 @@ function contextForModule(moduleName) {
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
     concepts: data.concepts.slice(0, 8),
+    boardConstituents: {
+      code: data.boardConstituents?.code,
+      name: data.boardConstituents?.name,
+      total: data.boardConstituents?.total,
+      rows: data.boardConstituents?.rows?.slice(0, 20) || [],
+    },
     stocks: data.stocks.slice(0, 8),
     screener: {
       activeFactors: Array.from(activeFactors),
@@ -3964,6 +4062,7 @@ async function loadMarketSnapshot() {
     const params = new URLSearchParams({ symbol: selectedQuote });
     const tradeDate = compactDateValue(activeRequestTradeDate());
     if (tradeDate) params.set("date", tradeDate);
+    if (selectedBoardCode) params.set("boardCode", selectedBoardCode);
     const response = await fetch(`${apiBase()}/api/market?${params.toString()}`, { cache: "no-store" });
     const payload = await response.json();
     if (!payload.ok) return;
@@ -4001,6 +4100,8 @@ async function loadMarketSnapshot() {
         sector.downCount || 0,
         sector.flatCount || 0,
         Math.round(((sector.netFund || 0) / 100000000) * 100) / 100,
+        sector.code || "",
+        yi(sector.amount || 0),
       ]);
     }
     if (Array.isArray(payload.concepts) && payload.concepts.length) {
@@ -4012,8 +4113,10 @@ async function loadMarketSnapshot() {
         yi(concept.amount || 0),
         concept.leader?.name || "-",
         concept.leader?.pct || 0,
+        concept.code || "",
       ]);
     }
+    data.boardConstituents = payload.boardConstituents || { code: selectedBoardCode, name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
     if (payload.limitPools) data.limitPools = payload.limitPools;
     if (payload.etfs) data.etfs = payload.etfs;
     if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;

@@ -56,6 +56,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Table columns: ID, 名称, 日期, 涨跌幅, 排名, 排名变化, 上涨家数, 下跌家数, 涨停家数, 资金流向(亿).
 - Clone enrichment: dataset switch, preset chips, range inputs, sort selectors and chart mode now update the visible table and charts instead of acting as display-only controls.
 - Clone enrichment: date range now persists and is sent as the active market date when refreshing public board data.
+- Clone enrichment: industry/concept rows now expose a 成分 action that pulls Eastmoney `fs=b:BKxxxx` constituent stocks, displays price/turnover/main-flow/industry/concept tags, exports them to CSV and passes the selected board constituents into LLM context.
 
 ## 行情
 

@@ -3,6 +3,7 @@ const path = require("path");
 
 const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21,f23,f100,f102,f103";
 const BOARD_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106,f128,f136,f140,f141";
+const BOARD_CONSTITUENT_FIELDS = `${STOCK_FIELDS},f62`;
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
 const EASTMONEY_A_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23";
 const EASTMONEY_A_SEGMENTS = ["m:1+t:2,m:1+t:23", "m:0+t:6,m:0+t:80"];
@@ -53,6 +54,7 @@ module.exports = async function handler(req, res) {
   const secid = secidFromSymbol(symbol);
   const tradeDate = String(req.query?.date || defaultTradeDate()).replace(/\D/g, "").slice(0, 8) || defaultTradeDate();
   const stockLimit = clientStockLimit(req);
+  const boardCode = normalizeBoardCode(req.query?.boardCode);
 
   const [
     eastmoneyStockResult,
@@ -79,6 +81,7 @@ module.exports = async function handler(req, res) {
     quote,
     tencentQuote,
     indexResult,
+    boardConstituents,
   ] = await Promise.all([
     fetchEastmoneyStockUniverse().catch(() => null),
     fetchSinaStockUniverse().catch(() => null),
@@ -104,6 +107,7 @@ module.exports = async function handler(req, res) {
     fetchEastmoneyQuote(secid).catch(() => null),
     fetchTencentQuote(symbol).catch(() => null),
     fetchEastmoneyIndices().catch(() => null),
+    boardCode ? fetchCached(`eastmoney:board-constituents:${boardCode}`, BOARD_CACHE_MS, () => fetchEastmoneyBoardConstituents(boardCode)).catch(() => null) : Promise.resolve(null),
   ]);
   const stockUniverse = pickStockUniverse(eastmoneyStockResult, sinaStockResult);
   const sectorUniverse = pickSectorUniverse(eastmoneySectorResult, sinaSectorResult);
@@ -120,6 +124,7 @@ module.exports = async function handler(req, res) {
     stockUniverse.source,
     sectorUniverse.source,
     conceptUniverse.source,
+    boardCode ? (boardConstituents?.rows?.length ? "eastmoney-board-constituents" : "board-constituents-fallback") : "",
     limitPools?.source || "limit-pool-fallback",
     etfs?.rows?.length ? "eastmoney-etf-spot" : "etf-fallback",
     moneyFlow?.rows?.length ? "eastmoney-moneyflow" : "moneyflow-fallback",
@@ -135,7 +140,7 @@ module.exports = async function handler(req, res) {
     baostock?.rows?.length ? "baostock-history-cache" : "baostock-cache-miss",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
     quote ? "eastmoney-quote" : tencentQuote ? "tencent-quote" : "quote-fallback",
-  ].join("+");
+  ].filter(Boolean).join("+");
 
   const market = buildMarketMetrics(stockUniverse.all, sectors, limitPools, northbound, etfs);
   const payload = {
@@ -154,6 +159,7 @@ module.exports = async function handler(req, res) {
     stocks: clientStocks,
     sectors,
     concepts: conceptUniverse.rows,
+    boardConstituents: annotateBoardConstituents(boardConstituents, boardCode, sectors, conceptUniverse.rows),
     limitPools: limitPools || { date: tradeDate, limitUp: [], broken: [], strong: [], stats: {} },
     etfs: etfs || { rows: [], stats: {} },
     moneyFlow: moneyFlow || { rows: [], latest: null, sum5MainYi: 0 },
@@ -396,6 +402,26 @@ function clientStockLimit(req) {
   const parsed = Math.round(Number(raw));
   if (!Number.isFinite(parsed)) return DEFAULT_CLIENT_STOCK_LIMIT;
   return Math.max(100, Math.min(MAX_CLIENT_STOCK_LIMIT, parsed));
+}
+
+function normalizeBoardCode(value) {
+  const code = String(value || "").trim().toUpperCase();
+  return /^BK\d{4,6}$/.test(code) ? code : "";
+}
+
+function annotateBoardConstituents(payload, boardCode, sectors = [], concepts = []) {
+  if (!boardCode) return { code: "", name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
+  const board = [...sectors, ...concepts].find((row) => row.code === boardCode);
+  const rows = payload?.rows || [];
+  return {
+    source: payload?.source || (rows.length ? "eastmoney-board-constituents" : ""),
+    code: boardCode,
+    name: board?.name || "",
+    type: board?.type || "",
+    total: payload?.total || rows.length,
+    returned: payload?.returned || rows.length,
+    rows,
+  };
 }
 
 function selectClientStocks(stockUniverse, limit) {
@@ -689,6 +715,51 @@ async function fetchEastmoneyBoards(fs, type, limit) {
     .flat()
     .slice(0, limit)
     .map((row, index) => normalizeEastmoneyBoardRow(row, index, type));
+}
+
+async function fetchEastmoneyBoardConstituents(boardCode) {
+  const limit = 500;
+  const pageSize = 100;
+  const firstPage = await fetchEastmoneyBoardConstituentPage(boardCode, 1, pageSize);
+  const total = Number(firstPage.total || firstPage.rows.length || 0);
+  const pageCount = Math.min(Math.ceil(total / pageSize), Math.ceil(limit / pageSize));
+  const pages = [firstPage.rows];
+  const pageNumbers = Array.from({ length: Math.max(0, pageCount - 1) }, (_, index) => index + 2);
+  const results = await Promise.all(pageNumbers.map((page) => fetchEastmoneyBoardConstituentPage(boardCode, page, pageSize).catch(() => ({ rows: [] }))));
+  pages.push(...results.map((result) => result.rows));
+  const rows = pages
+    .flat()
+    .slice(0, limit)
+    .map((row, index) => ({ ...normalizeStockRow(row), rank: index + 1, netFund: num(row.f62) }));
+  return {
+    source: "eastmoney-board-constituents",
+    code: boardCode,
+    total,
+    returned: rows.length,
+    rows,
+  };
+}
+
+async function fetchEastmoneyBoardConstituentPage(boardCode, page, pageSize) {
+  const params = new URLSearchParams({
+    pn: String(page),
+    pz: String(pageSize),
+    po: "1",
+    np: "1",
+    ut: "bd1d9ddb04089700cf9c27f6f7426281",
+    fltt: "2",
+    invt: "2",
+    fid: "f3",
+    fs: `b:${boardCode}`,
+    fields: BOARD_CONSTITUENT_FIELDS,
+  });
+  const payload = await fetchJson(`${EASTMONEY_ETF_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 3500,
+    headers: { Referer: "https://quote.eastmoney.com/" },
+  });
+  const rows = payload?.data?.diff || [];
+  return { total: payload?.data?.total || rows.length, rows };
 }
 
 async function fetchEastmoneyBoardPage(fs, page, pageSize) {
