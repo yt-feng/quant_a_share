@@ -26,6 +26,8 @@ const data = {
     ["沪深300", 0.19],
     ["中证500", -0.08],
   ],
+  limitDistribution: { up: 51, down: 59, flat: 0, limitUp: 0, limitDown: 0 },
+  quoteKlines: [],
   sectors: [
     ["黄金", 8.07, 1, 0, 24, 8, 6, -2.01],
     ["新能源车", 3.99, 2, 29, 268, 60, 20, 107.64],
@@ -255,7 +257,7 @@ function renderMarket() {
     <section class="grid metrics" style="margin-top:14px">${data.metrics.map((m) => metric(...m)).join("")}</section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel"><h2>大盘成交额趋势</h2><div id="amountChart" class="chart"></div></div>
-      <div class="panel"><h2>上涨占比趋势</h2><div id="breadthChart" class="chart"></div></div>
+      <div class="panel"><h2>上证涨跌趋势</h2><div id="breadthChart" class="chart"></div></div>
       <div class="panel"><h2>涨跌停板分布</h2><div id="limitChart" class="chart"></div></div>
       <div class="panel"><h2>指数涨跌幅</h2><div id="indexChart" class="chart"></div></div>
     </section>
@@ -1019,11 +1021,12 @@ async function loadMarketSnapshot() {
       data.metrics = [
         ["情绪温度", `${payload.market.temperature}%`, payload.market.state],
         ["成交额", `${payload.market.amountYi.toLocaleString()}亿`, marketSource],
-        ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `平盘 ${payload.market.flat}`],
+        ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `全市场 ${payload.market.total || "-"} 只，平盘 ${payload.market.flat}`],
         ["涨停/跌停", `${payload.market.limitUp} / ${payload.market.limitDown}`, "公开行情口径"],
-        ["站上MA5", "动态计算中", "详见因子表"],
-        ["资金净流入", "公开源更新", "板块资金见行业页"],
+        ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
+        ["资金净流入", `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿`, "板块资金聚合"],
       ];
+      data.limitDistribution = payload.market.limitDistribution || data.limitDistribution;
     }
     if (Array.isArray(payload.stocks) && payload.stocks.length) {
       const stockRows = payload.quote ? [payload.quote, ...payload.stocks.filter((stock) => stock.code !== payload.quote.code)] : payload.stocks;
@@ -1055,8 +1058,14 @@ async function loadMarketSnapshot() {
         Math.round(((sector.netFund || 0) / 100000000) * 100) / 100,
       ]);
     }
+    if (Array.isArray(payload.indices) && payload.indices.length) {
+      data.indices = payload.indices.map((index) => [index.name, index.pct]);
+    }
+    if (Array.isArray(payload.marketKlines) && payload.marketKlines.length) {
+      data.breadth = payload.marketKlines.slice(-30).map((row) => [row.date, Math.round((row.amount || 0) / 100000000), row.pct || 0]);
+    }
     if (Array.isArray(payload.klines) && payload.klines.length) {
-      data.breadth = payload.klines.slice(-30).map((row) => [row.date, Math.round((row.amount || 0) / 100000000), Math.max(20, Math.min(80, 50 + (row.pct || 0) * 3))]);
+      data.quoteKlines = payload.klines;
     }
     renderRuntimeShell();
     if (["market", "screener", "sectors", "quote", "llm", "subscription", "about"].includes(currentPage)) render();
@@ -1206,18 +1215,20 @@ function renderCharts() {
   if (currentPage === "market") {
     Plotly.newPlot("amountChart", [{ x: data.breadth.map((d) => d[0]), y: data.breadth.map((d) => d[1]), type: "scatter", mode: "lines+markers", line: { color: "#2563eb" } }], baseLayout, plotConfig);
     Plotly.newPlot("breadthChart", [{ x: data.breadth.map((d) => d[0]), y: data.breadth.map((d) => d[2]), type: "scatter", mode: "lines+markers", line: { color: "#0f766e" } }], baseLayout, plotConfig);
-    Plotly.newPlot("limitChart", [{ x: ["上涨", "下跌", "平盘", "涨停", "跌停"], y: [51, 59, 0, 0, 0], type: "bar", marker: { color: ["#dc2626", "#15803d", "#64748b", "#b91c1c", "#166534"] } }], baseLayout, plotConfig);
-    Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], baseLayout, plotConfig);
+    const distribution = data.limitDistribution || {};
+    Plotly.newPlot("limitChart", [{ x: ["上涨", "下跌", "平盘", "涨停", "跌停"], y: [distribution.up || 0, distribution.down || 0, distribution.flat || 0, distribution.limitUp || 0, distribution.limitDown || 0], type: "bar", marker: { color: ["#dc2626", "#15803d", "#64748b", "#b91c1c", "#166534"] } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "sectors") {
-    Plotly.newPlot("sectorFundChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[7]), type: "bar", marker: { color: data.sectors.map((d) => (d[7] >= 0 ? "#dc2626" : "#15803d")) } }], baseLayout, plotConfig);
-    Plotly.newPlot("sectorChangeChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[1]), type: "bar", marker: { color: "#b45309" } }], baseLayout, plotConfig);
+    Plotly.newPlot("sectorFundChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[7]), type: "bar", marker: { color: data.sectors.map((d) => (d[7] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    Plotly.newPlot("sectorChangeChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[1]), type: "bar", marker: { color: "#b45309" } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "quote") {
-    const x = data.breadth.map((d) => d[0]);
     const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
     const base = stock?.price || 100;
-    const close = data.breadth.map((d, index) => Number((base * (0.96 + index / Math.max(data.breadth.length, 1) * 0.08 + (Number(d[2]) - 50) / 1000)).toFixed(2)));
+    const quoteRows = data.quoteKlines.length ? data.quoteKlines.slice(-60) : data.breadth.map((d, index) => ({ date: d[0], close: Number((base * (0.96 + index / Math.max(data.breadth.length, 1) * 0.08 + (Number(d[2]) - 50) / 1000)).toFixed(2)) }));
+    const x = quoteRows.map((row) => row.date);
+    const close = quoteRows.map((row) => row.close);
     Plotly.newPlot(
       "quoteChart",
       [

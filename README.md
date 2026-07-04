@@ -47,6 +47,7 @@ npm run check:pages
 ## 已覆盖能力
 
 - 原站全量可见功能审计见：`docs/AIWUCHUAN_FULL_AUDIT.md`
+- 数据源路线图见：`docs/DATA_SOURCES.md`
 - 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、指数涨跌、趋势图。
 - 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选。
 - 板块与概念：行业/概念聚合、涨跌幅、排名变化、上涨/下跌家数、涨停家数、资金流向分布。
