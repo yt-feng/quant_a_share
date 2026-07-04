@@ -8,19 +8,22 @@
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   </head>
   <body>
+    <div id="globalProgress" class="global-progress" aria-hidden="true"><span></span></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
     <aside class="sidebar">
       <div class="brand">
         <span class="brand-mark">Q</span>
         <div>
           <strong>Quant A Share</strong>
-          <small>GitHub Pages 静态版</small>
+          <small id="runtime-label">多源投研工作台</small>
         </div>
       </div>
       <nav id="nav"></nav>
       <div class="sidebar-note">
         <span>数据模式</span>
-        <strong>演示数据</strong>
-        <p>完整 TuShare 实时版请运行 Streamlit。</p>
+        <strong id="source-label">检测中</strong>
+        <p id="source-note">正在识别当前部署环境。</p>
       </div>
     </aside>
 
@@ -31,6 +34,7 @@
           <p id="page-subtitle">公开数据研究看板，不含服务端密钥。</p>
         </div>
         <div class="top-actions">
+          <span id="backend-status" class="status-pill checking">后端检测中</span>
           <a class="link-button" href="https://github.com/yt-feng/quant_a_share" target="_blank" rel="noreferrer">GitHub</a>
           <a class="primary-button" href="./" aria-label="刷新页面">刷新</a>
         </div>

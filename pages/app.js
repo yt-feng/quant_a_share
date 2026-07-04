@@ -53,22 +53,38 @@ const VERCEL_BACKEND_URL = "";
 const pages = [
   ["market", "大盘情绪", "情绪温度、成交额、涨跌比与指数表现"],
   ["screener", "量化因子选股", "估值、趋势、资金和技术信号组合筛选"],
-  ["sectors", "板块与概念", "板块排名、资金流向和涨跌分布"],
+  ["sectors", "行业/概念", "板块排名、资金流向和涨跌分布"],
   ["quote", "行情", "单股行情、指标和操作计划"],
   ["watchlist", "自选", "本地演示自选分组"],
   ["llm", "LLM分析", "主题热点、选股池、板块看板和产业链问答"],
   ["qimen", "奇门遁甲", "事项起局、任务提交和解盘问答"],
   ["ai", "AI决策矩阵", "DeepSeek 服务端问答"],
-  ["about", "部署说明", "GitHub Pages 与 Vercel 后端说明"],
+  ["about", "复刻状态", "aiwuchuan 主模块覆盖进度与部署说明"],
+];
+
+const coverageRows = [
+  ["大盘情绪", "核心覆盖", "情绪温度、成交额、涨跌比、涨跌停、指数趋势；待接多源实时复盘统计。"],
+  ["量化因子选股", "核心覆盖", "估值、市值、换手、量比、均线、RPS、MACD/KDJ/RSI、VWAP 等因子骨架；待补完整策略市场、保存/共享。"],
+  ["行业/概念", "核心覆盖", "行业与概念排名、资金流、涨跌分布；待接 AKShare 实时行业/概念明细。"],
+  ["行情", "部分覆盖", "单股 K 线、指标和操作计划已做；待补 1 分钟分时、FIB/GANN、指标参数弹窗。"],
+  ["自选", "部分覆盖", "分组和自选列表演示已做；待补账号级云端持久化。"],
+  ["LLM分析", "部分覆盖", "主题热点、选股池、板块看板、产业链问答入口已做；待补完整五个 tab 的真实表格联动。"],
+  ["奇门遁甲", "部分覆盖", "起局表单、同步起局、任务提交、结果区已做；待补点数扣费、任务历史和完整排盘详情。"],
+  ["AI决策矩阵", "核心覆盖", "DeepSeek 后端问答、热门问题模式、行情上下文已接；待补对话历史和实时搜索开关。"],
+  ["订阅账号与点数", "演示覆盖", "商品/点数账本方向已覆盖；真实支付、订单核销、钱包账单还没有接生产流程。"],
 ];
 
 let currentPage = "market";
 let activeFactors = new Set(["ma20", "rps"]);
 let watchlist = ["300750.SZ", "688981.SH", "002230.SZ"];
+let toastTimer = 0;
+let progressTimers = [];
 
 function mount() {
+  renderRuntimeShell();
   renderNav();
   render();
+  checkBackendStatus();
 }
 
 function renderNav() {
@@ -160,10 +176,12 @@ function renderSectors() {
     </section>
     <section class="panel" style="margin-top:14px">
       <h2>板块数据</h2>
-      <table>
-        <thead><tr><th>名称</th><th>涨跌幅</th><th>排名</th><th>排名变化</th><th>上涨家数</th><th>下跌家数</th><th>涨停家数</th><th>资金流向(亿)</th></tr></thead>
-        <tbody>${data.sectors.map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${s[2]}</td><td>${signed(s[3], 0)}</td><td>${s[4]}</td><td>${s[5]}</td><td>${s[6]}</td><td>${signed(s[7])}</td></tr>`).join("")}</tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>名称</th><th>涨跌幅</th><th>排名</th><th>排名变化</th><th>上涨家数</th><th>下跌家数</th><th>涨停家数</th><th>资金流向(亿)</th></tr></thead>
+          <tbody>${data.sectors.map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${s[2]}</td><td>${signed(s[3], 0)}</td><td>${s[4]}</td><td>${s[5]}</td><td>${s[6]}</td><td>${signed(s[7])}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
     </section>
   `;
 }
@@ -295,6 +313,15 @@ function renderAbout() {
         <p>浏览器只调用后端接口，不直接持有密钥。</p>
       </div>
     </section>
+    <section class="panel" style="margin-top:14px">
+      <h2>与 aiwuchuan 主模块对齐情况</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>模块</th><th>状态</th><th>当前说明</th></tr></thead>
+          <tbody>${coverageRows.map(([module, status, note]) => `<tr><td>${module}</td><td>${statusBadge(status)}</td><td>${note}</td></tr>`).join("")}</tbody>
+        </table>
+      </div>
+    </section>
   `;
 }
 
@@ -312,21 +339,25 @@ function filteredStocks() {
 function stockTable(rows) {
   if (!rows.length) return `<p>暂无匹配数据。</p>`;
   return `
-    <table>
-      <thead><tr><th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>行业</th><th>RPS50</th><th>资金净流入</th><th>MACD</th></tr></thead>
-      <tbody>
-        ${rows.map((stock) => `<tr><td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.industry}</td><td>${stock.rps}</td><td>${signed(stock.fund)}亿</td><td>${stock.macd ? "金叉区" : "观察"}</td></tr>`).join("")}
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>行业</th><th>RPS50</th><th>资金净流入</th><th>MACD</th></tr></thead>
+        <tbody>
+          ${rows.map((stock) => `<tr><td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.industry}</td><td>${stock.rps}</td><td>${signed(stock.fund)}亿</td><td>${stock.macd ? "金叉区" : "观察"}</td></tr>`).join("")}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
 function sectorMiniTable() {
   return `
-    <table>
-      <thead><tr><th>板块</th><th>涨跌幅</th><th>资金流向</th><th>上涨家数</th></tr></thead>
-      <tbody>${data.sectors.slice(0, 6).map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${signed(s[7])}亿</td><td>${s[4]}</td></tr>`).join("")}</tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>板块</th><th>涨跌幅</th><th>资金流向</th><th>上涨家数</th></tr></thead>
+        <tbody>${data.sectors.slice(0, 6).map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${signed(s[7])}亿</td><td>${s[4]}</td></tr>`).join("")}</tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -344,8 +375,10 @@ function attachEvents() {
       const target = document.querySelector(`#${button.dataset.target}`);
       const question = document.querySelector("#question")?.value || "";
       const mode = document.querySelector("#mode")?.value || "专家模式";
-      target.textContent = "后端分析中...";
-      button.setAttribute("disabled", "disabled");
+      const defaultText = button.dataset.defaultText || button.textContent;
+      button.dataset.defaultText = defaultText;
+      const progress = startChatProgress(button.dataset.chatModule, target);
+      setButtonLoading(button, true);
       try {
         const result = await askBackend({
           module: button.dataset.chatModule,
@@ -353,11 +386,15 @@ function attachEvents() {
           mode,
           context: contextForModule(button.dataset.chatModule),
         });
+        progress.succeed();
         target.textContent = result.answer || "后端没有返回内容。";
+        showToast("分析完成，结果已更新。", "success");
       } catch (error) {
-        target.textContent = error.message || "后端调用失败。";
+        progress.fail();
+        target.innerHTML = errorState(error.message || "后端调用失败。");
+        showToast(error.message || "后端调用失败。", "error");
       } finally {
-        button.removeAttribute("disabled");
+        setButtonLoading(button, false);
       }
     });
   });
@@ -395,6 +432,59 @@ function apiBase() {
   return "";
 }
 
+function isGithubPages() {
+  return location.hostname.endsWith("github.io");
+}
+
+function isVercel() {
+  return location.hostname.endsWith("vercel.app");
+}
+
+function renderRuntimeShell() {
+  const runtime = document.querySelector("#runtime-label");
+  const source = document.querySelector("#source-label");
+  const note = document.querySelector("#source-note");
+  if (isGithubPages()) {
+    runtime.textContent = "GitHub Pages 展示版";
+    source.textContent = "演示数据";
+    note.textContent = "问答模块请打开 Vercel 后端版。";
+    setBackendStatus("展示版", "muted");
+    return;
+  }
+  if (isVercel()) {
+    runtime.textContent = "Vercel 后端版";
+    source.textContent = "DeepSeek 后端";
+    note.textContent = "问答请求经由 /api/chat 处理。";
+    return;
+  }
+  runtime.textContent = "本地预览";
+  source.textContent = "本地静态预览";
+  note.textContent = "部署后会自动识别后端状态。";
+}
+
+async function checkBackendStatus() {
+  if (isGithubPages() && !VERCEL_BACKEND_URL) return;
+  const base = apiBase();
+  try {
+    const response = await fetch(`${base}/api/health`, { cache: "no-store" });
+    const payload = await response.json();
+    if (payload.ok && payload.deepseekConfigured) {
+      setBackendStatus("后端在线", "online");
+      return;
+    }
+    setBackendStatus("后端待配置", "warning");
+  } catch (error) {
+    setBackendStatus("后端未连通", "error");
+  }
+}
+
+function setBackendStatus(text, state) {
+  const target = document.querySelector("#backend-status");
+  if (!target) return;
+  target.textContent = text;
+  target.className = `status-pill ${state}`;
+}
+
 async function askBackend(payload) {
   const base = apiBase();
   if (location.hostname.endsWith("github.io") && !base) {
@@ -410,6 +500,111 @@ async function askBackend(payload) {
     throw new Error(data.error || "后端调用失败。");
   }
   return data;
+}
+
+function startChatProgress(moduleName, target) {
+  const phases = {
+    ai_matrix: ["整理行情上下文", "请求 DeepSeek", "生成操作计划", "校验触发条件"],
+    llm_analysis: ["聚合主题与板块", "请求 DeepSeek", "生成研究结论", "整理观察顺序"],
+    qimen: ["同步起局信息", "请求 DeepSeek", "生成解盘结论", "整理变化节点"],
+  };
+  const labels = phases[moduleName] || ["整理上下文", "请求模型", "生成回答", "整理结果"];
+  const steps = [
+    [0, 8, labels[0]],
+    [450, 28, labels[1]],
+    [1300, 58, labels[2]],
+    [2600, 78, labels[3]],
+    [5200, 90, "等待模型收尾"],
+  ];
+  clearProgressTimer();
+  target.setAttribute("aria-busy", "true");
+  target.innerHTML = loadingState(labels[0]);
+  const progressBar = document.querySelector("#globalProgress");
+  progressBar?.classList.add("active");
+  steps.forEach(([delay, value, label]) => {
+    const timer = window.setTimeout(() => {
+      setGlobalProgress(value);
+      target.innerHTML = loadingState(label);
+    }, delay);
+    progressTimers.push(timer);
+  });
+  return {
+    succeed() {
+      clearProgressTimer();
+      target.removeAttribute("aria-busy");
+      setGlobalProgress(100);
+      window.setTimeout(() => progressBar?.classList.remove("active"), 450);
+    },
+    fail() {
+      clearProgressTimer();
+      target.removeAttribute("aria-busy");
+      progressBar?.classList.remove("active");
+      setGlobalProgress(0);
+    },
+  };
+}
+
+function clearProgressTimer() {
+  progressTimers.forEach((timer) => window.clearTimeout(timer));
+  progressTimers = [];
+}
+
+function setGlobalProgress(value) {
+  const bar = document.querySelector("#globalProgress span");
+  if (!bar) return;
+  bar.style.transform = `scaleX(${Math.max(0, Math.min(100, value)) / 100})`;
+}
+
+function loadingState(label) {
+  return `
+    <div class="loading-card">
+      <div class="loading-head"><span class="spinner"></span><strong>${label}</strong></div>
+      <div class="skeleton-line wide"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line short"></div>
+    </div>
+  `;
+}
+
+function errorState(message) {
+  return `<div class="error-card"><strong>调用没有完成</strong><span>${escapeHtml(message)}</span></div>`;
+}
+
+function setButtonLoading(button, loading) {
+  if (loading) {
+    button.setAttribute("disabled", "disabled");
+    button.classList.add("is-loading");
+    button.innerHTML = `<span class="spinner"></span><span>分析中</span>`;
+    return;
+  }
+  button.removeAttribute("disabled");
+  button.classList.remove("is-loading");
+  button.textContent = button.dataset.defaultText || "提交";
+}
+
+function showToast(message, state = "info") {
+  const toast = document.querySelector("#toast");
+  if (!toast) return;
+  window.clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.className = `toast show ${state}`;
+  toastTimer = window.setTimeout(() => {
+    toast.className = "toast";
+  }, 2600);
+}
+
+function statusBadge(status) {
+  const cls = status.includes("核心") ? "done" : status.includes("演示") ? "demo" : "partial";
+  return `<span class="coverage-badge ${cls}">${status}</span>`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 function renderCharts() {
