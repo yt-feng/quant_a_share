@@ -207,6 +207,12 @@ const products = [
   ["points", "点数 7000点", "旗舰", "点数包", "钱包点数充值 7000 点", 500, "7000 点", "人工优先开通 永久有效"],
 ];
 
+const accountProfile = {
+  account: "u_dtfrwm",
+  status: "正常",
+  expiresAt: "2027-01-04 02:47:55",
+};
+
 const pages = [
   ["market", "大盘情绪", "情绪温度、成交额、涨跌比与指数表现"],
   ["screener", "量化因子选股", "估值、趋势、资金和技术信号组合筛选"],
@@ -3639,8 +3645,9 @@ function renderSubscription() {
   const summary = walletSummary();
   return `
     <section class="grid metrics">
-      ${metric("当前账号", "u_dtfrwm", "登录状态")}
-      ${metric("账号状态", "正常", "有效期至 2027-01-04")}
+      ${metric("当前账号", accountProfile.account, "登录状态")}
+      ${metric("账号状态", accountProfile.status, `当前账号状态：${accountProfile.status}`)}
+      ${metric("有效期", `剩余 ${subscriptionDaysLeft()} 天`, accountProfile.expiresAt)}
       ${metric("可用点数", summary.balance, "钱包余额")}
       ${metric("冻结点数", summary.frozen, "结算占用")}
       ${metric("订阅商品", `${products.length} 个`, "点数包 / 订阅套餐")}
@@ -3682,6 +3689,12 @@ function renderSubscription() {
       </div>
     </section>
   `;
+}
+
+function subscriptionDaysLeft() {
+  const expires = new Date(accountProfile.expiresAt.replace(" ", "T") + "+08:00").getTime();
+  const days = Math.ceil((expires - Date.now()) / 86400000);
+  return Math.max(0, days);
 }
 
 function renderModal() {
