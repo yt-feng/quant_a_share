@@ -2812,6 +2812,9 @@ function normalizeOrder(order) {
     amount: Number(order.amount) || 0,
     points: Number(order.points) || 0,
     suffix: String(order.suffix || "-"),
+    contact: String(order.contact || CURRENT_ACCOUNT),
+    paymentMethod: String(order.paymentMethod || "支付宝"),
+    openMethod: String(order.openMethod || (order.productType === "sub" ? "人工协助开通" : "自动到账")),
     status: String(order.status || "待核验"),
     updatedAt: String(order.updatedAt || order.createdAt || nowLabel()),
   };
@@ -2823,7 +2826,7 @@ function productPoints(product) {
   return match ? Number(match[0]) : 0;
 }
 
-function createSubscriptionOrder(product, suffix) {
+function createSubscriptionOrder(product, details = {}) {
   const order = normalizeOrder({
     id: `od_${Date.now()}`,
     createdAt: nowLabel(),
@@ -2831,7 +2834,10 @@ function createSubscriptionOrder(product, suffix) {
     productType: product[0],
     amount: Number(product[5]) || 0,
     points: productPoints(product),
-    suffix: suffix || "-",
+    suffix: details.suffix || "-",
+    contact: details.contact || CURRENT_ACCOUNT,
+    paymentMethod: details.paymentMethod || "支付宝",
+    openMethod: details.openMethod || (product[0] === "sub" ? "人工协助开通" : "自动到账"),
     status: "待核验",
     updatedAt: nowLabel(),
   });
@@ -2847,12 +2853,15 @@ function orderStatusTag(status) {
 
 function subscriptionOrderTable() {
   return simpleTable(
-    ["时间", "商品", "金额", "点数", "订单后四位", "状态", "更新时间", "操作"],
+    ["时间", "商品", "金额", "点数", "开通方式", "支付方式", "联系方式", "订单后四位", "状态", "更新时间", "操作"],
     subscriptionOrders.map((order) => [
       escapeHtml(order.createdAt),
       escapeHtml(order.productName),
       `¥ ${order.amount.toFixed(2)}`,
       order.points || "-",
+      escapeHtml(order.openMethod),
+      escapeHtml(order.paymentMethod),
+      escapeHtml(order.contact),
       escapeHtml(order.suffix),
       orderStatusTag(order.status),
       escapeHtml(order.updatedAt),
@@ -4220,13 +4229,13 @@ function adminSubscriptionExportRows() {
     order.createdAt,
     order.id,
     order.productName,
-    CURRENT_ACCOUNT,
+    order.contact || CURRENT_ACCOUNT,
     order.suffix,
     order.amount,
     order.productType === "sub" ? "订阅套餐" : "点数充值",
     order.status,
     CURRENT_ACCOUNT,
-    order.status === "已开通" ? "已完成" : "人工核对",
+    order.openMethod || (order.status === "已开通" ? "已完成" : "人工核对"),
     order.status === "已开通" ? "已发账号或已充值点数" : "",
   ]);
 }
@@ -4399,15 +4408,32 @@ function modalBody() {
   }
   if (modal.type === "buy") {
     const product = products[modal.productIndex] || products[0];
+    const orderNo = `OD${Date.now().toString().slice(-8)}`;
     return `
+      <div class="detail-strip">${tag("确认购买信息", "info")}${tag("扫码支付")}${tag("填写订单号后四位")}</div>
       <div class="order-box">
+        <strong>订单概览</strong>
+        <span>订单号：${orderNo}</span>
         <strong>${product[1]}</strong>
-        <span>金额：¥ ${Number(product[5]).toFixed(2)}</span>
+        <span>商品名称：${product[1]}</span>
+        <span>单价：¥ ${Number(product[5]).toFixed(2)}</span>
         <span>数量：1</span>
+        <span>总金额：¥ ${Number(product[5]).toFixed(2)}</span>
       </div>
-      <div class="fake-qr">扫码支付</div>
-      <label><span class="label">订单号后四位</span><input id="orderSuffix" placeholder="填写订单号后四位" maxlength="4" /></label>
-      <div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-submit-order="${modal.productIndex}">提交核验</button></div>
+      <div class="form-grid" style="margin-top:12px">
+        <label><span class="label">选择开通方式</span><select id="orderOpenMethod"><option>自动到账</option><option ${selectedAttr(product[0] === "sub")}>人工协助开通</option></select></label>
+        <label><span class="label">选择支付方式</span><select id="orderPaymentMethod"><option>支付宝</option></select></label>
+        <label><span class="label">接收或联系信息</span><input id="orderContact" placeholder="请输入微信号、邮箱或手机号，用于订单异常联系或人工开通" value="${CURRENT_ACCOUNT}" /></label>
+        <label><span class="label">订单号后四位</span><input id="orderSuffix" inputmode="numeric" placeholder="请输入4位数字，例如 5475" maxlength="4" /></label>
+      </div>
+      <div class="fake-qr">支付宝收款二维码</div>
+      <div class="panel inset" style="margin-top:12px">
+        <h3>支付核对信息</h3>
+        <h3>如何查看订单号后四位</h3>
+        <p class="table-note">打开支付宝 APP → 我的 → 账单 → 点击刚刚支付的这一笔 → 更多 → 找到订单号，填写最后四位即可。</p>
+        <div class="detail-strip">${tag("我已完成支付", "info")}${tag("主要用于核对当前支付记录")}${tag("管理员核对后处理开通或充值")}</div>
+      </div>
+      <div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-submit-order="${modal.productIndex}">我已完成支付，提交核验</button></div>
     `;
   }
   return "";
@@ -5017,10 +5043,21 @@ function attachEvents() {
   document.querySelector("[data-submit-order]")?.addEventListener("click", (event) => {
     const product = products[Number(event.currentTarget.dataset.submitOrder)] || products[0];
     const suffix = String(document.querySelector("#orderSuffix")?.value || "").replace(/\D/g, "").slice(-4);
-    createSubscriptionOrder(product, suffix);
+    const contact = String(document.querySelector("#orderContact")?.value || "").trim();
+    const paymentMethod = String(document.querySelector("#orderPaymentMethod")?.value || "支付宝").trim();
+    const openMethod = String(document.querySelector("#orderOpenMethod")?.value || "").trim();
+    if (!contact) {
+      showToast("请先填写微信号、邮箱或手机号。", "info");
+      return;
+    }
+    if (!/^\d{4}$/.test(suffix)) {
+      showToast("请输入订单号后四位数字。", "info");
+      return;
+    }
+    createSubscriptionOrder(product, { suffix, contact, paymentMethod, openMethod });
     modal = null;
     currentPage = "subscription";
-    showToast("订单已进入待核验状态。", "success");
+    showToast(`已提交核对信息，订单号后四位 ${suffix} 已入库。`, "success");
     renderNav();
     render();
   });

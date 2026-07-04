@@ -185,7 +185,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 ## 订阅账号与点数
 
 - Page title: 订阅账号与点数.
-- Actions: 刷新, 查看钱包账单, 商品说明, 立即购买, 去钱包账单, 前往 Ai 决策矩阵.
+- Actions: 刷新, 查看钱包账单, 商品说明, 立即购买, 去钱包账单, 前往 Ai 决策矩阵, 确认并支付, 我已完成支付, 提交核验.
 - Account metrics: 当前账号, 账号状态, 有效期/剩余天数, 可用点数, 冻结点数.
 - Product filters: 全部商品 10, 点数包 7, 订阅套餐 3.
 - Subscription products:
@@ -195,7 +195,8 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Point packages:
   - 100 / 200 / 300 / 500 / 1000 / 2500 / 7000 points.
 - Product cards include title, tag, category, description, price, features, quantity, 商品说明, 立即购买.
-- Clone enrichment: purchase flow includes confirmation modal, QR/pay state, order suffix input, pending verification orders, mark-open action and point-credit ledger update for point packages.
+- Purchase flow fields: 订单概览, 商品名称, 单价, 数量, 总金额, 选择开通方式, 选择支付方式, 接收或联系信息, 支付宝收款二维码, 支付核对信息, 订单号后四位, 如何查看订单号后四位.
+- Clone enrichment: purchase flow includes confirmation modal, QR/pay state, contact info, opening method, payment method, order suffix input, pending verification orders, mark-open action and point-credit ledger update for point packages.
 - Clone enrichment: account expiry is shown as a separate card with dynamic days-left calculation against the audited account expiry time.
 
 ## 管理后台
