@@ -192,7 +192,8 @@ module.exports = async function handler(req, res) {
     marketKlines,
   };
 
-  return res.status(200).json(applySnapshotFallback(payload, readMarketSnapshot(), symbol));
+  const finalPayload = attachPayloadCoverage(applySnapshotFallback(payload, readMarketSnapshot(), symbol));
+  return res.status(200).json(finalPayload);
 };
 
 function setCors(req, res) {
@@ -371,6 +372,38 @@ function stockFeatureCoverage(rows = []) {
     financialCache: count((row) => row.financialCached),
     baostockCache: count((row) => row.baostockCached),
   };
+}
+
+function attachPayloadCoverage(payload) {
+  const featureCoverage = payload.stockUniverse?.featureCoverage || stockFeatureCoverage(payload.stocks || []);
+  const limitPools = payload.limitPools || {};
+  const limitPoolCounts = {
+    limitUp: Array.isArray(limitPools.limitUp) ? limitPools.limitUp.length : 0,
+    broken: Array.isArray(limitPools.broken) ? limitPools.broken.length : 0,
+    strong: Array.isArray(limitPools.strong) ? limitPools.strong.length : 0,
+    maxStreak: Number(limitPools.stats?.maxStreak) || 0,
+    sealFundYi: Number(limitPools.stats?.sealFundYi) || 0,
+  };
+  const dataCoverage = {
+    stocks: payload.stocks?.length || 0,
+    stockUniverseTotal: payload.stockUniverse?.total || payload.stocks?.length || 0,
+    sectors: payload.sectors?.length || 0,
+    concepts: payload.concepts?.length || 0,
+    boardConstituents: payload.boardConstituents?.rows?.length || 0,
+    limitPools: limitPoolCounts.limitUp + limitPoolCounts.broken + limitPoolCounts.strong,
+    etfs: payload.etfs?.rows?.length || 0,
+    moneyFlowRows: payload.moneyFlow?.rows?.length || 0,
+    northboundRows: payload.northbound?.rows?.length || 0,
+    fundamentalsRows: payload.fundamentals?.rows?.length || 0,
+    hotRank: payload.popularity?.rank?.items?.length || 0,
+    announcements: payload.announcements?.items?.length || 0,
+    disclosures: payload.disclosures?.relations?.length || 0,
+    researchReports: payload.research?.reports?.length || 0,
+    yahooKlines: payload.yahooChart?.klines?.length || 0,
+    minuteKlines: payload.minuteKlines?.length || 0,
+    baostockRows: payload.baostock?.rows?.length || 0,
+  };
+  return { ...payload, featureCoverage, limitPoolCounts, dataCoverage };
 }
 
 function stockKey(value) {

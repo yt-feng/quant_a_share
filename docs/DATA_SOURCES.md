@@ -7,6 +7,7 @@
 - Eastmoney public quote APIs
   - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates and the full frontend stock pool when the `clist` channel is reachable.
   - `/api/market` now returns `stockUniverse.total/returned/limit/source`; default frontend stock payload limit is 6000 rows and can be adjusted with `MARKET_STOCK_LIMIT`.
+  - `/api/market` also exposes top-level `featureCoverage`, `limitPoolCounts` and `dataCoverage` so production coverage can be verified directly without reverse-engineering nested fields.
   - The same A-share rows now include full-market main/super/big/mid/small order net-flow fields from Eastmoney `clist`, then merge limit-pool state, hot-rank state, financial-cache summaries and BaoStock historical summaries into each stock row for factor screening.
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
   - Concept board quotes from `m:90+t:3`, including pct/change, amount, fund flow,涨跌家数, constituent count and leading stock fields.
