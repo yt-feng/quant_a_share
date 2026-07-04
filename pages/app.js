@@ -231,6 +231,7 @@ const pages = [
   ["qimen", "奇门遁甲", "事项起局、任务提交和解盘问答"],
   ["ai", "AI决策矩阵", "DeepSeek 服务端问答"],
   ["subscription", "订阅账号与点数", "账号状态、点数钱包、商品与下单状态"],
+  ["admin", "管理后台", "账号、AI历史、订阅、奇门和运营流水"],
   ["about", "复刻状态", "aiwuchuan 主模块覆盖清单与部署说明"],
 ];
 
@@ -250,6 +251,7 @@ const coverageRows = [
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
   ["AI决策矩阵", "已对齐", "新对话、独立钱包账单、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答、最近对话记录和多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通、7000点旗舰包和钱包账单。"],
+  ["管理后台", "已对齐", "账号管理、Ai历史管理、奇门运营面板、订阅与充值、奇门任务监控和操作日志已承接为只读/本地操作后台。"],
 ];
 
 const dataSourceRows = [
@@ -309,6 +311,7 @@ let llmPoolControls = { query: "", source: "all", stage: "all", themeType: "all"
 let llmSectorControls = { query: "", sort: "fund3", direction: "desc", columns: "all", pageSize: 50, page: 1 };
 let llmStockControls = { query: "", sort: "pct5", direction: "desc", columns: "all", pageSize: 50, page: 1 };
 let productFilter = "all";
+let selectedAdminTab = "账号管理";
 let sectorDataset = "sectors";
 let sectorStartDate = "2026-07-03";
 let sectorEndDate = "2026-07-03";
@@ -441,6 +444,7 @@ function render() {
     ai: renderAi,
     aiWallet: renderAiWallet,
     subscription: renderSubscription,
+    admin: renderAdmin,
     about: renderAbout,
   };
   view.innerHTML = (renderers[currentPage] || renderers.market)();
@@ -1869,6 +1873,20 @@ function exportRowsFor(key) {
       );
     case "walletLedger":
       return exportPayload("wallet-ledger", ["时间", "类型", "点数变化", "变更后余额", "变更后冻结", "备注"], walletLedger);
+    case "adminUsers":
+      return exportPayload("admin-users", ["用户名", "角色", "状态", "到期时间", "每日设备上限", "白名单豁免", "创建时间"], adminUserExportRows());
+    case "adminAiHistory":
+      return exportPayload("admin-ai-history", ["用户名", "角色", "状态", "最近条数", "消息条数", "剩余点数", "冻结点数", "最近更新时间", "账号创建时间"], adminAiHistoryExportRows());
+    case "adminCodes":
+      return exportPayload("admin-qimen-codes", ["生成时间", "批次", "兑换码", "点数", "状态", "使用人", "备注"], adminCodeRows().map((row) => row.slice(0, 7)));
+    case "adminWalletLedger":
+      return exportPayload("admin-wallet-ledger", ["时间", "用户", "类型", "点数变化", "变更后余额", "备注"], adminWalletLedgerExportRows());
+    case "adminSubscription":
+      return exportPayload("admin-subscription-payments", ["提交时间", "订单号", "商品", "联系方式", "订单号后四位", "金额", "类型", "状态", "账号", "处理方式", "管理员备注"], adminSubscriptionExportRows());
+    case "adminQimenJobs":
+      return exportPayload("admin-qimen-jobs", ["提交时间", "用户", "类型", "目标", "状态", "档位", "重试次数", "点数", "错误原因"], adminQimenJobExportRows());
+    case "adminQimenLogs":
+      return exportPayload("admin-qimen-logs", ["时间", "管理员", "目标用户", "动作", "详情", "请求ID"], adminLogExportRows());
     default:
       return null;
   }
@@ -3799,6 +3817,385 @@ function renderSubscription() {
   `;
 }
 
+function renderAdmin() {
+  const tabs = ["账号管理", "Ai历史管理", "运营面板", "订阅与充值", "奇门任务监控", "操作日志"];
+  if (!tabs.includes(selectedAdminTab)) selectedAdminTab = tabs[0];
+  const wallet = walletSummary();
+  const pendingPayments = adminSubscriptionExportRows().filter((row) => row[7] === "待核验").length;
+  return `
+    <section class="grid metrics">
+      ${metric("账号总数", adminUserExportRows().length, "管理后台当前库中的全部账号")}
+      ${metric("有历史账号", aiHistory.length ? 1 : 0, "至少存在 1 条最近/我的历史")}
+      ${metric("历史会话总数", aiHistory.length, "Ai决策矩阵最近历史")}
+      ${metric("待核对", pendingPayments, "订阅与充值记录")}
+      ${metric("钱包用户数", adminUserExportRows().length, `总余额 ${wallet.balance} / 冻结 ${wallet.frozen}`)}
+      ${metric("任务总数", qimenTasks.length, `操作日志 ${adminLogExportRows().length} 条`)}
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("管理后台", actionGroup(`<button class="ghost-button" data-admin-action="refresh">刷新</button>`, exportButton(adminExportKey())))}
+      <div class="tabbar">${tabs.map((tabName) => `<button class="tab-button ${selectedAdminTab === tabName ? "active" : ""}" data-admin-tab="${tabName}">${tabName}</button>`).join("")}</div>
+      ${renderAdminTab()}
+    </section>
+  `;
+}
+
+function adminExportKey() {
+  return {
+    账号管理: "adminUsers",
+    Ai历史管理: "adminAiHistory",
+    运营面板: "adminWalletLedger",
+    订阅与充值: "adminSubscription",
+    奇门任务监控: "adminQimenJobs",
+    操作日志: "adminQimenLogs",
+  }[selectedAdminTab] || "adminUsers";
+}
+
+function renderAdminTab() {
+  if (selectedAdminTab === "Ai历史管理") return renderAdminAiHistory();
+  if (selectedAdminTab === "运营面板") return renderAdminBilling();
+  if (selectedAdminTab === "订阅与充值") return renderAdminSubscription();
+  if (selectedAdminTab === "奇门任务监控") return renderAdminQimenJobs();
+  if (selectedAdminTab === "操作日志") return renderAdminLogs();
+  return renderAdminUsers();
+}
+
+function renderAdminUsers() {
+  const rows = adminUserRows();
+  return `
+    <div class="form-grid" style="margin-top:14px">
+      <label><span class="label">搜索用户名</span><input placeholder="搜索用户名" value="${CURRENT_ACCOUNT}" /></label>
+      <button class="primary-button align-end" data-admin-action="search-users">搜索</button>
+      <button class="ghost-button align-end" data-admin-action="new-user">新建账号</button>
+      <button class="ghost-button align-end" data-admin-action="logs">操作日志</button>
+    </div>
+    <div style="margin-top:14px">
+      ${simpleTable(["用户名", "角色", "状态", "到期时间", "每日设备上限", "白名单豁免", "创建时间", "操作"], rows)}
+    </div>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel inset">
+        ${panelTitle("编辑账号")}
+        <div class="form-grid">
+          <label><span class="label">用户名</span><input value="${CURRENT_ACCOUNT}" /></label>
+          <label><span class="label">新密码</span><input placeholder="留空表示不修改" /></label>
+          <label class="segmented"><input type="checkbox" checked />是否启用</label>
+          <label><span class="label">选择到期时间（北京时间）</span><input value="${accountProfile.expiresAt}" /></label>
+        </div>
+        <p class="table-note">按北京时间生效，到达该时间后账号将无法继续使用。每日设备上限留空表示全局默认。</p>
+      </div>
+      <div class="panel inset">
+        ${panelTitle("管理员操作日志", exportButton("adminQimenLogs"))}
+        ${simpleTable(["操作人", "目标用户", "操作类型", "时间", "详情"], adminLogExportRows().slice(0, 5).map((row) => [row[1], row[2], row[3], row[0], row[4]]))}
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminAiHistory() {
+  const detail = aiHistory[0];
+  return `
+    <div class="toolbar" style="margin-top:14px">
+      <input class="inline-input" placeholder="搜索用户名" value="${CURRENT_ACCOUNT}" />
+      <button class="chip active">仅看有历史</button>
+      <button class="chip">全部账号</button>
+      <button class="ghost-button" data-admin-action="reset-ai-history-filter">重置</button>
+      <button class="ghost-button" data-admin-action="clear-ai-history">一键清空</button>
+    </div>
+    ${simpleTable(["用户名", "角色", "状态", "最近条数", "消息条数", "剩余点数", "冻结点数", "最近更新时间", "账号创建时间", "操作"], adminAiHistoryRows())}
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel inset">
+        ${panelTitle(`${CURRENT_ACCOUNT} 的 Ai 历史`, exportButton("aiHistory"))}
+        ${tableOrEmpty(["标题", "消息数", "研究深度", "放行状态", "叙事模式", "更新时间", "操作"], adminAiSessionRows(), "暂无 Ai 历史", "在 AI 决策矩阵发起问答后会出现在这里。")}
+      </div>
+      <div class="panel inset">
+        ${panelTitle("Ai 历史详情")}
+        ${
+          detail
+            ? `<div class="detail-strip">${tag(detail.mode || "标准")}${tag(detail.scene || "Ai决策矩阵")}${tag(detail.realtime ? "实时搜索" : "非实时")}${tag(`点数 ${detail.points || 0}`)}</div>
+              <h3>研究结论合同</h3>
+              <p class="table-note">${escapeHtml(detail.question)}</p>
+              <div class="answer">${escapeHtml(detail.answer || "（空内容）")}</div>
+              ${simpleTable(["结构化章节", "状态"], [["核心结论", "已覆盖"], ["证据链", detail.meta?.contextChars ? "已覆盖" : "未设置"], ["证据冲突标记", "无冲突"], ["下一步补查建议", "按需补查"]])}`
+            : `<div class="empty-state compact-empty"><strong>请选择左侧一条历史会话</strong><span>用户提问与 Ai 决策矩阵正文会显示在这里。</span></div>`
+        }
+      </div>
+    </section>
+  `;
+}
+
+function renderAdminBilling() {
+  const wallet = walletSummary();
+  const codes = adminCodeRows();
+  const successTasks = qimenTasks.filter((task) => ["完成", "本地完成"].includes(task.status)).length;
+  return `
+    <section class="grid metrics" style="margin-top:14px">
+      ${metric("钱包用户数", adminUserExportRows().length, "全站钱包")}
+      ${metric("总余额", wallet.balance, `/ 冻结 ${wallet.frozen}`)}
+      ${metric("任务成功率", qimenTasks.length ? `${Math.round((successTasks / qimenTasks.length) * 100)}%` : "0%", `总任务 ${qimenTasks.length}`)}
+      ${metric("兑换码总量", codes.length, `/ 已作废 ${codes.filter((row) => row[4] === "已作废").length}`)}
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel inset">
+        ${panelTitle("生成兑换码", actionGroup(`<button class="ghost-button" data-admin-action="generate-codes">生成兑换码</button>`, exportButton("adminCodes", "导出全部兑换码")))}
+        <div class="form-grid">
+          <label><span class="label">前缀</span><input value="QM" /></label>
+          <label><span class="label">点数</span><input type="number" value="100" /></label>
+          <label><span class="label">数量</span><input type="number" value="10" /></label>
+          <label><span class="label">备注</span><input placeholder="首充活动 / 补偿发放" value="首充活动" /></label>
+        </div>
+        <div class="detail-strip">${tag("最新批次：QM-20260704", "info")}${tag("筛选最新批次")}${tag("导出最新批次")}</div>
+      </div>
+      <div class="panel inset">
+        ${panelTitle("近7天账单")}
+        ${simpleTable(["统计时间", "Jobs 7天趋势", "兑换码7天趋势", "账单7天趋势"], [[nowLabel().slice(0, 10), qimenTasks.length, codes.length, walletLedger.length]])}
+      </div>
+    </section>
+    <section class="panel inset" style="margin-top:14px">
+      ${panelTitle("兑换码列表", exportButton("adminCodes", "导出当前筛选"))}
+      <div class="toolbar"><button class="chip active">全部状态</button><button class="chip">未使用</button><button class="chip">已使用</button><input class="inline-input" placeholder="搜索兑换码/批次/备注/用户名" /></div>
+      ${simpleTable(["生成时间", "批次", "兑换码", "点数", "状态", "使用人", "备注", "操作"], codes)}
+    </section>
+    <section class="panel inset" style="margin-top:14px">
+      ${panelTitle("全站钱包流水", exportButton("adminWalletLedger"))}
+      ${simpleTable(["时间", "用户", "类型", "点数变化", "变更后余额", "备注"], adminWalletLedgerRows())}
+    </section>
+  `;
+}
+
+function renderAdminSubscription() {
+  return `
+    <div class="toolbar" style="margin-top:14px">
+      <button class="chip active">全部状态</button>
+      <button class="chip">待核对</button>
+      <button class="chip">已处理</button>
+      <button class="chip">全部类型</button>
+      <input class="inline-input" placeholder="搜索订单号 / 联系方式 / 商品 / 后四位" />
+      <button class="ghost-button" data-admin-action="reset-payments">重置</button>
+    </div>
+    <section class="grid metrics" style="margin-top:14px">
+      ${metric("总记录数", adminSubscriptionExportRows().length, "当前筛选范围内")}
+      ${metric("待核对", adminSubscriptionExportRows().filter((row) => row[7] === "待核验").length, "仍需人工核对")}
+      ${metric("已处理", adminSubscriptionExportRows().filter((row) => row[7] !== "待核验").length, "已完成核对")}
+      ${metric("总金额", `¥ ${adminSubscriptionExportRows().reduce((sum, row) => sum + Number(row[5] || 0), 0).toFixed(2)}`, "当前筛选累计")}
+    </section>
+    <div style="margin-top:14px">
+      ${tableOrEmpty(["提交时间", "订单号", "商品", "联系方式", "订单号后四位", "金额", "类型", "状态", "账号", "处理方式", "管理员备注", "操作"], adminSubscriptionRows(), "暂无订阅与充值记录", "用户购买商品并提交订单号后四位后会显示人工核对记录。")}
+    </div>
+  `;
+}
+
+function renderAdminQimenJobs() {
+  return `
+    <div class="toolbar" style="margin-top:14px">
+      <button class="ghost-button" data-admin-action="refresh-qimen-jobs">刷新</button>
+      <button class="chip active">全部状态</button>
+      <button class="chip">排队中</button>
+      <button class="chip">解盘中</button>
+      <button class="chip">成功</button>
+      <button class="chip">失败</button>
+    </div>
+    <div style="margin-top:14px">
+      ${tableOrEmpty(["提交时间", "用户", "类型", "目标", "状态", "档位", "重试次数", "点数", "错误原因", "操作"], adminQimenJobRows(), "暂无奇门任务", "用户提交异步解盘后会显示排队、执行、完成和失败状态。")}
+    </div>
+  `;
+}
+
+function renderAdminLogs() {
+  return `
+    <div class="toolbar" style="margin-top:14px">
+      <button class="ghost-button" data-admin-action="refresh-admin-logs">刷新</button>
+      <button class="chip active">全部动作</button>
+      <button class="chip">奇门钱包调整</button>
+      <button class="chip">奇门任务重试</button>
+      <button class="chip">生成兑换码</button>
+      <input class="inline-input" placeholder="搜索管理员/目标用户/动作/详情" />
+    </div>
+    <div style="margin-top:14px">
+      ${simpleTable(["时间", "管理员", "目标用户", "动作", "详情", "请求ID"], adminLogRows())}
+    </div>
+  `;
+}
+
+function tableOrEmpty(headers, rows, title, message) {
+  if (rows.length) return simpleTable(headers, rows);
+  return `<div class="empty-state compact-empty"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(message)}</span></div>`;
+}
+
+function adminStatusCell(status) {
+  return tag(status, status === "启用" || status === "成功" || status === "已完成" ? "info" : "");
+}
+
+function adminUserExportRows() {
+  return [
+    [CURRENT_ACCOUNT, "普通用户", "启用", accountProfile.expiresAt, "全局默认", "是", "2026-07-03 02:47:55"],
+    ["admin", "管理员", "启用", "永久有效", "全局默认", "是", "2026-07-01 09:00:00"],
+  ];
+}
+
+function adminUserRows() {
+  return adminUserExportRows().map((row) => [
+    escapeHtml(row[0]),
+    row[1] === "管理员" ? tag("管理员", "info") : tag("普通用户"),
+    adminStatusCell(row[2]),
+    escapeHtml(row[3]),
+    escapeHtml(row[4]),
+    escapeHtml(row[5]),
+    escapeHtml(row[6]),
+    `<button class="ghost-button table-action" data-admin-action="edit-user">编辑</button><button class="ghost-button table-action" data-admin-action="set-permanent">设永久</button><button class="ghost-button table-action" data-admin-action="add-points">加点</button><button class="ghost-button table-action" data-admin-action="clear-device">清设备限制</button>`,
+  ]);
+}
+
+function adminAiHistoryExportRows() {
+  const wallet = walletSummary();
+  return [
+    [CURRENT_ACCOUNT, "普通用户", "启用", aiHistory.length, aiHistory.length * 2, wallet.balance, wallet.frozen, aiHistory[0]?.at || "-", "2026-07-03 02:47:55"],
+    ["admin", "管理员", "启用", 0, 0, "-", "-", "-", "2026-07-01 09:00:00"],
+  ];
+}
+
+function adminAiHistoryRows() {
+  return adminAiHistoryExportRows().map((row) => [
+    escapeHtml(row[0]),
+    row[1] === "管理员" ? tag("管理员", "info") : tag("普通用户"),
+    adminStatusCell(row[2]),
+    row[3],
+    row[4],
+    row[5],
+    row[6],
+    escapeHtml(row[7]),
+    escapeHtml(row[8]),
+    `<button class="ghost-button table-action" data-admin-action="view-ai-history">查看历史</button><button class="ghost-button table-action" data-admin-action="clear-ai-history">一键清空</button>`,
+  ]);
+}
+
+function adminAiSessionRows() {
+  return aiHistory.slice(0, 20).map((item) => [
+    escapeHtml(recentPromptLabel(item.question) || "新对话"),
+    2,
+    escapeHtml(item.mode || "标准"),
+    tag("可放行", "info"),
+    escapeHtml(item.scene || "Ai决策矩阵"),
+    escapeHtml(item.at || "-"),
+    `<button class="ghost-button table-action" data-admin-action="view-ai-detail">查看正文</button>`,
+  ]);
+}
+
+function adminCodeRows() {
+  return [
+    ["2026-07-04 09:00:00", "QM-20260704", "QM-ABCD-123456", 100, "未使用", "-", "首充活动", `<button class="ghost-button table-action" data-admin-action="void-code">作废</button>`],
+    ["2026-07-04 09:00:00", "QM-20260704", "QM-VIP7-700000", 7000, "未使用", "-", "旗舰点数包", `<button class="ghost-button table-action" data-admin-action="void-code">作废</button>`],
+    ["2026-07-03 21:42:54", "QM-INIT", "QM-INIT-GIFT", 100, "已使用", CURRENT_ACCOUNT, "钱包初始化赠送", "-"],
+  ].map((row) => row.map((cell, index) => (index === 7 || typeof cell === "number" ? cell : escapeHtml(cell))));
+}
+
+function adminWalletLedgerExportRows() {
+  return walletLedger.map((row) => [row[0], CURRENT_ACCOUNT, row[1], row[2], row[3], row[5]]);
+}
+
+function adminWalletLedgerRows() {
+  return adminWalletLedgerExportRows().map((row) => [
+    escapeHtml(row[0]),
+    escapeHtml(row[1]),
+    escapeHtml(row[2]),
+    signed(Number(row[3]) || 0, 1),
+    row[4],
+    escapeHtml(row[5]),
+  ]);
+}
+
+function adminSubscriptionExportRows() {
+  return subscriptionOrders.map((order) => [
+    order.createdAt,
+    order.id,
+    order.productName,
+    CURRENT_ACCOUNT,
+    order.suffix,
+    order.amount,
+    order.productType === "sub" ? "订阅套餐" : "点数充值",
+    order.status,
+    CURRENT_ACCOUNT,
+    order.status === "已开通" ? "已完成" : "人工核对",
+    order.status === "已开通" ? "已发账号或已充值点数" : "",
+  ]);
+}
+
+function adminSubscriptionRows() {
+  return adminSubscriptionExportRows().map((row) => [
+    escapeHtml(row[0]),
+    escapeHtml(row[1]),
+    escapeHtml(row[2]),
+    escapeHtml(row[3]),
+    escapeHtml(row[4]),
+    `¥ ${Number(row[5] || 0).toFixed(2)}`,
+    escapeHtml(row[6]),
+    orderStatusTag(row[7]),
+    escapeHtml(row[8]),
+    escapeHtml(row[9]),
+    escapeHtml(row[10]),
+    row[7] === "待核验" ? `<button class="ghost-button table-action" data-admin-action="mark-payment-done">已完成</button><button class="ghost-button table-action" data-admin-action="delete-payment">删除</button>` : `<button class="ghost-button table-action" data-admin-action="delete-payment">删除</button>`,
+  ]);
+}
+
+function adminQimenJobExportRows() {
+  return qimenTasks.map((task) => [
+    task.submittedAt,
+    CURRENT_ACCOUNT,
+    task.itemType,
+    task.target,
+    ["完成", "本地完成"].includes(task.status) ? "成功" : task.status,
+    task.mode,
+    0,
+    task.points,
+    task.backendNote || "",
+  ]);
+}
+
+function adminQimenJobRows() {
+  return adminQimenJobExportRows().map((row) => [
+    escapeHtml(row[0]),
+    escapeHtml(row[1]),
+    escapeHtml(row[2]),
+    escapeHtml(row[3]),
+    adminStatusCell(row[4]),
+    escapeHtml(row[5]),
+    row[6],
+    row[7],
+    escapeHtml(row[8] || "-"),
+    `<button class="ghost-button table-action" data-admin-action="view-qimen-job">查看详情</button><button class="ghost-button table-action" data-admin-action="retry-qimen-job">重试</button><button class="ghost-button table-action" data-admin-action="delete-qimen-history">删除历史</button>`,
+  ]);
+}
+
+function adminLogExportRows() {
+  const ledgerRows = walletLedger.slice(0, 20).map((row, index) => [
+    row[0],
+    "admin",
+    CURRENT_ACCOUNT,
+    row[1] === "充值" ? "奇门钱包调整" : row[1] === "冻结" ? "冻结" : row[1],
+    `${row[1]} ${row[2]} 点，备注：${row[5]}`,
+    `local-ledger-${index + 1}`,
+  ]);
+  const orderRows = subscriptionOrders.map((order, index) => [
+    order.updatedAt,
+    "admin",
+    CURRENT_ACCOUNT,
+    "订阅与充值",
+    `${order.productName} ${order.status}，订单后四位 ${order.suffix}`,
+    `local-payment-${index + 1}`,
+  ]);
+  const taskRows = qimenTasks.map((task, index) => [
+    task.updatedAt || task.submittedAt,
+    "admin",
+    CURRENT_ACCOUNT,
+    "奇门任务重试",
+    `${task.itemType} / ${task.target} / ${task.status}`,
+    `local-qimen-${index + 1}`,
+  ]);
+  return [...ledgerRows, ...orderRows, ...taskRows].sort((a, b) => String(b[0]).localeCompare(String(a[0])));
+}
+
+function adminLogRows() {
+  return adminLogExportRows().map((row) => row.map((cell) => escapeHtml(cell)));
+}
+
 function subscriptionDaysLeft() {
   const expires = new Date(accountProfile.expiresAt.replace(" ", "T") + "+08:00").getTime();
   const days = Math.ceil((expires - Date.now()) / 86400000);
@@ -4543,6 +4940,18 @@ function attachEvents() {
     button.addEventListener("click", () => {
       selectedLlmTab = button.dataset.llmTab;
       persistLlmState();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedAdminTab = button.dataset.adminTab;
+      render();
+    });
+  });
+  document.querySelectorAll("[data-admin-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+      showToast("管理后台操作已在本地视图记录。", "success");
       render();
     });
   });

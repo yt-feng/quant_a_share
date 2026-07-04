@@ -193,3 +193,15 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Product cards include title, tag, category, description, price, features, quantity, 商品说明, 立即购买.
 - Clone enrichment: purchase flow includes confirmation modal, QR/pay state, order suffix input, pending verification orders, mark-open action and point-credit ledger update for point packages.
 - Clone enrichment: account expiry is shown as a separate card with dynamic days-left calculation against the audited account expiry time.
+
+## 管理后台
+
+- Original admin routes: `/admin/users`, `/admin/ai-matrix/history`, `/admin/qimen/billing`, `/admin/subscription-payments`, `/admin/qimen/jobs`, `/admin/qimen/logs`.
+- Navigation label: 管理后台, visible for admin accounts on the original site.
+- 账号管理: 搜索用户名, 搜索, 刷新, 新建账号, 操作日志, 用户名, 角色, 管理员/普通用户, 状态, 到期时间, 永久有效, 每日设备上限, 全局默认, 白名单豁免, 创建时间, 编辑, 设永久, 加点, 清设备限制, 管理员操作日志.
+- Ai历史管理: 搜索用户名, 仅看有历史, 全部账号, 搜索, 重置, 刷新, 账号总数, 有历史账号, 历史会话总数, 历史消息总数, 查看历史, 一键清空, 研究深度, 放行状态, 叙事模式, 阻断缺口, 证据链, 补查审计, 搜索预算.
+- 奇门运营面板: 刷新, 导出全部兑换码, 导出未使用兑换码, 钱包用户数, 总余额, 冻结, 任务成功率, 兑换码总量, 近7天账单, 生成兑换码, 兑换码列表, 状态筛选, 批次筛选, 作废, 全站钱包流水.
+- 订阅与充值: 刷新, 导出当前筛选, 总记录数, 待核对, 已处理, 总金额, 状态筛选, 类型筛选, 搜索订单号 / 联系方式 / 商品 / 后四位, 标记已处理, 删除.
+- 奇门任务监控: 刷新, 提交时间, 用户, 类型, 目标, 状态, 档位, 重试次数, 点数, 错误原因, 查看详情, 重试, 删除历史.
+- 奇门管理员日志: 刷新, 动作筛选, 搜索管理员/目标用户/动作/详情, 时间, 管理员, 目标用户, 动作, 详情, 请求ID.
+- Clone enrichment: the admin surface is implemented as one 管理后台 page with six tabs, local account/order/wallet/task data, CSV exports and local operation feedback.
