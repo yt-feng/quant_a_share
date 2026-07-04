@@ -50,6 +50,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Actions: 刷新数据, 重置筛选.
 - Metrics: 总板块数, 平均涨跌幅, 总上涨家数, 总下跌家数, 总资金流向.
 - Table columns: ID, 名称, 日期, 涨跌幅, 排名, 排名变化, 上涨家数, 下跌家数, 涨停家数, 资金流向(亿).
+- Clone enrichment: dataset switch, preset chips, range inputs, sort selectors and chart mode now update the visible table and charts instead of acting as display-only controls.
 
 ## 行情
 
@@ -60,6 +61,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Header metrics: stock name/code, price, percent change, volume, PE.
 - Clone enrichment: single-stock money flow, financial snapshot cache, Eastmoney popularity rank/keywords/related stocks and company announcements are wired into the quote page.
 - Clone enrichment: quote charts now use Eastmoney 1-minute intraday trends, Eastmoney daily K-line, BaoStock cache and Yahoo backup as switchable sources. VOL/MACD parameters affect chart calculations, indicator switching updates sub-panels, and drawing-tool selections persist in browser storage as chart overlays.
+- Clone enrichment: date range, adjustment selector, 近半年/近一年 and 加载更多历史 now persist and filter the active quote chart rows.
 - Drawing tools: trend line, ray, horizontal line, arrow, FIB, GANN, parallel line, clear drawings, zoom in, zoom out, reset.
 - Indicator controls: 刷新指标.
 - Indicator panels: 副图1 VOL, 副图2 MACD.
@@ -140,6 +142,6 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - 账号订阅 半年, 368.00, 半年订阅, 账号开通 6 个月.
   - 账号订阅 一年, 688.00, 年度订阅, 人工优先开通 12 个月.
 - Point packages:
-  - 100 / 200 / 300 / 500 / 1000 / 2500 points and one additional high-tier package.
+  - 100 / 200 / 300 / 500 / 1000 / 2500 / 7000 points.
 - Product cards include title, tag, category, description, price, features, quantity, 商品说明, 立即购买.
 - Clone enrichment: purchase flow includes confirmation modal, QR/pay state, order suffix input, pending verification orders, mark-open action and point-credit ledger update for point packages.

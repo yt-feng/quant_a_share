@@ -147,8 +147,8 @@ const products = [
   ["points", "点数 300点", "热卖", "点数包", "钱包点数充值 300 点", 30, "300 点", "账号直充 永久有效"],
   ["points", "点数 500点", "性价比", "点数包", "钱包点数充值 500 点", 50, "500 点", "账号直充 永久有效"],
   ["points", "点数 1000点", "推荐", "点数包", "钱包点数充值 1000 点", 100, "1000 点", "账号直充 永久有效"],
-  ["points", "点数 2500点", "大额", "点数包", "钱包点数充值 2500 点", 250, "2500 点", "账号直充 永久有效"],
-  ["points", "点数 5000点", "深度", "点数包", "钱包点数充值 5000 点", 500, "5000 点", "账号直充 永久有效"],
+  ["points", "点数 2500点", "大额", "点数包", "钱包点数充值 2500 点", 200, "2500 点", "账号直充 永久有效"],
+  ["points", "点数 7000点", "旗舰", "点数包", "钱包点数充值 7000 点", 500, "7000 点", "人工优先开通 永久有效"],
 ];
 
 const pages = [
@@ -167,13 +167,13 @@ const pages = [
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
-  ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
-  ["行情", "已对齐", "股票查询、日期、复权、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
+  ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表；筛选条件会实时影响表格与图表。"],
+  ["行情", "已对齐", "股票查询、日期、复权、近半年/近一年、加载更多历史、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
-  ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通和钱包账单。"],
+  ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通、7000点旗舰包和钱包账单。"],
 ];
 
 const dataSourceRows = [
@@ -208,6 +208,11 @@ let progressTimers = [];
 let selectedLlmTab = "主题热点";
 let selectedTopicName = "";
 let productFilter = "all";
+let sectorDataset = "sectors";
+let sectorPreset = "all";
+let sectorSort = { field: "pct", direction: "desc" };
+let sectorRange = { min: "", max: "" };
+let sectorChartType = "bar";
 let sidebarCollapsed = false;
 let shellTheme = "light";
 let shellEventsAttached = false;
@@ -216,6 +221,10 @@ let modal = null;
 let marketSource = "演示数据";
 let selectedQuote = "600519";
 let quoteChartMode = "minute";
+let quoteStartDate = "2026-01-05";
+let quoteEndDate = "2026-07-04";
+let quoteAdjust = "qfq";
+let quoteHistoryLimit = 120;
 let quoteIndicator1 = "VOL";
 let quoteIndicator2 = "MACD";
 let quoteVolParams = { m1: 5, m2: 10 };
@@ -502,41 +511,45 @@ function renderScreener() {
 }
 
 function renderSectors() {
-  const totalUp = data.sectors.reduce((sum, row) => sum + Number(row[4] || 0), 0);
-  const totalDown = data.sectors.reduce((sum, row) => sum + Number(row[5] || 0), 0);
-  const totalFund = data.sectors.reduce((sum, row) => sum + Number(row[7] || 0), 0);
+  const rows = activeSectorRows();
+  const totalUp = rows.reduce((sum, row) => sum + Number(row.up || 0), 0);
+  const totalDown = rows.reduce((sum, row) => sum + Number(row.down || 0), 0);
+  const totalFund = rows.reduce((sum, row) => sum + Number(row.fund || 0), 0);
   const hasSectorFund = !marketSource.includes("sina-industry-sectors");
-  const avgConceptPct = data.concepts.reduce((sum, row) => sum + Number(row[1] || 0), 0) / Math.max(data.concepts.length, 1);
+  const avgPct = rows.reduce((sum, row) => sum + Number(row.pct || 0), 0) / Math.max(rows.length, 1);
+  const sourceCount = sectorDataset === "concepts" ? data.concepts.length : data.sectors.length;
   return `
     <section class="panel compact-panel">
       <div class="toolbar">
-        <label class="segmented"><input type="radio" checked />板块数据</label>
-        <label class="segmented"><input type="radio" />概念数据</label>
+        <label class="segmented"><input type="radio" name="sectorDataset" data-sector-dataset="sectors" ${sectorDataset === "sectors" ? "checked" : ""} />板块数据</label>
+        <label class="segmented"><input type="radio" name="sectorDataset" data-sector-dataset="concepts" ${sectorDataset === "concepts" ? "checked" : ""} />概念数据</label>
         <label><span class="label">开始日期</span><input value="2026-07-03" /></label>
         <label><span class="label">结束日期</span><input value="2026-07-03" /></label>
-        <button class="chip" data-toast="已应用：下跌(0~-5%)">下跌(0~-5%)</button>
-        <button class="chip" data-toast="已应用：上涨(0~5%)">上涨(0~5%)</button>
-        <button class="chip" data-toast="已应用：震荡(-10~10%)">震荡(-10~10%)</button>
+        <button class="chip ${sectorPreset === "down" ? "active" : ""}" data-sector-preset="down">下跌(0~-5%)</button>
+        <button class="chip ${sectorPreset === "up" ? "active" : ""}" data-sector-preset="up">上涨(0~5%)</button>
+        <button class="chip ${sectorPreset === "flat" ? "active" : ""}" data-sector-preset="flat">震荡(-10~10%)</button>
         <button class="primary-button" data-refresh-market="1">刷新数据</button>
-        <button class="ghost-button" data-toast="筛选已重置">重置筛选</button>
+        <button class="ghost-button" data-reset-sector-filters="1">重置筛选</button>
       </div>
     </section>
     <section class="grid metrics" style="margin-top:14px">
-      ${metric("总板块数", data.sectors.length, "公开行情")}
-      ${metric("平均涨跌幅", `${(data.sectors.reduce((s, r) => s + r[1], 0) / Math.max(data.sectors.length, 1)).toFixed(2)}%`, "排序口径")}
+      ${metric(sectorDataset === "concepts" ? "总概念数" : "总板块数", sourceCount, "公开行情")}
+      ${metric("当前筛选", `${rows.length} 条`, sectorPresetLabel())}
+      ${metric("平均涨跌幅", `${avgPct.toFixed(2)}%`, "当前筛选")}
       ${metric("总上涨家数", totalUp, "样本聚合")}
       ${metric("总下跌家数", totalDown, "样本聚合")}
       ${metric("总资金流向", hasSectorFund ? `${totalFund >= 0 ? "+" : ""}${totalFund.toFixed(2)}亿` : "无字段", hasSectorFund ? "公开源" : "当前板块源不含资金字段")}
-      ${metric("概念板块", data.concepts.length, `均涨跌 ${avgConceptPct.toFixed(2)}%`)}
+      ${metric("图表模式", sectorChartType === "pie" ? "饼图" : "柱状图", sectorSortLabel())}
     </section>
     <section class="panel compact-panel" style="margin-top:14px">
       <div class="form-grid">
-        <label><span class="label">排序字段</span><select><option>涨跌幅</option><option>资金流向</option><option>排名变化</option><option>上涨家数</option></select></label>
-        <label><span class="label">排序</span><select><option>降序</option><option>升序</option></select></label>
-        <label><span class="label">最小值</span><input type="number" placeholder="最小值" /></label>
-        <label><span class="label">最大值</span><input type="number" placeholder="最大值" /></label>
-        <label class="segmented"><input type="radio" checked />柱状图</label>
-        <label class="segmented"><input type="radio" />饼图</label>
+        <label><span class="label">排序字段</span><select data-sector-sort-field><option value="pct" ${selectedAttr(sectorSort.field === "pct")}>涨跌幅</option><option value="fund" ${selectedAttr(sectorSort.field === "fund")}>资金流向</option><option value="rankChange" ${selectedAttr(sectorSort.field === "rankChange")}>排名变化</option><option value="up" ${selectedAttr(sectorSort.field === "up")}>上涨家数</option></select></label>
+        <label><span class="label">排序</span><select data-sector-sort-direction><option value="desc" ${selectedAttr(sectorSort.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(sectorSort.direction === "asc")}>升序</option></select></label>
+        <label><span class="label">最小值</span><input id="sectorMin" type="number" placeholder="最小值" value="${escapeHtml(sectorRange.min)}" /></label>
+        <label><span class="label">最大值</span><input id="sectorMax" type="number" placeholder="最大值" value="${escapeHtml(sectorRange.max)}" /></label>
+        <button class="ghost-button align-end" data-apply-sector-range="1">应用范围</button>
+        <label class="segmented"><input type="radio" name="sectorChartType" data-sector-chart-type="bar" ${sectorChartType === "bar" ? "checked" : ""} />柱状图</label>
+        <label class="segmented"><input type="radio" name="sectorChartType" data-sector-chart-type="pie" ${sectorChartType === "pie" ? "checked" : ""} />饼图</label>
       </div>
     </section>
     <section class="grid two">
@@ -544,17 +557,8 @@ function renderSectors() {
       <div class="panel"><h2>涨跌幅排名</h2><div id="sectorChangeChart" class="chart"></div></div>
     </section>
     <section class="panel" style="margin-top:14px">
-      <h2>行业板块数据</h2>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>名称</th><th>涨跌幅</th><th>排名</th><th>排名变化</th><th>上涨家数</th><th>下跌家数</th><th>涨停家数</th><th>资金流向(亿)</th></tr></thead>
-          <tbody>${data.sectors.map((s) => `<tr><td>${s[0]}</td><td>${signed(s[1])}%</td><td>${s[2]}</td><td>${signed(s[3], 0)}</td><td>${s[4]}</td><td>${s[5]}</td><td>${s[6]}</td><td>${signed(s[7])}</td></tr>`).join("")}</tbody>
-        </table>
-      </div>
-    </section>
-    <section class="panel" style="margin-top:14px">
-      <h2>概念板块数据</h2>
-      ${simpleTable(["概念", "涨跌幅", "排名", "成分数", "成交额", "领涨股", "领涨幅"], data.concepts.slice(0, 40).map((row) => [row[0], `${signed(row[1])}%`, row[2], row[3], `${row[4].toLocaleString()}亿`, row[5], `${signed(row[6])}%`]))}
+      <h2>${sectorDataset === "concepts" ? "概念板块数据" : "行业板块数据"}</h2>
+      ${sectorBoardTable(rows)}
     </section>
   `;
 }
@@ -573,18 +577,21 @@ function renderQuote() {
       <div class="form-grid">
         <label><span class="label">股票名称</span><input placeholder="如 贵州茅台" value="${stock.name}" /></label>
         <label><span class="label">股票代码</span><input id="quoteCode" placeholder="如 600519" value="${stock.code.slice(0, 6)}" /></label>
-        <label><span class="label">开始日期</span><input value="2026-01-05" /></label>
-        <label><span class="label">结束日期</span><input value="2026-07-04" /></label>
-        <label><span class="label">复权</span><select><option>前复权(qfq)</option><option>后复权(hfq)</option><option>不复权</option></select></label>
+        <label><span class="label">开始日期</span><input id="quoteStartDate" type="date" value="${escapeHtml(quoteStartDate)}" /></label>
+        <label><span class="label">结束日期</span><input id="quoteEndDate" type="date" value="${escapeHtml(quoteEndDate)}" /></label>
+        <label><span class="label">复权</span><select id="quoteAdjust" data-quote-adjust><option value="qfq" ${selectedAttr(quoteAdjust === "qfq")}>前复权(qfq)</option><option value="hfq" ${selectedAttr(quoteAdjust === "hfq")}>后复权(hfq)</option><option value="none" ${selectedAttr(quoteAdjust === "none")}>不复权</option></select></label>
         <button class="ghost-button align-end" data-add-watch="${stock.code}">加自选</button>
         <button class="primary-button align-end" data-query-quote="1">查询</button>
       </div>
       <div class="toolbar" style="margin-top:12px">
+        <button class="chip" data-quote-range="half">近半年</button>
+        <button class="chip" data-quote-range="year">近一年</button>
+        <button class="ghost-button compact-button" data-load-more-history="1">加载更多历史</button>
         <button class="chip ${quoteChartMode === "minute" ? "active" : ""}" data-quote-mode="minute">分时</button>
         <button class="chip ${quoteChartMode === "daily" ? "active" : ""}" data-quote-mode="daily">日K</button>
         <button class="chip ${quoteChartMode === "baostock" ? "active" : ""}" data-quote-mode="baostock">BaoStock</button>
         <button class="chip ${quoteChartMode === "yahoo" ? "active" : ""}" data-quote-mode="yahoo">全球备份</button>
-        ${tag(`股票代码：${stock.code.slice(0, 6)} · ${chartLabel} ${quoteRows.length} 条`, "info")}
+        ${tag(`股票代码：${stock.code.slice(0, 6)} · ${chartLabel} ${quoteRows.length} 条 · ${quoteAdjustLabel()}`, "info")}
       </div>
     </section>
     <section class="grid metrics">
@@ -675,6 +682,93 @@ function renderQuote() {
   `;
 }
 
+function activeSectorRows() {
+  const rows = sectorDataset === "concepts" ? conceptBoardRows() : industryBoardRows();
+  const min = sectorRange.min === "" ? Number.NaN : Number(sectorRange.min);
+  const max = sectorRange.max === "" ? Number.NaN : Number(sectorRange.max);
+  return rows
+    .filter((row) => {
+      if (sectorPreset === "down" && !(row.pct <= 0 && row.pct >= -5)) return false;
+      if (sectorPreset === "up" && !(row.pct >= 0 && row.pct <= 5)) return false;
+      if (sectorPreset === "flat" && !(row.pct >= -10 && row.pct <= 10)) return false;
+      const value = sectorMetric(row, sectorSort.field);
+      if (Number.isFinite(min) && value < min) return false;
+      if (Number.isFinite(max) && value > max) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      const av = sectorMetric(a, sectorSort.field);
+      const bv = sectorMetric(b, sectorSort.field);
+      const primary = sectorSort.direction === "asc" ? av - bv : bv - av;
+      return primary || a.rank - b.rank;
+    });
+}
+
+function industryBoardRows() {
+  return data.sectors.map((row) => ({
+    type: "industry",
+    name: row[0],
+    pct: Number(row[1]) || 0,
+    rank: Number(row[2]) || 0,
+    rankChange: Number(row[3]) || 0,
+    up: Number(row[4]) || 0,
+    down: Number(row[5]) || 0,
+    limit: Number(row[6]) || 0,
+    fund: Number(row[7]) || 0,
+    companies: Number(row[4] || 0) + Number(row[5] || 0) + Number(row[6] || 0),
+    leader: "-",
+    leaderPct: 0,
+  }));
+}
+
+function conceptBoardRows() {
+  return data.concepts.map((row) => ({
+    type: "concept",
+    name: row[0],
+    pct: Number(row[1]) || 0,
+    rank: Number(row[2]) || 0,
+    rankChange: 0,
+    up: 0,
+    down: 0,
+    limit: 0,
+    fund: Number(row[4]) || 0,
+    companies: Number(row[3]) || 0,
+    leader: row[5] || "-",
+    leaderPct: Number(row[6]) || 0,
+  }));
+}
+
+function sectorMetric(row, field) {
+  if (field === "fund") return Number(row.fund) || 0;
+  if (field === "rankChange") return Number(row.rankChange) || 0;
+  if (field === "up") return Number(row.up) || 0;
+  return Number(row.pct) || 0;
+}
+
+function sectorSortLabel() {
+  const labels = { pct: "涨跌幅", fund: "资金流向", rankChange: "排名变化", up: "上涨家数" };
+  return `${labels[sectorSort.field] || "涨跌幅"} / ${sectorSort.direction === "asc" ? "升序" : "降序"}`;
+}
+
+function sectorPresetLabel() {
+  const labels = { all: "全部", down: "下跌(0~-5%)", up: "上涨(0~5%)", flat: "震荡(-10~10%)" };
+  return labels[sectorPreset] || "全部";
+}
+
+function sectorBoardTable(rows) {
+  if (!rows.length) return `<div class="empty-state compact-empty"><strong>当前筛选没有数据</strong><span>可以放宽涨跌幅预设或范围条件。</span></div>`;
+  if (sectorDataset === "concepts") {
+    return simpleTable(
+      ["概念", "涨跌幅", "排名", "成分数", "成交额", "领涨股", "领涨幅"],
+      rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, row.companies, `${row.fund.toLocaleString()}亿`, escapeHtml(row.leader), `${signed(row.leaderPct)}%`])
+    );
+  }
+  return simpleTable(
+    ["名称", "涨跌幅", "排名", "排名变化", "上涨家数", "下跌家数", "涨停家数", "资金流向(亿)"],
+    rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, signed(row.rankChange, 0), row.up, row.down, row.limit, signed(row.fund)])
+  );
+}
+
 function renderWatchlist() {
   const entries = watchlist
     .map((entry) => ({ entry, stock: data.stocks.find((stock) => stock.code === entry.code) }))
@@ -756,6 +850,10 @@ function loadQuoteState() {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_quote") || "null");
     if (!stored) return;
     if (["minute", "daily", "baostock", "yahoo"].includes(stored.chartMode)) quoteChartMode = stored.chartMode;
+    if (stored.startDate) quoteStartDate = normalizeDateValue(stored.startDate) || quoteStartDate;
+    if (stored.endDate) quoteEndDate = normalizeDateValue(stored.endDate) || quoteEndDate;
+    if (["qfq", "hfq", "none"].includes(stored.adjust)) quoteAdjust = stored.adjust;
+    quoteHistoryLimit = clampInt(stored.historyLimit, 60, 600, quoteHistoryLimit);
     if (stored.indicator1) quoteIndicator1 = String(stored.indicator1);
     if (stored.indicator2) quoteIndicator2 = String(stored.indicator2);
     quoteVolParams = {
@@ -779,6 +877,10 @@ function persistQuoteState() {
       "quant_a_share_quote",
       JSON.stringify({
         chartMode: quoteChartMode,
+        startDate: quoteStartDate,
+        endDate: quoteEndDate,
+        adjust: quoteAdjust,
+        historyLimit: quoteHistoryLimit,
         indicator1: quoteIndicator1,
         indicator2: quoteIndicator2,
         volParams: quoteVolParams,
@@ -1716,8 +1818,8 @@ function renderSubscription() {
   const summary = walletSummary();
   return `
     <section class="grid metrics">
-      ${metric("当前账号", "演示账号", "登录状态")}
-      ${metric("账号状态", "正常", "订阅与点数可用")}
+      ${metric("当前账号", "u_dtfrwm", "登录状态")}
+      ${metric("账号状态", "正常", "有效期至 2027-01-04")}
       ${metric("可用点数", summary.balance, "钱包余额")}
       ${metric("冻结点数", summary.frozen, "结算占用")}
       ${metric("订阅商品", `${products.length} 个`, "点数包 / 订阅套餐")}
@@ -2288,7 +2390,7 @@ function attachEvents() {
   });
   document.querySelector("[data-recharge-wallet]")?.addEventListener("click", () => {
     const code = String(document.querySelector("#walletCode")?.value || "").trim();
-    const match = code.match(/(5000|2500|1000|500|300|200|100)/);
+    const match = code.match(/(7000|2500|1000|500|300|200|100)/);
     const points = match ? Number(match[1]) : 100;
     appendWalletLedger("充值", points, code ? `兑换码 ${code}` : "手动充值点数");
     persistQimenState();
@@ -2344,11 +2446,74 @@ function attachEvents() {
       loadMarketSnapshot();
     });
   });
+  document.querySelectorAll("[data-sector-dataset]").forEach((input) => {
+    input.addEventListener("change", () => {
+      sectorDataset = input.dataset.sectorDataset === "concepts" ? "concepts" : "sectors";
+      render();
+    });
+  });
+  document.querySelectorAll("[data-sector-preset]").forEach((button) => {
+    button.addEventListener("click", () => {
+      sectorPreset = sectorPreset === button.dataset.sectorPreset ? "all" : button.dataset.sectorPreset;
+      render();
+    });
+  });
+  document.querySelector("[data-sector-sort-field]")?.addEventListener("change", (event) => {
+    sectorSort = { ...sectorSort, field: event.currentTarget.value };
+    render();
+  });
+  document.querySelector("[data-sector-sort-direction]")?.addEventListener("change", (event) => {
+    sectorSort = { ...sectorSort, direction: event.currentTarget.value === "asc" ? "asc" : "desc" };
+    render();
+  });
+  document.querySelector("[data-apply-sector-range]")?.addEventListener("click", () => {
+    sectorRange = {
+      min: document.querySelector("#sectorMin")?.value || "",
+      max: document.querySelector("#sectorMax")?.value || "",
+    };
+    render();
+  });
+  document.querySelectorAll("[data-sector-chart-type]").forEach((input) => {
+    input.addEventListener("change", () => {
+      sectorChartType = input.dataset.sectorChartType === "pie" ? "pie" : "bar";
+      render();
+    });
+  });
+  document.querySelector("[data-reset-sector-filters]")?.addEventListener("click", () => {
+    sectorPreset = "all";
+    sectorRange = { min: "", max: "" };
+    sectorSort = { field: "pct", direction: "desc" };
+    sectorChartType = "bar";
+    render();
+  });
   document.querySelectorAll("[data-query-quote]").forEach((button) => {
     button.addEventListener("click", () => {
       selectedQuote = (document.querySelector("#quoteCode")?.value || selectedQuote).replace(/\D/g, "").slice(0, 6) || selectedQuote;
+      quoteStartDate = normalizeDateValue(document.querySelector("#quoteStartDate")?.value) || quoteStartDate;
+      quoteEndDate = normalizeDateValue(document.querySelector("#quoteEndDate")?.value) || quoteEndDate;
+      quoteAdjust = document.querySelector("#quoteAdjust")?.value || quoteAdjust;
+      persistQuoteState();
       loadMarketSnapshot();
     });
+  });
+  document.querySelector("[data-quote-adjust]")?.addEventListener("change", (event) => {
+    quoteAdjust = ["qfq", "hfq", "none"].includes(event.currentTarget.value) ? event.currentTarget.value : "qfq";
+    persistQuoteState();
+    render();
+  });
+  document.querySelectorAll("[data-quote-range]").forEach((button) => {
+    button.addEventListener("click", () => {
+      quoteEndDate = new Date().toISOString().slice(0, 10);
+      quoteStartDate = button.dataset.quoteRange === "year" ? shiftDate(365) : shiftDate(183);
+      quoteHistoryLimit = button.dataset.quoteRange === "year" ? 260 : 160;
+      persistQuoteState();
+      render();
+    });
+  });
+  document.querySelector("[data-load-more-history]")?.addEventListener("click", () => {
+    quoteHistoryLimit = Math.min(600, quoteHistoryLimit + 80);
+    persistQuoteState();
+    render();
   });
   document.querySelectorAll("[data-quote-mode]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -2966,19 +3131,54 @@ function escapeHtml(value) {
 }
 
 function activeQuoteRows(stock) {
-  if (quoteChartMode === "minute" && data.minuteKlines.length) return data.minuteKlines;
-  if (quoteChartMode === "baostock" && data.baostock?.rows?.length) return data.baostock.rows.slice(-120);
-  if (quoteChartMode === "yahoo" && data.yahooChart?.klines?.length) return data.yahooChart.klines.slice(-120);
-  if (data.quoteKlines.length) return data.quoteKlines.slice(-120);
+  let rows = [];
+  if (quoteChartMode === "minute" && data.minuteKlines.length) rows = data.minuteKlines;
+  else if (quoteChartMode === "baostock" && data.baostock?.rows?.length) rows = data.baostock.rows;
+  else if (quoteChartMode === "yahoo" && data.yahooChart?.klines?.length) rows = data.yahooChart.klines;
+  else if (data.quoteKlines.length) rows = data.quoteKlines;
+  if (rows.length) return filterQuoteRows(rows, quoteChartMode === "minute");
   const base = stock?.price || 100;
-  return data.breadth.map((d, index) => ({
+  return filterQuoteRows(data.breadth.map((d, index) => ({
     date: d[0],
     open: Number((base * (0.98 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
     high: Number((base * (1 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
     low: Number((base * (0.96 + index / Math.max(data.breadth.length, 1) * 0.03)).toFixed(2)),
     close: Number((base * (0.97 + index / Math.max(data.breadth.length, 1) * 0.04 + (Number(d[2]) - 50) / 1000)).toFixed(2)),
     volume: d[1] * 10000,
-  }));
+  })));
+}
+
+function filterQuoteRows(rows, isMinute = false) {
+  const start = normalizeDateValue(quoteStartDate);
+  const end = normalizeDateValue(quoteEndDate);
+  const filtered = rows.filter((row) => {
+    const rowDate = normalizeDateValue(row.date || row.time || "");
+    if (!rowDate) return true;
+    if (start && rowDate < start) return false;
+    if (end && rowDate > end) return false;
+    return true;
+  });
+  const limit = isMinute ? Math.max(240, quoteHistoryLimit) : quoteHistoryLimit;
+  return (filtered.length ? filtered : rows).slice(-Math.max(20, limit));
+}
+
+function normalizeDateValue(value) {
+  const match = String(value || "").match(/\d{4}[-/]\d{1,2}[-/]\d{1,2}/);
+  if (!match) return "";
+  const [year, month, day] = match[0].replace(/\//g, "-").split("-").map((part) => part.padStart(2, "0"));
+  return `${year}-${month}-${day}`;
+}
+
+function shiftDate(days) {
+  const date = new Date();
+  date.setDate(date.getDate() - days);
+  return date.toISOString().slice(0, 10);
+}
+
+function quoteAdjustLabel() {
+  if (quoteAdjust === "hfq") return "后复权";
+  if (quoteAdjust === "none") return "不复权";
+  return "前复权";
 }
 
 function movingAverage(values, windowSize) {
@@ -3115,9 +3315,16 @@ function renderCharts() {
     Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "sectors") {
-    const chartSectors = data.sectors.slice(0, 30);
-    Plotly.newPlot("sectorFundChart", [{ x: chartSectors.map((d) => d[0]), y: chartSectors.map((d) => d[7]), type: "bar", marker: { color: chartSectors.map((d) => (d[7] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
-    Plotly.newPlot("sectorChangeChart", [{ x: chartSectors.map((d) => d[0]), y: chartSectors.map((d) => d[1]), type: "bar", marker: { color: "#b45309" } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    const chartRows = activeSectorRows().slice(0, 30);
+    if (sectorChartType === "pie") {
+      const fundValues = chartRows.map((d) => Math.abs(d.fund));
+      const pctValues = chartRows.map((d) => Math.abs(d.pct));
+      Plotly.newPlot("sectorFundChart", [{ labels: chartRows.map((d) => d.name), values: fundValues, type: "pie", hole: 0.45 }], baseLayout, plotConfig);
+      Plotly.newPlot("sectorChangeChart", [{ labels: chartRows.map((d) => d.name), values: pctValues, type: "pie", hole: 0.45 }], baseLayout, plotConfig);
+    } else {
+      Plotly.newPlot("sectorFundChart", [{ x: chartRows.map((d) => d.name), y: chartRows.map((d) => d.fund), type: "bar", marker: { color: chartRows.map((d) => (d.fund >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+      Plotly.newPlot("sectorChangeChart", [{ x: chartRows.map((d) => d.name), y: chartRows.map((d) => d.pct), type: "bar", marker: { color: "#b45309" } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    }
   }
   if (currentPage === "quote") {
     const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
