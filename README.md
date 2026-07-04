@@ -68,7 +68,7 @@ npm run cache:market
 - LLM 分析：主题热度、主题全字段、新闻证据、主题个股、选股池、板块看板、个股评估矩阵、产业链分析的本地研究版。
 - AI 决策矩阵：基于多源公开行情、资金流、板块、ETF、人气榜、公告和财务快照生成操作计划、触发条件、失效条件、仓位区间和观察点。
 - 奇门遁甲：本地任务表单、同步起局扣点、钱包账单、持久化任务列表、本地解盘和 DeepSeek 增强解盘。
-- 订阅账号与点数：本地商品与点数账本，不接真实支付。
+- 订阅账号与点数：商品筛选、购买确认、扫码状态、订单后四位、待核验/已开通订单表和点数账本，不接真实支付。
 
 ## 快速开始
 
@@ -112,6 +112,8 @@ TUSHARE_TOKEN=你的 TuShare Pro token
 - `quant_a_share_screener`
 - `quant_a_share_quote`
 - `quant_a_share_qimen`
+- `quant_a_share_subscription`
+- `quant_a_share_shell`
 
 这些状态不会提交到 Git，也不需要本地后端常驻。
 

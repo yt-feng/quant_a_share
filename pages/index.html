@@ -20,6 +20,12 @@
         </div>
       </div>
       <nav id="nav"></nav>
+      <div class="recent-prompts" aria-label="最近问题">
+        <span>最近问题</span>
+        <button data-shell-prompt="结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。">宁德时代短线计划</button>
+        <button data-shell-prompt="今天哪些板块资金在持续流入，哪些方向更适合低吸观察？">资金流入方向</button>
+        <button data-shell-prompt="我持有东方财富，当前成本大概18元，盘中该怎么处理？">持仓处理</button>
+      </div>
       <div class="sidebar-note">
         <span>数据模式</span>
         <strong id="source-label">检测中</strong>
@@ -34,9 +40,13 @@
           <p id="page-subtitle">公开数据研究看板，不含服务端密钥。</p>
         </div>
         <div class="top-actions">
+          <button class="ghost-button shell-button" data-toggle-sidebar="1">收起侧栏</button>
+          <button class="ghost-button shell-button" data-toggle-theme="1">深色</button>
+          <span class="user-pill">u_dtfrwm</span>
           <span id="backend-status" class="status-pill checking">后端检测中</span>
           <a class="link-button" href="https://github.com/yt-feng/quant_a_share" target="_blank" rel="noreferrer">GitHub</a>
           <a class="primary-button" href="./" aria-label="刷新页面">刷新</a>
+          <button class="ghost-button shell-button" data-logout="1">退出</button>
         </div>
       </header>
 

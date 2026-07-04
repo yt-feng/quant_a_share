@@ -173,7 +173,7 @@ const coverageRows = [
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
-  ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
+  ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通和钱包账单。"],
 ];
 
 const dataSourceRows = [
@@ -208,6 +208,10 @@ let progressTimers = [];
 let selectedLlmTab = "主题热点";
 let selectedTopicName = "";
 let productFilter = "all";
+let sidebarCollapsed = false;
+let shellTheme = "light";
+let shellEventsAttached = false;
+let subscriptionOrders = [];
 let modal = null;
 let marketSource = "演示数据";
 let selectedQuote = "600519";
@@ -219,10 +223,14 @@ let quoteMacdParams = { short: 12, long: 26, mid: 9 };
 let quoteDrawings = [];
 
 function mount() {
+  loadShellState();
   loadScreenerState();
   loadWatchlistState();
   loadQuoteState();
   loadQimenState();
+  loadSubscriptionState();
+  applyShellState();
+  attachShellEvents();
   renderRuntimeShell();
   renderNav();
   render();
@@ -307,6 +315,69 @@ function tag(text, tone = "") {
 
 function panelTitle(title, action = "") {
   return `<div class="panel-title"><h2>${title}</h2>${action}</div>`;
+}
+
+function loadShellState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_shell") || "null");
+    sidebarCollapsed = Boolean(stored?.sidebarCollapsed);
+    shellTheme = stored?.theme === "dark" ? "dark" : "light";
+  } catch (error) {
+    sidebarCollapsed = false;
+    shellTheme = "light";
+  }
+}
+
+function persistShellState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_shell",
+      JSON.stringify({
+        sidebarCollapsed,
+        theme: shellTheme,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("界面设置已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function applyShellState() {
+  document.body.classList.toggle("sidebar-collapsed", sidebarCollapsed);
+  document.body.classList.toggle("theme-dark", shellTheme === "dark");
+  const sidebarButton = document.querySelector("[data-toggle-sidebar]");
+  if (sidebarButton) sidebarButton.textContent = sidebarCollapsed ? "展开侧栏" : "收起侧栏";
+  const themeButton = document.querySelector("[data-toggle-theme]");
+  if (themeButton) themeButton.textContent = shellTheme === "dark" ? "浅色" : "深色";
+}
+
+function attachShellEvents() {
+  if (shellEventsAttached) return;
+  shellEventsAttached = true;
+  document.querySelector("[data-toggle-sidebar]")?.addEventListener("click", () => {
+    sidebarCollapsed = !sidebarCollapsed;
+    applyShellState();
+    persistShellState();
+  });
+  document.querySelector("[data-toggle-theme]")?.addEventListener("click", () => {
+    shellTheme = shellTheme === "dark" ? "light" : "dark";
+    applyShellState();
+    persistShellState();
+  });
+  document.querySelector("[data-logout]")?.addEventListener("click", () => {
+    showToast("已退出当前演示会话。", "success");
+  });
+  document.querySelectorAll("[data-shell-prompt]").forEach((button) => {
+    button.addEventListener("click", () => {
+      currentPage = "ai";
+      renderNav();
+      render();
+      const question = document.querySelector("#question");
+      if (question) question.value = button.dataset.shellPrompt;
+      showToast("最近问题已填入 AI 决策矩阵。", "success");
+    });
+  });
 }
 
 function renderMarket() {
@@ -1073,6 +1144,100 @@ function handleQimenSync() {
   showToast("起局信息已同步。", "success");
 }
 
+function loadSubscriptionState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_subscription") || "null");
+    subscriptionOrders = Array.isArray(stored?.orders) ? stored.orders.map(normalizeOrder).filter(Boolean).slice(0, 30) : [];
+  } catch (error) {
+    subscriptionOrders = [];
+  }
+}
+
+function persistSubscriptionState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_subscription",
+      JSON.stringify({
+        orders: subscriptionOrders,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("订单状态已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeOrder(order) {
+  if (!order) return null;
+  return {
+    id: String(order.id || `od_${Date.now()}_${Math.random().toString(16).slice(2)}`),
+    createdAt: String(order.createdAt || nowLabel()),
+    productName: String(order.productName || "点数包"),
+    productType: String(order.productType || "points"),
+    amount: Number(order.amount) || 0,
+    points: Number(order.points) || 0,
+    suffix: String(order.suffix || "-"),
+    status: String(order.status || "待核验"),
+    updatedAt: String(order.updatedAt || order.createdAt || nowLabel()),
+  };
+}
+
+function productPoints(product) {
+  if (!product || product[0] !== "points") return 0;
+  const match = String(product[6] || product[1] || "").match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+function createSubscriptionOrder(product, suffix) {
+  const order = normalizeOrder({
+    id: `od_${Date.now()}`,
+    createdAt: nowLabel(),
+    productName: product[1],
+    productType: product[0],
+    amount: Number(product[5]) || 0,
+    points: productPoints(product),
+    suffix: suffix || "-",
+    status: "待核验",
+    updatedAt: nowLabel(),
+  });
+  subscriptionOrders = [order, ...subscriptionOrders].slice(0, 30);
+  persistSubscriptionState();
+  return order;
+}
+
+function orderStatusTag(status) {
+  const tone = status === "已开通" ? "info" : status === "待核验" ? "" : "demo";
+  return tag(escapeHtml(status), tone);
+}
+
+function subscriptionOrderTable() {
+  return simpleTable(
+    ["时间", "商品", "金额", "点数", "订单后四位", "状态", "更新时间", "操作"],
+    subscriptionOrders.map((order) => [
+      escapeHtml(order.createdAt),
+      escapeHtml(order.productName),
+      `¥ ${order.amount.toFixed(2)}`,
+      order.points || "-",
+      escapeHtml(order.suffix),
+      orderStatusTag(order.status),
+      escapeHtml(order.updatedAt),
+      order.status === "待核验" ? `<button class="ghost-button table-action" data-complete-order="${escapeHtml(order.id)}">标记开通</button>` : "-",
+    ])
+  );
+}
+
+function completeSubscriptionOrder(orderId) {
+  const order = subscriptionOrders.find((item) => item.id === orderId);
+  if (!order || order.status === "已开通") return;
+  order.status = "已开通";
+  order.updatedAt = nowLabel();
+  if (order.points > 0) {
+    appendWalletLedger("充值", order.points, `订单开通 ${order.productName}`);
+    persistQimenState();
+  }
+  persistSubscriptionState();
+}
+
 function dedupeWatchlist(entries) {
   const seen = new Set();
   return entries.filter((entry) => {
@@ -1556,7 +1721,7 @@ function renderSubscription() {
       ${metric("可用点数", summary.balance, "钱包余额")}
       ${metric("冻结点数", summary.frozen, "结算占用")}
       ${metric("订阅商品", `${products.length} 个`, "点数包 / 订阅套餐")}
-      ${metric("账单流水", `${walletLedger.length} 条`, "可查看")}
+      ${metric("订单记录", `${subscriptionOrders.length} 条`, "待核验 / 已开通")}
     </section>
     <section class="panel" style="margin-top:14px">
       ${panelTitle("订阅商品", `<div class="toolbar"><button class="ghost-button" data-open-modal="wallet">查看钱包账单</button><button class="ghost-button" data-refresh-market="1">刷新</button></div>`)}
@@ -1587,7 +1752,11 @@ function renderSubscription() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">${panelTitle("快捷入口")}<div class="toolbar"><button class="ghost-button" data-open-modal="wallet">去钱包账单</button><button class="primary-button" data-goto-page="ai">前往 AI 决策矩阵</button></div></div>
-      <div class="panel">${panelTitle("下单状态")}<div class="order-flow"><span>确认购买信息</span><span>扫码支付</span><span>填写订单号后四位</span><span>等待开通</span></div></div>
+      <div class="panel">
+        ${panelTitle("下单状态")}
+        <div class="order-flow"><span>确认购买信息</span><span>扫码支付</span><span>填写订单号后四位</span><span>等待开通</span><span>已开通</span></div>
+        ${subscriptionOrders.length ? subscriptionOrderTable() : `<div class="empty-state compact-empty"><strong>暂无订单</strong><span>购买商品并提交后四位后会显示核验状态。</span></div>`}
+      </div>
     </section>
   `;
 }
@@ -1668,8 +1837,8 @@ function modalBody() {
         <span>数量：1</span>
       </div>
       <div class="fake-qr">扫码支付</div>
-      <label><span class="label">订单号后四位</span><input placeholder="填写订单号后四位" maxlength="4" /></label>
-      <div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-close-modal="1" data-toast="订单已进入待核验状态">提交核验</button></div>
+      <label><span class="label">订单号后四位</span><input id="orderSuffix" placeholder="填写订单号后四位" maxlength="4" /></label>
+      <div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-submit-order="${modal.productIndex}">提交核验</button></div>
     `;
   }
   return "";
@@ -2097,6 +2266,23 @@ function attachEvents() {
   document.querySelectorAll("[data-buy-product]").forEach((button) => {
     button.addEventListener("click", () => {
       modal = { type: "buy", productIndex: Number(button.dataset.buyProduct) };
+      render();
+    });
+  });
+  document.querySelector("[data-submit-order]")?.addEventListener("click", (event) => {
+    const product = products[Number(event.currentTarget.dataset.submitOrder)] || products[0];
+    const suffix = String(document.querySelector("#orderSuffix")?.value || "").replace(/\D/g, "").slice(-4);
+    createSubscriptionOrder(product, suffix);
+    modal = null;
+    currentPage = "subscription";
+    showToast("订单已进入待核验状态。", "success");
+    renderNav();
+    render();
+  });
+  document.querySelectorAll("[data-complete-order]").forEach((button) => {
+    button.addEventListener("click", () => {
+      completeSubscriptionOrder(button.dataset.completeOrder);
+      showToast("订单已标记开通。", "success");
       render();
     });
   });

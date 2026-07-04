@@ -8,6 +8,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Menu items: 大盘情绪, 量化因子选股, 行业, 行情, 自选, LLM分析, 奇门遁甲, Ai决策矩阵, 订阅账号与点数.
 - Recent prompt area.
 - User identity display, logout, theme switch.
+- Clone enrichment: shell now includes sidebar collapse, recent prompt shortcuts, user pill, logout action and persisted light/dark theme state.
 
 ## 大盘情绪
 
@@ -141,4 +142,4 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Point packages:
   - 100 / 200 / 300 / 500 / 1000 / 2500 points and one additional high-tier package.
 - Product cards include title, tag, category, description, price, features, quantity, 商品说明, 立即购买.
-- Purchase flow needs confirmation modal, QR/pay state, order suffix input, and pending/success states in the clone.
+- Clone enrichment: purchase flow includes confirmation modal, QR/pay state, order suffix input, pending verification orders, mark-open action and point-credit ledger update for point packages.
