@@ -2301,13 +2301,13 @@ function renderAbout() {
 }
 
 function filteredStocks() {
-  return data.stocks.filter((stock) => stockPassesAllFilters(stock)).sort(sortScreenerRows);
+  return screenerStocks().filter((stock) => stockPassesAllFilters(stock)).sort(sortScreenerRows);
 }
 
 function relaxedStocks() {
   const filters = activeFilterPredicates();
   if (!filters.length) return [];
-  const ranked = data.stocks
+  const ranked = screenerStocks()
     .map((stock) => {
       const score = filters.reduce((sum, filter) => sum + (filter.pass(stock) ? 1 : 0), 0);
       return { ...stock, factorScore: score, factorTotal: filters.length };
@@ -2319,10 +2319,18 @@ function relaxedStocks() {
 
 function factorHitCounts() {
   const counts = new Map();
+  const rows = screenerStocks();
   factorGroups.flatMap(([, chips]) => chips).forEach(([key]) => {
-    counts.set(key, data.stocks.filter((stock) => factorPasses(stock, key)).length);
+    counts.set(key, rows.filter((stock) => factorPasses(stock, key)).length);
   });
   return counts;
+}
+
+function screenerStocks() {
+  if (!Array.isArray(data.stocks)) return [];
+  const needsDerivedFields = data.stocks.some((stock) => stock && (!Number.isFinite(Number(stock.rps)) || typeof stock.ma20 === "undefined" || typeof stock.macd === "undefined" || !Number.isFinite(Number(stock.fund))));
+  if (needsDerivedFields) data.stocks = buildClientStockRows(data.stocks);
+  return data.stocks;
 }
 
 function sortScreenerRows(a, b) {
