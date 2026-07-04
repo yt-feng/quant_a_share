@@ -18,10 +18,12 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - State selector / display: 震荡行情.
 - Action: 加载复盘数据统计.
 - Expected output: market emotion metrics and replay statistics.
+- Original chart panels include 大盘成交额趋势, 大盘情绪(5日线占比)趋势, 涨跌停板分布对比, 连板梯队结构 and 指数涨跌幅.
 - Clone enrichment: ETF资金排行、东财人气榜、涨停池/炸板池、北向资金 are wired into the Vercel market snapshot and LLM context.
 - Clone enrichment: date range and market-state controls now persist and update the replay-stat cards plus amount/index trend charts.
 - Clone enrichment: the market page now shows a live source-coverage table for Eastmoney, ETF, money flow, Stock Connect, financial fields, BaoStock, Yahoo backup, announcements and research feeds.
 - Clone enrichment: market tables now show live/cache freshness badges for limit pools, ETF, Stock Connect, hot rank and derived market tables.
+- Clone enrichment: 连板梯队结构 is now derived from the Eastmoney limit-up pool, displayed as 1板/2板/3板/4板/5板+ counts plus seal-fund line, and exported as CSV.
 
 ## 量化因子选股
 

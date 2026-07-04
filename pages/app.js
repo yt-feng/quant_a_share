@@ -610,6 +610,7 @@ function syncSectorDateInputs() {
 function renderMarket() {
   const review = marketReviewStats();
   const rows = filteredMarketBreadth();
+  const ladderRows = limitLadderRows();
   return `
     <section class="panel compact-panel">
       <div class="toolbar">
@@ -630,12 +631,17 @@ function renderMarket() {
       <div class="panel"><h2>大盘成交额趋势</h2><div id="amountChart" class="chart"></div></div>
       <div class="panel"><h2>上证涨跌趋势</h2><div id="breadthChart" class="chart"></div></div>
       <div class="panel"><h2>涨跌停板分布</h2><div id="limitChart" class="chart"></div></div>
+      <div class="panel"><h2>连板梯队结构</h2><div id="ladderChart" class="chart"></div></div>
       <div class="panel"><h2>指数涨跌幅</h2><div id="indexChart" class="chart"></div></div>
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
         ${panelTitle(`涨停池 ${data.limitPools.limitUp.length} · 炸板 ${data.limitPools.broken.length}`, actionGroup(tag(`交易日 ${data.limitPools.date || "-"}`, "info"), freshnessTag("limitPools"), exportButton("limitPools")))}
         ${simpleTable(["代码", "名称", "连板", "首次封板", "封板资金", "行业"], data.limitPools.limitUp.slice(0, 8).map((row) => [row.code, row.name, row.streak || "-", row.firstSealTime || "-", `${yi(row.sealFund)}亿`, row.industry || "-"]))}
+      </div>
+      <div class="panel">
+        ${panelTitle("连板梯队", actionGroup(tag(`最高 ${limitLadderMaxStreak()}板`, "info"), exportButton("limitLadder")))}
+        ${simpleTable(["梯队", "家数", "封板资金", "代表个股"], ladderRows.map((row) => [row.label, row.count, `${plainSigned(row.sealFundYi, 2, "亿")}`, row.leaders]))}
       </div>
       <div class="panel">
         ${panelTitle("北向资金", actionGroup(tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"), freshnessTag("northbound"), exportButton("northbound")))}
@@ -680,6 +686,34 @@ function marketReviewStats() {
   const avgAmountYi = Math.round((rows.reduce((sum, row) => sum + (Number(row[1]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
   const avgPct = Math.round((rows.reduce((sum, row) => sum + (Number(row[2]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
   return { avgAmountYi, avgPct };
+}
+
+function limitLadderRows() {
+  const buckets = [
+    { key: "1", label: "1板", min: 1, max: 1, rows: [] },
+    { key: "2", label: "2板", min: 2, max: 2, rows: [] },
+    { key: "3", label: "3板", min: 3, max: 3, rows: [] },
+    { key: "4", label: "4板", min: 4, max: 4, rows: [] },
+    { key: "5p", label: "5板+", min: 5, max: Infinity, rows: [] },
+  ];
+  (data.limitPools?.limitUp || []).forEach((row) => {
+    const streak = Math.max(1, Math.round(Number(row.streak) || 1));
+    const bucket = buckets.find((item) => streak >= item.min && streak <= item.max) || buckets[0];
+    bucket.rows.push(row);
+  });
+  return buckets.map((bucket) => {
+    const sorted = [...bucket.rows].sort((a, b) => (Number(b.sealFund) || 0) - (Number(a.sealFund) || 0));
+    return {
+      label: bucket.label,
+      count: bucket.rows.length,
+      sealFundYi: yi(bucket.rows.reduce((sum, row) => sum + (Number(row.sealFund) || 0), 0)),
+      leaders: sorted.slice(0, 3).map((row) => row.name || row.code).filter(Boolean).join("、") || "-",
+    };
+  });
+}
+
+function limitLadderMaxStreak() {
+  return (data.limitPools?.limitUp || []).reduce((max, row) => Math.max(max, Number(row.streak) || 0), 0);
 }
 
 function sourceCoverageRows() {
@@ -1694,6 +1728,8 @@ function exportRowsFor(key) {
       return exportPayload("source-coverage", ["来源", "状态", "覆盖", "最近样本", "新鲜度", "用途"], sourceCoverageExportRows());
     case "limitPools":
       return exportPayload("limit-pools", ["池", "交易日", "排名", "代码", "名称", "价格", "涨跌幅", "连板", "首次封板", "最后封板", "封板资金_亿", "成交额_亿", "换手率", "行业", "原因"], limitPoolExportRows());
+    case "limitLadder":
+      return exportPayload("limit-ladder", ["交易日", "梯队", "家数", "封板资金_亿", "代表个股"], limitLadderExportRows());
     case "northbound":
       return exportPayload("northbound", ["交易日", "通道", "方向", "板块", "指数", "指数涨跌幅", "上涨家数", "下跌家数", "平盘家数", "净买额_亿", "净流入_亿", "剩余额度_亿", "额度阈值_亿"], northboundExportRows());
     case "etfs":
@@ -1858,6 +1894,10 @@ function limitPoolExportRows() {
       row.rawReason || row.limitStats || "",
     ])
   );
+}
+
+function limitLadderExportRows() {
+  return limitLadderRows().map((row) => [data.limitPools.date || "-", row.label, row.count, row.sealFundYi, row.leaders]);
 }
 
 function northboundExportRows() {
@@ -5862,6 +5902,16 @@ function renderCharts() {
     Plotly.newPlot("breadthChart", [{ x: marketRows.map((d) => d[0]), y: marketRows.map((d) => d[2]), type: "scatter", mode: "lines+markers", line: { color: "#0f766e" } }], baseLayout, plotConfig);
     const distribution = data.limitDistribution || {};
     Plotly.newPlot("limitChart", [{ x: ["上涨", "下跌", "平盘", "涨停", "跌停"], y: [distribution.up || 0, distribution.down || 0, distribution.flat || 0, distribution.limitUp || 0, distribution.limitDown || 0], type: "bar", marker: { color: ["#dc2626", "#15803d", "#64748b", "#b91c1c", "#166534"] } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    const ladderRows = limitLadderRows();
+    Plotly.newPlot(
+      "ladderChart",
+      [
+        { x: ladderRows.map((row) => row.label), y: ladderRows.map((row) => row.count), type: "bar", name: "家数", marker: { color: "#b91c1c" } },
+        { x: ladderRows.map((row) => row.label), y: ladderRows.map((row) => row.sealFundYi), type: "scatter", mode: "lines+markers", name: "封板资金(亿)", yaxis: "y2", line: { color: "#2563eb" } },
+      ],
+      { ...baseLayout, xaxis: { type: "category" }, yaxis2: { overlaying: "y", side: "right", showgrid: false } },
+      plotConfig
+    );
     Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "sectors") {
