@@ -169,8 +169,10 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Hot prompts Q1-Q12:
   - Buy/hold/low-absorb/do-T prompts by stock/sector and horizon.
   - Market, volume, sector rotation, fund flow, popularity list prompts.
-- Wallet entry routes to 订阅账号与点数.
+- Wallet route: `/ai-matrix/wallet`.
+- Wallet page: 钱包账单, 刷新, 兑换码充值, 立即充值, 可用点数, 冻结点数, 累计充值, 累计消费, 管理员流水, 点数变化.
 - Clone enrichment: live prompt context includes ETF flow, hot rank, stock popularity, announcements, fundamentals and Yahoo/yfinance-compatible backup quotes.
+- Clone enrichment: AI wallet is now an independent in-app route with persisted local ledger, recharge input, account summary and CSV export instead of only routing to subscription status.
 - Clone enrichment: the LLM 主题热点 tab now derives topic heat, trend, theme_score, tier, decision, evidence snippets, mapping rows and theme stock candidates from Eastmoney industry/concept boards, A-share industry/concept tags, popularity keywords and Eastmoney research reports. 选股池、板块全景看板 and 个股评估矩阵 now use live market-derived rows instead of fixed sample rows.
 - Clone enrichment: new conversation, realtime-search toggle, mode selection, hot prompts and recent-answer history now persist in browser storage and feed chat context.
 - Clone enrichment: data-source coverage rows now feed the chat context so answers can state which market, money-flow, financial, cache and disclosure feeds are currently populated.

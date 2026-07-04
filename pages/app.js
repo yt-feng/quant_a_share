@@ -234,6 +234,10 @@ const pages = [
   ["about", "复刻状态", "aiwuchuan 主模块覆盖清单与部署说明"],
 ];
 
+const hiddenPages = {
+  aiWallet: ["AI决策矩阵钱包", "点数余额、兑换码充值和消费流水"],
+};
+
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜；日期区间会联动趋势图和复盘统计。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
@@ -244,7 +248,7 @@ const coverageRows = [
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题类型、关键词、来源、策略、排序、列集、页大小和翻页会联动表格并进入问答上下文。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
-  ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答、最近对话记录和多源行情上下文。"],
+  ["AI决策矩阵", "已对齐", "新对话、独立钱包账单、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答、最近对话记录和多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、订单核验、标记开通、7000点旗舰包和钱包账单。"],
 ];
 
@@ -416,7 +420,7 @@ function recentPromptLabel(prompt) {
 }
 
 function setTitle() {
-  const page = pages.find(([id]) => id === currentPage);
+  const page = pages.find(([id]) => id === currentPage) || hiddenPages[currentPage] || pages[0];
   document.querySelector("#page-title").textContent = page[1];
   document.querySelector("#page-subtitle").textContent = page[2];
 }
@@ -435,10 +439,11 @@ function render() {
     llm: renderLlm,
     qimen: renderQimen,
     ai: renderAi,
+    aiWallet: renderAiWallet,
     subscription: renderSubscription,
     about: renderAbout,
   };
-  view.innerHTML = renderers[currentPage]();
+  view.innerHTML = (renderers[currentPage] || renderers.market)();
   view.insertAdjacentHTML("beforeend", renderModal());
   attachEvents();
   requestAnimationFrame(renderCharts);
@@ -1862,6 +1867,8 @@ function exportRowsFor(key) {
           item.answer,
         ])
       );
+    case "walletLedger":
+      return exportPayload("wallet-ledger", ["时间", "类型", "点数变化", "变更后余额", "变更后冻结", "备注"], walletLedger);
     default:
       return null;
   }
@@ -3099,7 +3106,7 @@ function renderAi() {
   return `
     <section class="grid two">
       <div class="panel">
-        ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-new-ai-chat="1">新对话</button><button class="ghost-button" data-goto-page="subscription">钱包</button></div>`)}
+        ${panelTitle("AI 决策矩阵", `<div class="toolbar"><button class="ghost-button" data-new-ai-chat="1">新对话</button><button class="ghost-button" data-goto-page="aiWallet">钱包</button></div>`)}
         ${aiSceneGrid()}
         <div class="detail-strip">${tag(`当前场景：${scene.title}`, "info")}${tag(`后端模块：${scene.module}`)}${tag(scene.scope)}${tag(`可用 ${summary.balance}点`)}${tag(`冻结 ${summary.frozen}点`)}${tag(`预估 ${estimatedCost}点`, "info")}</div>
         <div class="panel inset">
@@ -3135,6 +3142,51 @@ function renderAi() {
         <div style="margin-top:16px">${panelTitle("对话记录", exportButton("aiHistory"))}</div>
         ${aiHistoryTable()}
       </div>
+    </section>
+  `;
+}
+
+function renderAiWallet() {
+  const summary = walletSummary();
+  const ledgerRows = walletLedger.map((row) => [
+    escapeHtml(row[0]),
+    escapeHtml(row[1]),
+    signed(Number(row[2]) || 0, 1),
+    row[3],
+    row[4],
+    escapeHtml(row[5]),
+  ]);
+  return `
+    <section class="grid metrics">
+      ${metric("可用点数", summary.balance, "当前账号可用")}
+      ${metric("冻结点数", summary.frozen, "处理中占用")}
+      ${metric("累计充值", summary.recharge, "兑换码 / 订单开通")}
+      ${metric("累计消费", summary.spent, "AI决策矩阵 / 奇门")}
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        ${panelTitle("钱包账单", actionGroup(`<button class="ghost-button" data-goto-page="ai">返回 AI 决策矩阵</button>`, `<button class="ghost-button" data-refresh-market="1">刷新</button>`))}
+        <p class="table-note">查看当前账号的点数余额、冻结点数、兑换充值和消费流水。</p>
+        <div class="detail-strip">${tag(`账号 ${CURRENT_ACCOUNT}`, "info")}${tag("管理员流水")}${tag(`${walletLedger.length} 条记录`)}</div>
+        <div class="form-grid" style="margin-top:12px">
+          <label><span class="label">兑换码充值</span><input id="walletCode" placeholder="请输入兑换码，例如 AI-ABCD-123456" /></label>
+          <button class="primary-button align-end" data-recharge-wallet="1">立即充值</button>
+        </div>
+      </div>
+      <div class="panel">
+        ${panelTitle("账单摘要")}
+        <div class="detail-strip">${tag("消费")}${tag("兑换充值", "info")}${tag("管理员调整")}${tag("点数变化")}</div>
+        ${simpleTable(["维度", "当前值", "说明"], [
+          ["可用点数", summary.balance, "可继续用于 AI 问答和奇门任务"],
+          ["冻结点数", summary.frozen, "生成中或结算中的占用"],
+          ["累计充值", summary.recharge, "点数包、兑换码、管理员调整"],
+          ["累计消费", summary.spent, "AI 与奇门扣点合计"],
+        ])}
+      </div>
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("管理员流水", exportButton("walletLedger"))}
+      ${simpleTable(["时间", "类型", "点数变化", "变更后余额", "变更后冻结", "备注"], ledgerRows)}
     </section>
   `;
 }
@@ -4475,7 +4527,7 @@ function attachEvents() {
     const points = match ? Number(match[1]) : 100;
     appendWalletLedger("充值", points, code ? `兑换码 ${code}` : "手动充值点数");
     persistQimenState();
-    modal = { type: "wallet" };
+    modal = currentPage === "aiWallet" ? null : { type: "wallet" };
     showToast(`已充值 ${points} 点。`, "success");
     render();
   });
@@ -5439,7 +5491,7 @@ async function loadMarketSnapshot() {
     data.quoteKlines = Array.isArray(payload.klines) ? payload.klines : [];
     data.minuteKlines = Array.isArray(payload.minuteKlines) ? payload.minuteKlines : [];
     renderRuntimeShell();
-    if (["market", "screener", "backtest", "compare", "sectors", "quote", "llm", "subscription", "about"].includes(currentPage)) render();
+    if (["market", "screener", "backtest", "compare", "sectors", "quote", "llm", "aiWallet", "subscription", "about"].includes(currentPage)) render();
   } catch (error) {
     showToast("公开行情暂未更新，继续使用内置样本。", "info");
   }
