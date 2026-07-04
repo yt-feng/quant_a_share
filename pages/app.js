@@ -47,6 +47,7 @@ const data = {
   moneyFlow: { rows: [], latest: null, sum5MainYi: 0 },
   northbound: { rows: [], northRows: [], northNetBuyYi: 0, northNetInYi: 0 },
   fundamentals: null,
+  yahooChart: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
     { code: "002594.SZ", name: "比亚迪", price: 246.7, pct: 2.9, industry: "汽车", rps: 84, fund: 9.7, pe: 24, pb: 2.8, ma20: true, macd: true },
@@ -446,6 +447,7 @@ function renderQuote() {
       ${metric("市净率", stock.pb || data.fundamentals?.pb || "-", "PB")}
       ${metric("5日主力", `${plainSigned(data.moneyFlow.sum5MainYi || 0, 2, "亿")}`, "近5日合计")}
       ${metric("ROE", financials.roe ? `${financials.roe}%` : "-", data.fundamentals?.reportLabel || "财务快照")}
+      ${metric("全球备份", data.yahooChart?.price ? data.yahooChart.price.toFixed(2) : "-", data.yahooChart?.symbol || "Yahoo chart")}
       ${metric("技术状态", stock.ma20 && stock.macd ? "偏强" : "观察", "MA20 / MACD")}
     </section>
     <section class="grid two" style="margin-top:14px">
@@ -1136,6 +1138,7 @@ function contextForModule(moduleName) {
     moneyFlow: data.moneyFlow.latest,
     northbound: data.northbound.northRows || data.northbound.rows,
     fundamentals: data.fundamentals,
+    yahooChart: data.yahooChart,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
       itemType: document.querySelector("#itemType")?.value,
@@ -1248,6 +1251,7 @@ async function loadMarketSnapshot() {
     if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;
     if (payload.northbound) data.northbound = payload.northbound;
     if (payload.fundamentals) data.fundamentals = payload.fundamentals;
+    if (payload.yahooChart) data.yahooChart = payload.yahooChart;
     if (Array.isArray(payload.indices) && payload.indices.length) {
       data.indices = payload.indices.map((index) => [index.name, index.pct]);
     }

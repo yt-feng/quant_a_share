@@ -39,7 +39,7 @@ npm run check:pages
 - `Sina public endpoint`：当前用于全 A 股票池兜底、行业板块、概念板块和财务报告关键指标。
 - `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless。
 - `BaoStock`：作为免费历史 K 线、估值、换手率、财务字段的稳定补位，适合后续 GitHub Action 批量缓存。
-- `yfinance`：作为全球股票、ETF、港美股，以及 A 股基础 K 线的备用入口，适合后续离线缓存。
+- `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
 - `TuShare Pro`：保留为高一致性、标准化字段和更完整特色数据的可选增强源。
 - `演示数据`：所有在线源不可用时继续兜底，保证应用可打开、可调试。
 

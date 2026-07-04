@@ -43,6 +43,7 @@ module.exports = async function handler(req, res) {
     moneyFlow,
     northbound,
     fundamentals,
+    yahooChart,
     klines,
     marketKlines,
     quote,
@@ -57,6 +58,7 @@ module.exports = async function handler(req, res) {
     fetchEastmoneyMoneyFlow(secid).catch(() => null),
     fetchEastmoneyNorthbound().catch(() => null),
     fetchFundamentals(symbol, secid).catch(() => null),
+    fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
     fetchEastmoneyQuote(secid).catch(() => null),
@@ -76,6 +78,7 @@ module.exports = async function handler(req, res) {
     moneyFlow?.rows?.length ? "eastmoney-moneyflow" : "moneyflow-fallback",
     northbound?.rows?.length ? "eastmoney-northbound" : "northbound-fallback",
     enrichedFundamentals?.source || "fundamentals-fallback",
+    yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
     quote ? "eastmoney-quote" : "quote-fallback",
   ].join("+");
@@ -94,6 +97,7 @@ module.exports = async function handler(req, res) {
     moneyFlow: moneyFlow || { rows: [], latest: null, sum5MainYi: 0 },
     northbound: northbound || { rows: [], northNetBuyYi: 0, northNetInYi: 0 },
     fundamentals: enrichedFundamentals,
+    yahooChart,
     indices,
     quote: mergeQuoteFundamentals(selectedQuote, enrichedFundamentals),
     klines,
@@ -455,6 +459,35 @@ async function fetchEastmoneyNorthbound() {
     northRows,
     northNetBuyYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.netBuyAmt) || 0), 0)),
     northNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.dayNetAmtIn) || 0), 0)),
+  };
+}
+
+async function fetchYahooChart(symbol) {
+  const yahooSymbol = yahooSymbolFromAshare(symbol);
+  const payload = await fetchJson(`https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yahooSymbol)}?range=6mo&interval=1d`, {
+    attempts: 2,
+    timeoutMs: 4500,
+    headers: { Referer: "https://finance.yahoo.com/" },
+  });
+  const result = payload?.chart?.result?.[0];
+  if (!result) return null;
+  const timestamps = result.timestamp || [];
+  const quote = result.indicators?.quote?.[0] || {};
+  const klines = timestamps.map((timestamp, index) => ({
+    date: new Date(timestamp * 1000).toISOString().slice(0, 10),
+    open: num(quote.open?.[index]),
+    high: num(quote.high?.[index]),
+    low: num(quote.low?.[index]),
+    close: num(quote.close?.[index]),
+    volume: num(quote.volume?.[index]),
+  }));
+  return {
+    source: "yahoo-chart-yfinance-compatible",
+    symbol: yahooSymbol,
+    price: num(result.meta?.regularMarketPrice),
+    currency: clean(result.meta?.currency),
+    exchange: clean(result.meta?.exchangeName),
+    klines: klines.slice(-120),
   };
 }
 
@@ -832,6 +865,13 @@ function defaultTradeDate() {
   const month = String(china.getMonth() + 1).padStart(2, "0");
   const dayOfMonth = String(china.getDate()).padStart(2, "0");
   return `${year}${month}${dayOfMonth}`;
+}
+
+function yahooSymbolFromAshare(symbol) {
+  if (symbol.includes(".")) return symbol;
+  if (symbol.startsWith("6")) return `${symbol}.SS`;
+  if (symbol.startsWith("0") || symbol.startsWith("3")) return `${symbol}.SZ`;
+  return symbol;
 }
 
 function roundYi(value) {

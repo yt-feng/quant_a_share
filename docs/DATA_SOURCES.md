@@ -16,6 +16,8 @@
   - Sina industry board fallback, providing industry name, company count, pct/change, total volume, total amount and leading stock.
   - Sina concept board fallback, providing concept name, company count, pct/change, total volume, total amount and leading stock.
   - Sina financial report API, providing report-period financial fields such as revenue, net profit, EPS, BVPS, ROE, ROA, gross margin, net margin and debt ratio.
+- Yahoo Finance chart API
+  - yfinance-compatible HTTP source for A-share `.SS/.SZ`, HK, US stocks and ETFs; returned as a global quote/K-line backup.
 - DeepSeek API
   - Server-side `/api/chat` only.
 
@@ -24,7 +26,7 @@
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, Eastmoney money flow, Stock Connect and Sina financial reports.
 - BaoStock: good free source for historical K-line, valuation and financial fields when a Python batch/cache job is acceptable.
-- yfinance: useful for US/HK/global stocks and ETFs, not enough for A-share涨停、板块、资金流.
+- yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.
 - efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
 - Tencent/Sina quote endpoints: useful as low-cost online fallbacks for current quote fields; names require GBK/GB18030 decoding for some quote APIs.
 
