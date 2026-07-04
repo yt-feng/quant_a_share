@@ -1820,6 +1820,8 @@ function exportRowsFor(key) {
       return exportPayload("source-coverage", ["来源", "状态", "覆盖", "最近样本", "新鲜度", "用途"], sourceCoverageExportRows());
     case "productionCoverage":
       return exportPayload("production-coverage", ["维度", "当前值", "口径", "说明"], productionCoverageRows());
+    case "sourceMapping":
+      return exportPayload("source-mapping", ["开源/参考能力", "生产来源", "Node适配器/缓存", "当前覆盖", "状态"], dataSourceMappingRows());
     case "limitPools":
       return exportPayload("limit-pools", ["池", "交易日", "排名", "代码", "名称", "价格", "涨跌幅", "连板", "首次封板", "最后封板", "封板资金_亿", "成交额_亿", "换手率", "行业", "原因"], limitPoolExportRows());
     case "limitLadder":
@@ -1997,6 +1999,26 @@ function productionCoverageRows() {
     ["BaoStock历史缓存", `${feature.baostockCache || 0}股 / ${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "GitHub Actions baostock-cache", "历史K线、估值、换手、均线和收益"],
     ["人气/公告/研报", `${coverage.hotRank || 0}/${coverage.announcements || 0}/${coverage.researchReports || 0}`, "人气榜 / 公告 / 研报", "热点、事件和产业链证据"],
     ["K线备份", `${coverage.minuteKlines || data.minuteKlines.length}/${coverage.yahooKlines || data.yahooChart?.klines?.length || 0}`, "东财分钟线 / Yahoo日线", "行情页图表和全球备份"],
+  ];
+}
+
+function dataSourceMappingRows() {
+  const feature = data.featureCoverage || {};
+  const pools = data.limitPoolCounts || {};
+  const coverage = data.dataCoverage || {};
+  return [
+    ["AKShare stock_zh_a_spot_em / efinance 实时报价", "东方财富 A股 clist", "fetchEastmoneyStockUniverse / fetchEastmoneyStockPage", `${coverage.stocks || data.stocks.length}/${coverage.stockUniverseTotal || data.stockUniverse?.total || data.stocks.length}只`, "核心接入"],
+    ["AKShare stock_board_industry_name_em", "东方财富行业板块 m:90+t:2", "fetchEastmoneySectors / fetchEastmoneyBoards", `${coverage.sectors || data.sectors.length}个行业`, "核心接入"],
+    ["AKShare stock_board_concept_name_em", "东方财富概念板块 m:90+t:3", "fetchEastmoneyConcepts / fetchEastmoneyBoards", `${coverage.concepts || data.concepts.length}个概念`, "核心接入"],
+    ["AKShare board constituent APIs", "东方财富 fs=b:BKxxxx 成分股", "fetchEastmoneyBoardConstituents", `${coverage.boardConstituents || data.boardConstituents?.rows?.length || 0}只当前板块`, "按需接入"],
+    ["AKShare stock_zt_pool_em / strong / zbgc", "东方财富涨停池/炸板池/强势池", "fetchEastmoneyLimitPools / fetchEastmoneyPool", `${pools.limitUp || 0}/${pools.broken || 0}/${pools.strong || 0}`, "核心接入"],
+    ["AKShare stock_individual_fund_flow", "东方财富个股资金流 daykline", "fetchEastmoneyMoneyFlow", `${coverage.moneyFlowRows || data.moneyFlow?.rows?.length || 0}日`, "核心接入"],
+    ["AKShare stock_hsgt_*", "东方财富沪深港通资金", "fetchEastmoneyNorthbound", `${coverage.northboundRows || data.northbound?.rows?.length || 0}条`, "核心接入"],
+    ["AKShare fund_etf_spot_em", "东方财富 ETF grid", "fetchEastmoneyEtfs", `${coverage.etfs || data.etfs?.rows?.length || 0}只`, "核心接入"],
+    ["BaoStock query_history_k_data_plus", "GitHub Actions BaoStock 缓存", "scripts/update_baostock_cache.py + readBaoStockCache", `${feature.baostockCache || 0}股/${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "云缓存接入"],
+    ["yfinance history/download", "Yahoo chart HTTP", "fetchYahooChart", `${coverage.yahooKlines || data.yahooChart?.klines?.length || 0}点`, "后端接入"],
+    ["efinance quote history", "东方财富日K/分钟趋势", "fetchEastmoneyKlines / fetchEastmoneyMinuteKlines", `${data.quoteKlines.length}/${coverage.minuteKlines || data.minuteKlines.length}点`, "核心接入"],
+    ["AKShare / Sina financial report map", "东方财富财务 + 新浪财报 + financial-cache", "fetchFundamentals / update-financial-cache", `${feature.financialCache || 0}股/${coverage.fundamentalsRows || data.fundamentals?.rows?.length || 0}项`, "核心接入"],
   ];
 }
 
@@ -4506,6 +4528,10 @@ function renderAbout() {
         </table>
       </div>
     </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("开源能力到生产后端映射", exportButton("sourceMapping"))}
+      ${simpleTable(["开源/参考能力", "生产来源", "Node适配器/缓存", "当前覆盖", "状态"], dataSourceMappingRows().map((row) => [row[0], row[1], row[2], row[3], statusBadge(row[4])]))}
+    </section>
   `;
 }
 
@@ -5880,6 +5906,7 @@ function contextForModule(moduleName) {
       dataCoverage: data.dataCoverage,
       rows: productionCoverageRows().map(([dimension, current, scope, note]) => ({ dimension, current, scope, note })),
     },
+    sourceMapping: dataSourceMappingRows().map(([capability, productionSource, adapter, coverage, status]) => ({ capability, productionSource, adapter, coverage, status })),
     stockUniverse: data.stockUniverse,
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),

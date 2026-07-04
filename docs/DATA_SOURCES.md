@@ -52,6 +52,7 @@
   - Server-side `/api/chat` only.
 - In-app source coverage
   - The 复刻状态 page now shows production-connected sources, cloud-cache sources and reference-only sources side by side.
+  - The same page now includes an "开源能力到生产后端映射" table mapping AKShare, BaoStock, yfinance/Yahoo and efinance-style capabilities to the Node adapters or GitHub Action caches actually used in production.
   - The factor screener diagnosis strip now reports stock-pool size plus PE/PB, market-cap, quote/volume, industry/concept, main-money, limit-pool, financial-cache and historical-cache coverage.
   - LLM 主题热点/选股池/板块全景/个股矩阵 now reuse the same market payload: Eastmoney board data, stock industry/concept tags, popularity keywords and research metadata.
   - 行业/概念 page can request Eastmoney board constituent stocks, display the current board table, export it to CSV and pass the selected board constituents into chat context.

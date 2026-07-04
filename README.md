@@ -74,6 +74,7 @@ npm run cache:market
 - 订阅账号与点数：账号状态、有效期剩余天数、商品筛选、购买确认、开通方式、支付宝扫码、联系信息、订单后四位核对说明、待核验/已开通订单表、7000 点旗舰包和点数账本，不接真实支付。
 - 管理后台：承接原站管理员路由，包含账号管理、Ai 历史管理、奇门运营面板、订阅与充值核对、奇门任务监控和操作日志；当前实现以本地状态/只读表格为主，支持 CSV 导出和本地操作反馈。
 - 数据覆盖验收：复刻状态页显示 `/api/market` 顶层 `featureCoverage`、`limitPoolCounts`、`dataCoverage` 生产摘要，并可导出 CSV；AI/奇门问答上下文也会携带同一份覆盖摘要。
+- 开源能力映射：复刻状态页展示 AKShare、BaoStock、yfinance/Yahoo、efinance 风格能力分别落到哪些 Vercel Node 适配器或 GitHub Actions 缓存，并可导出 CSV。
 
 ## 快速开始
 
