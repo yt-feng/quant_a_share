@@ -1942,7 +1942,7 @@ function etfExportRows() {
 }
 
 function screenerExportHeaders() {
-  return ["匹配", "代码", "名称", "最新价", "涨跌幅", "量能信号", "MACD", "流通市值_亿", "行业整体RPS_50", "行业RPS_50", "行业", "K线形态", "趋势支撑线_次日", "趋势压力线_60"];
+  return ["匹配", "代码", "名称", "最新价", "涨跌幅", "主力净额_亿", "主力占比", "特征源", "量能信号", "MACD", "流通市值_亿", "行业整体RPS_50", "行业RPS_50", "行业", "K线形态", "趋势支撑线_次日", "趋势压力线_60"];
 }
 
 function screenerExportRows() {
@@ -1956,7 +1956,7 @@ function stockExportRow(stock, index) {
   const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
   const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
   const match = Number.isFinite(stock.factorScore) ? `${stock.factorScore}/${stock.factorTotal}` : "";
-  return [match, stock.code, stock.name, stock.price, stock.pct, stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量", stock.macd ? "金叉区" : "观察", floatMvYi, sectorRps, stock.rps, stock.industry, pattern, (stock.price * 0.96).toFixed(2), (stock.price * 1.08).toFixed(2)];
+  return [match, stock.code, stock.name, stock.price, stock.pct, stock.fund, stock.mainRatio || "", stockFeatureLabel(stock), stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量", stock.macd ? "金叉区" : "观察", floatMvYi, sectorRps, stock.rps, stock.industry, pattern, (stock.price * 0.96).toFixed(2), (stock.price * 1.08).toFixed(2)];
 }
 
 function sectorExportPayload() {
@@ -3868,6 +3868,10 @@ function screenerDiagnostics(filteredRows, relaxedRows) {
     ["量价", rows.filter((stock) => Number(stock.amount) > 0 && Number(stock.volumeRatio) > 0).length],
     ["行业/概念", rows.filter((stock) => stock.industry || stock.concepts).length],
     ["资金/RPS", rows.filter((stock) => Number.isFinite(Number(stock.fund)) && Number.isFinite(Number(stock.rps))).length],
+    ["主力资金", rows.filter((stock) => Number(stock.mainNet) !== 0 || Number(stock.mainRatio) !== 0).length],
+    ["涨停池", rows.filter((stock) => stock.limitPool || stock.isLimitUp).length],
+    ["财务缓存", rows.filter((stock) => stock.financialCached).length],
+    ["历史缓存", rows.filter((stock) => stock.baostockCached).length],
   ];
   const fieldTotal = Math.max(1, rows.length);
   return {
@@ -3979,6 +3983,7 @@ function factorPasses(stock, key) {
   const rpsCombo = Math.round((stock.rps + (stock.sectorRps || stock.rps) + (stock.inSectorRps || stock.rps)) / 3);
   const upperShadow = stock.high && stock.open ? stock.high > Math.max(stock.open, stock.price) * 1.025 : false;
   const lowerShadow = stock.low && stock.open ? Math.min(stock.open, stock.price) > stock.low * 1.025 : false;
+  const hasMainInflow = (Number(stock.mainNet) || 0) > 0 || (Number(stock.fund) || 0) > 0;
   const checks = {
     pe: () => stock.pe > 0 && stock.pe <= 30,
     pb: () => stock.pb > 0 && stock.pb <= 3,
@@ -3986,7 +3991,7 @@ function factorPasses(stock, key) {
     mv50_200: () => totalMv >= 5000000000 && totalMv <= 20000000000,
     float100: () => circMv >= 10000000000,
     float50: () => circMv > 0 && circMv <= 5000000000,
-    limit: () => stock.pct >= 9.8,
+    limit: () => stock.isLimitUp || stock.limitPool === "limitUp" || stock.pct >= 9.8,
     turn3: () => stock.turnover >= 3,
     turnLow: () => stock.turnover > 0 && stock.turnover < 1,
     vr15: () => stock.volumeRatio >= 1.5,
@@ -3999,7 +4004,7 @@ function factorPasses(stock, key) {
     ma5: () => stock.pct >= -0.3,
     ma10: () => stock.pct >= -0.8,
     ma20: () => stock.ma20,
-    ma60: () => stock.rps >= 55,
+    ma60: () => typeof stock.aboveMa60 === "boolean" ? stock.aboveMa60 : stock.rps >= 55,
     ma90: () => stock.rps >= 60,
     ma144: () => stock.rps >= 65,
     rps: () => stock.rps >= 70,
@@ -4013,11 +4018,11 @@ function factorPasses(stock, key) {
     upperShadow: () => upperShadow,
     lowerShadow: () => lowerShadow,
     dealer: () => stock.rps >= 75 && stock.turnover >= 2,
-    absorb: () => stock.fund > 0,
-    strongAbsorb: () => stock.fund > 0 && stock.rps >= 70,
-    strongAbsorb3: () => stock.fund > 0 && stock.rps >= 70 && stock.turnover >= 2,
+    absorb: () => hasMainInflow,
+    strongAbsorb: () => hasMainInflow && stock.rps >= 70,
+    strongAbsorb3: () => hasMainInflow && stock.rps >= 70 && stock.turnover >= 2,
     attack: () => stock.pct >= 3 && stock.amount >= 1000000000,
-    trigger: () => stock.pct >= 1 && stock.fund > 0,
+    trigger: () => stock.pct >= 1 && hasMainInflow,
     fundRsi: () => stock.fundRsi >= 50,
     cost20: () => stock.price >= stock.cost20,
     cost60: () => stock.price >= stock.cost60,
@@ -4028,13 +4033,13 @@ function factorPasses(stock, key) {
     vwapBreak: () => stock.pct >= 2 && stock.amount >= 1000000000,
     vwapFast: () => stock.pct >= 4,
     vwapPos: () => stock.price >= stock.vwap,
-    entry: () => stock.pct >= 0 && stock.fund > 0 && stock.rps >= 60,
+    entry: () => stock.pct >= 0 && hasMainInflow && stock.rps >= 60,
     gaussUp: () => stock.rps >= 60,
     gaussStart: () => stock.rps >= 70 && stock.pct >= 0,
     gaussTurn: () => stock.pct > 1 && stock.rps >= 55,
-    superRes: () => stock.rps >= 82 && stock.fund > 0 && stock.macd,
-    resAttack: () => stock.pct >= 3 && stock.fund > 0,
-    resStart: () => stock.rps >= 70 && stock.fund > 0,
+    superRes: () => stock.rps >= 82 && hasMainInflow && stock.macd,
+    resAttack: () => stock.pct >= 3 && hasMainInflow,
+    resStart: () => stock.rps >= 70 && hasMainInflow,
     auction: () => stock.pct >= 5 && stock.turnover >= 3,
     support60: () => stock.rps >= 45 && stock.rps <= 65,
     support144: () => stock.rps >= 40 && stock.rps <= 60,
@@ -4281,7 +4286,7 @@ function stockTable(rows) {
   return `
     <div class="table-wrap">
       <table>
-        <thead><tr>${hasFactorScore ? "<th>匹配</th>" : ""}<th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th><th>操作</th></tr></thead>
+        <thead><tr>${hasFactorScore ? "<th>匹配</th>" : ""}<th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>主力净额</th><th>特征源</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th><th>操作</th></tr></thead>
         <tbody>
           ${rows
             .map((stock, index) => stockTableRow(stock, index, hasFactorScore))
@@ -4297,7 +4302,17 @@ function stockTableRow(stock, index, hasFactorScore = false) {
   const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
   const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
   const scoreCell = hasFactorScore ? `<td>${stock.factorScore}/${stock.factorTotal}</td>` : "";
-  return `<tr>${scoreCell}<td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td><td>${stockActionButtons(stock.code)}</td></tr>`;
+  return `<tr>${scoreCell}<td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${plainSigned(stock.fund || 0, 2, "亿")}</td><td>${stockFeatureLabel(stock)}</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td><td>${stockActionButtons(stock.code)}</td></tr>`;
+}
+
+function stockFeatureLabel(stock) {
+  const parts = [];
+  if (Number(stock.mainNet) !== 0 || Number(stock.mainRatio) !== 0) parts.push("资金");
+  if (stock.limitPool === "limitUp" || stock.isLimitUp) parts.push("涨停");
+  else if (stock.limitPool) parts.push("异动池");
+  if (stock.baostockCached) parts.push("历史");
+  if (stock.financialCached) parts.push("财务");
+  return parts.join("/") || "行情";
 }
 
 function sectorMiniTable() {
@@ -5399,16 +5414,28 @@ function buildClientStockRows(rows) {
     return true;
   });
   const pctValues = baseRows.map((stock) => Number(stock.pct) || 0).sort((a, b) => a - b);
+  const pct20Values = baseRows.filter((stock) => stock.baostockCached).map((stock) => Number(stock.pct20)).filter(Number.isFinite).sort((a, b) => a - b);
+  const pct60Values = baseRows.filter((stock) => stock.baostockCached).map((stock) => Number(stock.pct60)).filter(Number.isFinite).sort((a, b) => a - b);
   const amountValues = baseRows.map((stock) => Number(stock.amount) || 0).sort((a, b) => a - b);
   return baseRows.map((stock) => {
     const pct = Number(stock.pct) || 0;
     const amount = Number(stock.amount) || 0;
     const price = Number(stock.price) || 0;
-    const rps = Math.max(20, Math.min(99, Math.round(percentileRank(pct, pctValues) * 100)));
+    const hasHistoryCache = Boolean(stock.baostockCached);
+    const pct20 = hasHistoryCache ? Number(stock.pct20) : NaN;
+    const pct60 = hasHistoryCache ? Number(stock.pct60) : NaN;
+    const shortStrength = Number.isFinite(pct20) && pct20Values.length > 2 ? percentileRank(pct20, pct20Values) : percentileRank(pct, pctValues);
+    const longStrength = Number.isFinite(pct60) && pct60Values.length > 2 ? percentileRank(pct60, pct60Values) : shortStrength;
+    const rps = Math.max(20, Math.min(99, Math.round(shortStrength * 100)));
     const amountRank = percentileRank(amount, amountValues);
-    const fund = Math.round(((amount / 100000000) * (pct >= 0 ? Math.min(1.5, pct / 6 + 0.25) : Math.max(-1.5, pct / 6 - 0.25))) * 100) / 100;
+    const mainNet = Number(stock.mainNet) || 0;
+    const mainRatio = Number(stock.mainRatio) || 0;
+    const fund = mainNet ? yi(mainNet) : Math.round(((amount / 100000000) * (pct >= 0 ? Math.min(1.5, pct / 6 + 0.25) : Math.max(-1.5, pct / 6 - 0.25))) * 100) / 100;
     const sectorRps = Math.max(20, Math.min(99, Math.round((rps * 0.75 + amountRank * 100 * 0.25))));
     const vwap = price && stock.open ? Math.round(((price * 2 + Number(stock.open)) / 3) * 100) / 100 : price;
+    const ma20Price = hasHistoryCache ? Number(stock.ma20Price) || 0 : 0;
+    const ma60Price = hasHistoryCache ? Number(stock.ma60Price) || 0 : 0;
+    const turnover = Number(stock.turnover) || 0;
     return {
       code: stock.code,
       name: stock.name,
@@ -5418,18 +5445,30 @@ function buildClientStockRows(rows) {
       industry: stock.industry || stock.area || "A股",
       concepts: stock.concepts || "",
       rps,
-      rps120: Math.max(20, Math.min(99, Math.round((rps + amountRank * 100) / 2))),
+      rps120: Math.max(20, Math.min(99, Math.round((longStrength * 100 + amountRank * 100) / 2))),
       sectorRps,
       inSectorRps: Math.max(20, Math.min(99, Math.round((rps * 0.65 + sectorRps * 0.35)))),
       fund,
-      fundRsi: Math.max(0, Math.min(99, Math.round(50 + fund * 1.6))),
+      mainNet,
+      mainRatio,
+      limitPool: stock.limitPool || "",
+      isLimitUp: Boolean(stock.isLimitUp) || stock.limitPool === "limitUp" || pct >= 9.8,
+      limitStreak: Number(stock.limitStreak) || 0,
+      sealFund: Number(stock.sealFund) || 0,
+      hotRank: Number(stock.hotRank) || 0,
+      financialCached: Boolean(stock.financialCached),
+      baostockCached: Boolean(stock.baostockCached),
+      roe: Number(stock.roe) || 0,
+      netProfit: Number(stock.netProfit) || 0,
+      fundRsi: Math.max(0, Math.min(99, Math.round(mainRatio ? 50 + mainRatio * 1.2 : 50 + fund * 1.6))),
       pe: Number(stock.pe) || 0,
       pb: Number(stock.pb) || 0,
-      ma20: pct >= -0.8 || rps >= 55,
+      ma20: ma20Price ? price >= ma20Price : pct >= -0.8 || rps >= 55,
+      aboveMa60: ma60Price ? price >= ma60Price : rps >= 55,
       macd: pct >= 1 || (pct >= 0 && amountRank >= 0.65),
       amount,
       volume: Number(stock.volume) || 0,
-      turnover: Number(stock.turnover) || 0,
+      turnover,
       volumeRatio: Number(stock.volumeRatio) || Math.max(0.5, Math.round((0.8 + amountRank * 1.8) * 100) / 100),
       amplitude: Number(stock.amplitude) || Math.abs(pct) * 1.35,
       totalMv: Number(stock.totalMv) || 0,
@@ -5438,8 +5477,12 @@ function buildClientStockRows(rows) {
       low: Number(stock.low) || price,
       open: Number(stock.open) || price,
       preClose: Number(stock.preClose) || price,
-      cost20: Math.round(price * 0.985 * 100) / 100,
-      cost60: Math.round(price * 0.96 * 100) / 100,
+      cost20: ma20Price || Math.round(price * 0.985 * 100) / 100,
+      cost60: ma60Price || Math.round(price * 0.96 * 100) / 100,
+      pct20: Number.isFinite(pct20) ? pct20 : 0,
+      pct60: Number.isFinite(pct60) ? pct60 : 0,
+      high60: Number(stock.high60) || 0,
+      low60: Number(stock.low60) || 0,
       vwap,
       vwapScore: Math.max(0, Math.min(10, Math.round((rps / 12 + amountRank * 2) * 10) / 10)),
     };

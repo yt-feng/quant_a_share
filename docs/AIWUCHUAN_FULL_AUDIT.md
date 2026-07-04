@@ -41,9 +41,10 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Strategy controls: 策略名称, 保存策略, 我的策略.
 - Clone enrichment: custom conditions, recent-N conditions, sort settings and saved strategies are now active filters and persist in browser storage.
 - Run controls: 交易日(不填则最新日), sort field, sort order, display columns, 筛选.
-- Table columns: 代码, 名称, 最新价, 涨跌幅, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
+- Table columns: 代码, 名称, 最新价, 涨跌幅, 主力净额, 特征源, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
 - Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area, including the all-zero case for over-strict custom filters.
 - Clone enrichment: the screener now shows a live diagnosis strip with stock-pool size, strict hits, similar candidates, tightest conditions and PE/PB/market-cap/volume/industry/fund/RPS field coverage. The 筛选 action refreshes Vercel market data on both Vercel and GitHub Pages before re-rendering results.
+- Clone enrichment: all-stock screener rows are enriched with Eastmoney full-market main-money fields, limit/broken/strong-pool tags, hot-rank tags, financial-cache fields and BaoStock MA/return summaries before factor calculation.
 
 ## 策略回测
 

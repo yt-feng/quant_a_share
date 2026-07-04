@@ -7,6 +7,7 @@
 - Eastmoney public quote APIs
   - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates and the full frontend stock pool when the `clist` channel is reachable.
   - `/api/market` now returns `stockUniverse.total/returned/limit/source`; default frontend stock payload limit is 6000 rows and can be adjusted with `MARKET_STOCK_LIMIT`.
+  - The same A-share rows now include full-market main/super/big/mid/small order net-flow fields from Eastmoney `clist`, then merge limit-pool state, hot-rank state, financial-cache summaries and BaoStock historical summaries into each stock row for factor screening.
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
   - Concept board quotes from `m:90+t:3`, including pct/change, amount, fund flow,涨跌家数, constituent count and leading stock fields.
   - Board constituent stocks through `fs=b:BKxxxx`, exposed as `boardConstituents` when the frontend requests a selected industry/concept board.
@@ -45,11 +46,12 @@
 - BaoStock cache
   - `scripts/update_baostock_cache.py` queries historical daily K-line, turnover, PE/PB/PS/PCF fields and writes `pages/data/baostock-cache.json`.
   - The symbol universe is expanded from the bundled market snapshot: default core names, current quote, high-amount stocks, hot-rank stocks and limit-up pool names, capped by `BAOSTOCK_MAX_SYMBOLS`.
-  - `/api/market` exposes the matching symbol cache as `baostock` for quote, LLM and factor context, reading the bundled file first and the deployed static JSON as a fallback on Vercel.
+  - `/api/market` exposes the matching symbol cache as `baostock` for quote and LLM context, and also folds MA5/MA20/MA60, pct20/pct60, high60/low60 and historical valuation fields back into the all-stock screener rows.
 - DeepSeek API
   - Server-side `/api/chat` only.
 - In-app source coverage
   - The 复刻状态 page now shows production-connected sources, cloud-cache sources and reference-only sources side by side.
+  - The factor screener diagnosis strip now reports stock-pool size plus PE/PB, market-cap, quote/volume, industry/concept, main-money, limit-pool, financial-cache and historical-cache coverage.
   - LLM 主题热点/选股池/板块全景/个股矩阵 now reuse the same market payload: Eastmoney board data, stock industry/concept tags, popularity keywords and research metadata.
   - 行业/概念 page can request Eastmoney board constituent stocks, display the current board table, export it to CSV and pass the selected board constituents into chat context.
 - Quote chart overlays
@@ -62,7 +64,7 @@
   - Chat context includes normalized `dataFreshness` rows alongside the source-coverage rows.
 - Table exports
   - Market review, source coverage, limit pools, Stock Connect, ETF flow, hot rank, factor screener, boards, quote money flow, fundamentals, BaoStock rows, popularity, announcements, disclosures, LLM tables, research reports and AI history now export current-view CSV files in-browser.
-  - Exports use the same `/api/market` payload and active filters as the visible tables, so no extra backend route or local worker is needed.
+  - Factor-screener exports include match score, main-money amount/ratio and feature-source labels, using the same `/api/market` payload and active filters as the visible tables.
 
 ## Recommended Free / Low-Cost Sources
 

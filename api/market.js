@@ -1,7 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21,f23,f100,f102,f103";
+const STOCK_FIELDS =
+  "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21,f23,f62,f66,f69,f72,f75,f78,f81,f84,f87,f184,f100,f102,f103";
 const BOARD_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106,f128,f136,f140,f141";
 const BOARD_CONSTITUENT_FIELDS = `${STOCK_FIELDS},f62`;
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
@@ -109,17 +110,23 @@ module.exports = async function handler(req, res) {
     fetchEastmoneyIndices().catch(() => null),
     boardCode ? fetchCached(`eastmoney:board-constituents:${boardCode}`, BOARD_CACHE_MS, () => fetchEastmoneyBoardConstituents(boardCode)).catch(() => null) : Promise.resolve(null),
   ]);
-  const stockUniverse = pickStockUniverse(eastmoneyStockResult, sinaStockResult);
+  const [financialCachePayload, baostockCachePayload] = await Promise.all([readFullFinancialCache(req), readFullBaoStockCache(req)]);
+  const stockUniverse = enrichStockUniverse(pickStockUniverse(eastmoneyStockResult, sinaStockResult), {
+    limitPools,
+    popularityRank,
+    financialCachePayload,
+    baostockCachePayload,
+  });
   const sectorUniverse = pickSectorUniverse(eastmoneySectorResult, sinaSectorResult);
   const conceptUniverse = pickConceptUniverse(eastmoneyConceptResult, sinaConceptResult);
   const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
   const clientStocks = selectClientStocks(stockUniverse, stockLimit);
   const selectedQuote = quote || tencentQuote || clientStocks.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || clientStocks[0] || stockUniverse.leaders[0] || sampleStocks[0];
-  const financialCache = needsFinancialCache(fundamentals) ? await readFinancialCache(symbol, req) : null;
+  const financialCache = needsFinancialCache(fundamentals) ? await readFinancialCache(symbol, req, financialCachePayload) : null;
   const enrichedFundamentals = enrichFundamentalsFromQuote(mergeFinancialSources(fundamentals, financialCache), selectedQuote);
   const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
-  const baostock = await readBaoStockCache(symbol, req);
+  const baostock = await readBaoStockCache(symbol, req, baostockCachePayload);
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
@@ -155,6 +162,7 @@ module.exports = async function handler(req, res) {
       limit: stockLimit,
       leaderSample: stockUniverse.leaders?.length || 0,
       source: stockUniverse.source,
+      featureCoverage: stockFeatureCoverage(stockUniverse.all || clientStocks),
     },
     stocks: clientStocks,
     sectors,
@@ -208,32 +216,40 @@ function readMarketSnapshot() {
   return null;
 }
 
-async function readBaoStockCache(symbol, req) {
-  const payload = readBundledJson(BAOSTOCK_CACHE_FILE) || (await readPublicJsonCache(req, BAOSTOCK_CACHE_FILE));
+async function readFullBaoStockCache(req) {
+  return readBundledJson(BAOSTOCK_CACHE_FILE) || (await readPublicJsonCache(req, BAOSTOCK_CACHE_FILE));
+}
+
+async function readFullFinancialCache(req) {
+  return readBundledJson(FINANCIAL_CACHE_FILE) || (await readPublicJsonCache(req, FINANCIAL_CACHE_FILE));
+}
+
+async function readBaoStockCache(symbol, req, payload = null) {
+  const cachePayload = payload || (await readFullBaoStockCache(req));
   const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
-  const item = payload?.symbols?.[key];
+  const item = cachePayload?.symbols?.[key];
   if (!item?.rows?.length) {
     return { source: "baostock-cache-miss", symbol: key, rows: [], latest: null };
   }
   return {
     ...item,
-    generatedAt: payload.generatedAt,
-    lookbackDays: payload.lookbackDays,
+    generatedAt: cachePayload.generatedAt,
+    lookbackDays: cachePayload.lookbackDays,
   };
 }
 
-async function readFinancialCache(symbol, req) {
-  const payload = readBundledJson(FINANCIAL_CACHE_FILE) || (await readPublicJsonCache(req, FINANCIAL_CACHE_FILE));
+async function readFinancialCache(symbol, req, payload = null) {
+  const cachePayload = payload || (await readFullFinancialCache(req));
   const key = String(symbol || "").replace(/\D/g, "").slice(0, 6);
-  const item = payload?.symbols?.[key];
+  const item = cachePayload?.symbols?.[key];
   if (!item) return null;
   return {
     ...item,
     source: item.source?.includes("financial-cache") ? item.source : `${item.source || "financial-cache"}+financial-cache`,
     cache: {
       scope: "github-actions-json",
-      generatedAt: payload.generatedAt,
-      symbolCount: Object.keys(payload.symbols || {}).length,
+      generatedAt: cachePayload.generatedAt,
+      symbolCount: Object.keys(cachePayload.symbols || {}).length,
     },
   };
 }
@@ -257,6 +273,116 @@ function mergeFinancialSources(live, cached) {
     reportLabel: live.reportLabel || cached.reportLabel,
     cache: cached.cache,
   };
+}
+
+function enrichStockUniverse(universe, context = {}) {
+  const allRows = universe?.all?.length ? universe.all : universe?.leaders || [];
+  const maps = buildStockFeatureMaps(context);
+  const all = allRows.map((row) => enrichStockRowWithContext(row, maps));
+  const leaders = selectScreenerUniverse(all, 800);
+  return {
+    ...universe,
+    all,
+    leaders,
+  };
+}
+
+function buildStockFeatureMaps({ limitPools, popularityRank, financialCachePayload, baostockCachePayload } = {}) {
+  const limit = new Map();
+  const addPool = (items, poolType) => {
+    (items || []).forEach((row) => {
+      const key = stockKey(row.code);
+      if (!key || limit.has(key)) return;
+      limit.set(key, { ...row, poolType });
+    });
+  };
+  addPool(limitPools?.limitUp, "limitUp");
+  addPool(limitPools?.broken, "broken");
+  addPool(limitPools?.strong, "strong");
+
+  const hot = new Map();
+  (popularityRank?.items || []).forEach((row) => {
+    const key = stockKey(row.code);
+    if (key) hot.set(key, row);
+  });
+
+  return {
+    limit,
+    hot,
+    financial: financialCachePayload?.symbols || {},
+    baostock: baostockCachePayload?.symbols || {},
+  };
+}
+
+function enrichStockRowWithContext(stock, maps) {
+  const key = stockKey(stock?.code);
+  const limit = maps.limit.get(key);
+  const hot = maps.hot.get(key);
+  const financial = maps.financial?.[key];
+  const baostock = maps.baostock?.[key];
+  const financials = financial?.financials || {};
+  const latestHistory = baostock?.latest || {};
+  const pe = firstFinite(stock.pe, latestHistory.peTTM, financial?.peDynamic);
+  const pb = firstFinite(stock.pb, latestHistory.pbMRQ, financial?.pb);
+  return {
+    ...stock,
+    pe,
+    pb,
+    mainNet: firstFinite(stock.mainNet, 0),
+    mainRatio: firstFinite(stock.mainRatio, 0),
+    superNet: firstFinite(stock.superNet, 0),
+    bigNet: firstFinite(stock.bigNet, 0),
+    midNet: firstFinite(stock.midNet, 0),
+    smallNet: firstFinite(stock.smallNet, 0),
+    limitPool: limit?.poolType || "",
+    isLimitUp: limit?.poolType === "limitUp" || Number(stock.pct) >= 9.8,
+    limitStreak: firstFinite(limit?.streak, 0),
+    sealFund: firstFinite(limit?.sealFund, 0),
+    firstSealTime: limit?.firstSealTime || "",
+    hotRank: firstFinite(hot?.rank, 0),
+    hotRankChange: firstFinite(hot?.rankChange, 0),
+    financialCached: Boolean(financial),
+    roe: firstFinite(financials.roe, financial?.roe, 0),
+    revenue: firstFinite(financials.revenue, 0),
+    netProfit: firstFinite(financials.netProfit, financials.parentNetProfit, 0),
+    grossMargin: firstFinite(financials.grossMargin, 0),
+    debtRatio: firstFinite(financials.debtRatio, 0),
+    reportDate: financial?.reportDate || "",
+    baostockCached: Boolean(baostock?.rows?.length),
+    ma5Price: firstFinite(baostock?.ma5, 0),
+    ma20Price: firstFinite(baostock?.ma20, 0),
+    ma60Price: firstFinite(baostock?.ma60, 0),
+    pct20: firstFinite(baostock?.pct20, 0),
+    pct60: firstFinite(baostock?.pct60, 0),
+    high60: firstFinite(baostock?.high60, 0),
+    low60: firstFinite(baostock?.low60, 0),
+    historyDate: latestHistory.date || "",
+  };
+}
+
+function stockFeatureCoverage(rows = []) {
+  const total = rows.length;
+  const count = (predicate) => rows.filter(predicate).length;
+  return {
+    total,
+    mainMoney: count((row) => Number(row.mainNet) !== 0 || Number(row.mainRatio) !== 0),
+    limitPool: count((row) => row.limitPool),
+    hotRank: count((row) => Number(row.hotRank) > 0),
+    financialCache: count((row) => row.financialCached),
+    baostockCache: count((row) => row.baostockCached),
+  };
+}
+
+function stockKey(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 6);
+}
+
+function firstFinite(...values) {
+  for (const value of values) {
+    const number = Number(value);
+    if (Number.isFinite(number) && number !== 0) return number;
+  }
+  return 0;
 }
 
 async function readPublicJsonCache(req, relativePath) {
@@ -1533,6 +1659,16 @@ function normalizeStockRow(row) {
     pe: num(row.f9),
     volumeRatio: num(row.f10),
     pb: num(row.f23),
+    mainNet: num(row.f62),
+    superNet: num(row.f66),
+    superRatio: num(row.f69),
+    bigNet: num(row.f72),
+    bigRatio: num(row.f75),
+    midNet: num(row.f78),
+    midRatio: num(row.f81),
+    smallNet: num(row.f84),
+    smallRatio: num(row.f87),
+    mainRatio: num(row.f184),
     industry: clean(row.f100),
     area: clean(row.f102),
     concepts: clean(row.f103),
