@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18";
 const SECTOR_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106";
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
@@ -18,6 +21,7 @@ const SINA_MAX_PAGES = 90;
 const SHORT_CACHE_MS = 90 * 1000;
 const BOARD_CACHE_MS = 8 * 60 * 1000;
 const FINANCIAL_CACHE_MS = 6 * 60 * 60 * 1000;
+const SNAPSHOT_CACHE_FILE = path.join("pages", "data", "market-cache.json");
 
 const memoryCache = new Map();
 
@@ -107,7 +111,7 @@ module.exports = async function handler(req, res) {
   ].join("+");
 
   const market = buildMarketMetrics(stockUniverse.all, sectors, limitPools, northbound, etfs);
-  return res.status(200).json({
+  const payload = {
     ok: true,
     source,
     asOf: new Date().toISOString(),
@@ -131,7 +135,9 @@ module.exports = async function handler(req, res) {
     quote: mergeQuoteFundamentals(selectedQuote, enrichedFundamentals),
     klines,
     marketKlines,
-  });
+  };
+
+  return res.status(200).json(applySnapshotFallback(payload, readMarketSnapshot(), symbol));
 };
 
 function setCors(req, res) {
@@ -139,6 +145,101 @@ function setCors(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.setHeader("Cache-Control", "s-maxage=45, stale-while-revalidate=240");
+}
+
+function readMarketSnapshot() {
+  const candidates = [path.join(process.cwd(), SNAPSHOT_CACHE_FILE), path.join(__dirname, "..", SNAPSHOT_CACHE_FILE)];
+  for (const filePath of candidates) {
+    try {
+      if (!fs.existsSync(filePath)) continue;
+      const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      if (payload?.ok) return payload;
+    } catch (error) {
+      // Snapshot fallback is optional; live sources should continue without it.
+    }
+  }
+  return null;
+}
+
+function applySnapshotFallback(payload, snapshot, symbol) {
+  if (!snapshot?.ok) {
+    return {
+      ...payload,
+      cacheSnapshot: { available: false, hit: false, usedFields: [] },
+    };
+  }
+  const next = { ...payload };
+  const usedFields = [];
+  const sameSymbol = snapshotMatchesSymbol(snapshot, symbol);
+  const fill = (field, isEmpty, isUsable, symbolScoped = false) => {
+    if (!isEmpty(next[field]) || !isUsable(snapshot[field])) return;
+    if (symbolScoped && !sameSymbol) return;
+    next[field] = snapshot[field];
+    usedFields.push(field);
+  };
+
+  fill("stocks", (value) => emptyRows(value) || next.source.includes("sample-stock-fallback"), hasRows);
+  fill("sectors", (value) => emptyRows(value) || next.source.includes("sample-sector-fallback"), hasRows);
+  fill("concepts", emptyRows, hasRows);
+  fill("limitPools", (value) => emptyRows(value?.limitUp), (value) => hasRows(value?.limitUp));
+  fill("etfs", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows));
+  fill("northbound", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows));
+  fill("indices", emptyRows, hasRows);
+  fill("marketKlines", emptyRows, hasRows);
+  fill("quote", (value) => !value || next.source.includes("quote-fallback"), (value) => value?.code, true);
+  fill("klines", emptyRows, hasRows, true);
+  fill("moneyFlow", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
+  fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
+  fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
+  fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
+
+  if (emptyRows(next.popularity?.rank?.items) && hasRows(snapshot.popularity?.rank?.items)) {
+    next.popularity = { ...(next.popularity || {}), rank: snapshot.popularity.rank };
+    usedFields.push("popularity.rank");
+  }
+  if ((!next.popularity?.stock?.latest || emptyRows(next.popularity?.stock?.keywords)) && snapshot.popularity?.stock?.latest && sameSymbol) {
+    next.popularity = { ...(next.popularity || {}), stock: snapshot.popularity.stock };
+    usedFields.push("popularity.stock");
+  }
+
+  const marketFields = new Set(["stocks", "sectors", "concepts", "limitPools", "etfs", "northbound", "indices", "marketKlines"]);
+  if (snapshot.market && usedFields.some((field) => marketFields.has(field))) {
+    next.market = snapshot.market;
+    usedFields.push("market");
+  }
+  if (usedFields.length) {
+    next.source = `${next.source}+github-action-cache`;
+  }
+  next.cacheSnapshot = {
+    available: true,
+    hit: usedFields.length > 0,
+    usedFields,
+    generatedAt: snapshot.cacheSnapshot?.generatedAt || snapshot.asOf || null,
+    symbol: snapshot.cacheSnapshot?.symbol || snapshot.quote?.code || null,
+  };
+  return next;
+}
+
+function snapshotMatchesSymbol(snapshot, symbol) {
+  const normalized = String(symbol || "").replace(/\D/g, "").slice(0, 6);
+  const candidates = [snapshot.cacheSnapshot?.symbol, snapshot.quote?.code, snapshot.moneyFlow?.code, snapshot.fundamentals?.code]
+    .filter(Boolean)
+    .map((value) => String(value).replace(/\D/g, "").slice(0, 6));
+  return candidates.includes(normalized);
+}
+
+function hasRows(value) {
+  return Array.isArray(value) && value.length > 0;
+}
+
+function emptyRows(value) {
+  return !Array.isArray(value) || value.length === 0;
+}
+
+function emptyFundamentals(value) {
+  if (!value) return true;
+  const financials = value.financials || {};
+  return Object.keys(financials).length === 0 && emptyRows(value.rows);
 }
 
 function pickStockUniverse(eastmoneyStockResult, sinaStockResult) {

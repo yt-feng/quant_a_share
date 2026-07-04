@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "scripts": {
-    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js && node --check api/market.js"
+    "check:pages": "node --check pages/app.js && node --check api/chat.js && node --check api/health.js && node --check api/market.js && node --check scripts/update-market-cache.js",
+    "cache:market": "node scripts/update-market-cache.js"
   }
 }

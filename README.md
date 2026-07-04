@@ -31,6 +31,12 @@ DEEPSEEK_MODEL=deepseek-chat
 npm run check:pages
 ```
 
+云端快照脚本：
+
+```bash
+npm run cache:market
+```
+
 ## 数据源策略
 
 项目后续按“免费公开源优先、TuShare 作为增强源”的方式接数据：
@@ -39,8 +45,9 @@ npm run check:pages
 - `Sina public endpoint`：当前用于全 A 股票池兜底、行业板块、概念板块和财务报告关键指标。
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。
 - `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括 ETF、涨停池、人气榜、资金流、公告和财务摘要。
-- `BaoStock`：作为免费历史 K 线、估值、换手率、财务字段的稳定补位，适合后续 GitHub Action 批量缓存；当前线上财务快照已做 Vercel warm instance 内存缓存。
+- `BaoStock`：作为免费历史 K 线、估值、换手率、财务字段的稳定补位，适合后续 GitHub Action 批量缓存；当前线上财务快照已做 Vercel warm instance 内存缓存和 GitHub Actions JSON 快照兜底。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
+- `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端生成 `pages/data/market-cache.json`，Vercel 后端在公开源返回空数据时自动读这个快照兜底。
 - `TuShare Pro`：保留为高一致性、标准化字段和更完整特色数据的可选增强源。
 - `演示数据`：所有在线源不可用时继续兜底，保证应用可打开、可调试。
 
