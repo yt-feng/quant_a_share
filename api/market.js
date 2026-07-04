@@ -64,6 +64,7 @@ module.exports = async function handler(req, res) {
     stockPopularity,
     eastmoneyAnnouncements,
     cninfoAnnouncements,
+    cninfoRelations,
     yahooChart,
     klines,
     marketKlines,
@@ -85,6 +86,7 @@ module.exports = async function handler(req, res) {
     fetchCached(`eastmoney:stock-popularity:${symbol}`, SHORT_CACHE_MS, () => fetchEastmoneyStockPopularity(symbol)).catch(() => null),
     fetchCached(`eastmoney:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchEastmoneyAnnouncements(symbol)).catch(() => null),
     fetchCached(`cninfo:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchCninfoAnnouncements(symbol)).catch(() => null),
+    fetchCached(`cninfo:relations:${symbol}`, BOARD_CACHE_MS, () => fetchCninfoRelations(symbol)).catch(() => null),
     fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
@@ -112,6 +114,7 @@ module.exports = async function handler(req, res) {
     popularityRank?.items?.length ? "eastmoney-hot-rank" : "hot-rank-fallback",
     stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
     announcements?.items?.length ? announcements.source : "announcement-fallback",
+    cninfoRelations?.items?.length ? "cninfo-relations" : "relation-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
     baostock?.rows?.length ? "baostock-history-cache" : "baostock-cache-miss",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
@@ -138,6 +141,10 @@ module.exports = async function handler(req, res) {
       stock: stockPopularity || { latest: null, keywords: [], related: [], realtime: [] },
     },
     announcements: announcements || { items: [], source: "" },
+    disclosures: {
+      source: cninfoRelations?.source || "",
+      relations: cninfoRelations?.items || [],
+    },
     yahooChart,
     baostock,
     indices,
@@ -227,6 +234,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("moneyFlow", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
   fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
   fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
+  fill("disclosures", (value) => emptyRows(value?.relations), (value) => hasRows(value?.relations), true);
   fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
   fill("baostock", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
 
@@ -766,16 +774,24 @@ async function fetchEastmoneyAnnouncements(symbol) {
 }
 
 async function fetchCninfoAnnouncements(symbol) {
+  return fetchCninfoDisclosure(symbol, "fulltext", "cninfo-announcements", normalizeCninfoAnnouncement);
+}
+
+async function fetchCninfoRelations(symbol) {
+  return fetchCninfoDisclosure(symbol, "relation", "cninfo-relations", normalizeCninfoRelation);
+}
+
+async function fetchCninfoDisclosure(symbol, tabName, sourceName, normalizeRow) {
   const stockMap = await fetchCached("cninfo:stock-map", FINANCIAL_CACHE_MS, fetchCninfoStockMap).catch(() => ({}));
   const orgId = stockMap[symbol];
-  if (!orgId) return { source: "cninfo-announcements", items: [] };
+  if (!orgId) return { source: sourceName, items: [] };
   const endDate = compactChinaDate();
   const startDate = compactChinaDate(-370);
   const body = new URLSearchParams({
     pageNum: "1",
     pageSize: "30",
     column: "szse",
-    tabName: "fulltext",
+    tabName,
     plate: "",
     stock: `${symbol},${orgId}`,
     searchkey: "",
@@ -798,8 +814,8 @@ async function fetchCninfoAnnouncements(symbol) {
     },
   });
   return {
-    source: "cninfo-announcements",
-    items: (payload?.announcements || []).slice(0, 20).map(normalizeCninfoAnnouncement),
+    source: sourceName,
+    items: (payload?.announcements || []).slice(0, 20).map(normalizeRow),
   };
 }
 
@@ -1312,6 +1328,14 @@ function normalizeCninfoAnnouncement(row) {
     artCode: clean(row.announcementId),
     url,
     pdfUrl: row.adjunctUrl ? `http://static.cninfo.com.cn/${row.adjunctUrl}` : "",
+  };
+}
+
+function normalizeCninfoRelation(row) {
+  return {
+    ...normalizeCninfoAnnouncement(row),
+    provider: "cninfo-relation",
+    category: clean(row.announcementTypeName || row.announcementType || "调研/关系披露"),
   };
 }
 

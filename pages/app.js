@@ -50,6 +50,7 @@ const data = {
   fundamentals: null,
   popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
   announcements: { items: [] },
+  disclosures: { relations: [] },
   yahooChart: null,
   baostock: { rows: [], latest: null },
   stocks: [
@@ -530,6 +531,8 @@ function renderQuote() {
       <div class="panel">
         <h2>公司公告</h2>
         ${simpleTable(["来源", "日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.provider === "cninfo" ? "巨潮" : "东财", row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
+        <h2 style="margin-top:16px">调研/关系披露</h2>
+        ${simpleTable(["来源", "日期", "标题"], (data.disclosures.relations || []).slice(0, 6).map((row) => ["巨潮", row.date, row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
       </div>
     </section>
   `;
@@ -1188,6 +1191,9 @@ function contextForModule(moduleName) {
       stock: data.popularity.stock,
     },
     announcements: data.announcements.items?.slice(0, 8) || [],
+    disclosures: {
+      relations: data.disclosures.relations?.slice(0, 8) || [],
+    },
     yahooChart: data.yahooChart,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
@@ -1305,6 +1311,7 @@ async function loadMarketSnapshot() {
     if (payload.fundamentals) data.fundamentals = payload.fundamentals;
     if (payload.popularity) data.popularity = payload.popularity;
     if (payload.announcements) data.announcements = payload.announcements;
+    if (payload.disclosures) data.disclosures = payload.disclosures;
     if (payload.yahooChart) data.yahooChart = payload.yahooChart;
     if (payload.baostock) data.baostock = payload.baostock;
     if (Array.isArray(payload.indices) && payload.indices.length) {

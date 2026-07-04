@@ -6,9 +6,11 @@ from pathlib import Path
 import baostock as bs
 
 
-SYMBOLS = [item.strip() for item in os.getenv("BAOSTOCK_SYMBOLS", "600519,000001,300750,688981,300059,002594").split(",") if item.strip()]
+BASE_SYMBOLS = [item.strip() for item in os.getenv("BAOSTOCK_SYMBOLS", "600519,000001,300750,688981,300059,002594").split(",") if item.strip()]
+MAX_SYMBOLS = int(os.getenv("BAOSTOCK_MAX_SYMBOLS", "24"))
 LOOKBACK_DAYS = int(os.getenv("BAOSTOCK_LOOKBACK_DAYS", "420"))
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "baostock-cache.json"
+MARKET_CACHE_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "market-cache.json"
 FIELDS = (
     "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,"
     "tradestatus,pctChg,peTTM,pbMRQ,psTTM,pcfNcfTTM,isST"
@@ -18,6 +20,35 @@ FIELDS = (
 def baostock_code(symbol: str) -> str:
     digits = "".join(ch for ch in symbol if ch.isdigit())[:6]
     return f"sh.{digits}" if digits.startswith(("6", "9")) else f"sz.{digits}"
+
+
+def normalize_symbol(symbol: str) -> str:
+    return "".join(ch for ch in str(symbol) if ch.isdigit())[:6]
+
+
+def candidate_symbols():
+    symbols = []
+
+    def add(value):
+        code = normalize_symbol(value)
+        if len(code) == 6 and code not in symbols:
+            symbols.append(code)
+
+    for symbol in BASE_SYMBOLS:
+        add(symbol)
+    if MARKET_CACHE_PATH.exists():
+        try:
+            market = json.loads(MARKET_CACHE_PATH.read_text(encoding="utf-8"))
+            add(market.get("quote", {}).get("code"))
+            for row in market.get("stocks", [])[:16]:
+                add(row.get("code"))
+            for row in market.get("popularity", {}).get("rank", {}).get("items", [])[:12]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("limitUp", [])[:8]:
+                add(row.get("code"))
+        except (OSError, json.JSONDecodeError):
+            pass
+    return symbols[:MAX_SYMBOLS]
 
 
 def public_code(bs_code: str) -> str:
@@ -102,24 +133,31 @@ def fetch_symbol(symbol: str, start_date: str, end_date: str):
 def main():
     end_date = date.today()
     start_date = end_date - timedelta(days=LOOKBACK_DAYS)
+    symbols = candidate_symbols()
     payload = {
         "ok": True,
         "source": "baostock-history-cache",
         "generatedAt": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
         "lookbackDays": LOOKBACK_DAYS,
+        "maxSymbols": MAX_SYMBOLS,
+        "requestedSymbols": symbols,
         "symbols": {},
+        "errors": {},
     }
     login = bs.login()
     if login.error_code != "0":
         raise RuntimeError(login.error_msg)
     try:
-        for symbol in SYMBOLS:
-            payload["symbols"][symbol] = fetch_symbol(symbol, start_date.isoformat(), end_date.isoformat())
+        for symbol in symbols:
+            try:
+                payload["symbols"][symbol] = fetch_symbol(symbol, start_date.isoformat(), end_date.isoformat())
+            except Exception as error:
+                payload["errors"][symbol] = str(error)
     finally:
         bs.logout()
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(OUTPUT_PATH), "symbols": list(payload["symbols"].keys())}, ensure_ascii=False, indent=2))
+    print(json.dumps({"output": str(OUTPUT_PATH), "symbols": list(payload["symbols"].keys()), "errors": payload["errors"]}, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
