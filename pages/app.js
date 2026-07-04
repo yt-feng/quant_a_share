@@ -733,7 +733,7 @@ function renderQuote() {
           <button class="ghost-button icon-tool" title="缩小" data-quote-zoom="out">缩小</button>
           <button class="ghost-button icon-tool" title="重置" data-quote-zoom="reset">重置</button>
         </div>
-        <div class="detail-strip" style="margin-top:12px">${quoteDrawings.length ? quoteDrawings.slice(-6).map((item) => tag(`${item.tool} ${item.price}`)).join("") : tag("暂无画图记录")}</div>
+        <div class="detail-strip" style="margin-top:12px">${quoteDrawings.length ? quoteDrawings.slice(-6).map((item) => tag(quoteDrawingLabel(item))).join("") : tag("暂无画图记录")}</div>
         <h2 style="margin-top:16px">技术指标</h2>
         <div class="indicator-row">
           <span>副图1</span><strong>${quoteIndicator1}</strong>
@@ -3007,15 +3007,7 @@ function attachEvents() {
   document.querySelectorAll("[data-drawing-tool]").forEach((button) => {
     button.addEventListener("click", () => {
       const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];
-      quoteDrawings = [
-        ...quoteDrawings,
-        {
-          tool: button.dataset.drawingTool,
-          code: stock.code,
-          price: stock.price ? stock.price.toFixed(2) : "-",
-          at: new Date().toISOString(),
-        },
-      ].slice(-20);
+      quoteDrawings = [...quoteDrawings, createQuoteDrawing(button.dataset.drawingTool, stock, activeQuoteRows(stock))].slice(-20);
       persistQuoteState();
       render();
     });
@@ -3672,6 +3664,148 @@ function filterQuoteRows(rows, isMinute = false) {
   return (filtered.length ? filtered : rows).slice(-Math.max(20, limit));
 }
 
+function createQuoteDrawing(tool, stock, rows) {
+  const chartRows = rows.length ? rows : [{ date: new Date().toISOString().slice(0, 10), close: stock?.price || 0, high: stock?.price || 0, low: stock?.price || 0 }];
+  const x = chartRows.map((row) => row.time || row.date);
+  const closes = chartRows.map((row) => Number(row.close) || Number(stock?.price) || 0);
+  const endIndex = Math.max(0, chartRows.length - 1);
+  const startIndex = Math.max(0, endIndex - Math.min(24, Math.max(4, Math.floor(chartRows.length * 0.35))));
+  const recent = chartRows.slice(Math.max(0, endIndex - 40));
+  const high = Math.max(...recent.map((row) => Number(row.high) || Number(row.close) || closes[endIndex] || 0));
+  const low = Math.min(...recent.map((row) => Number(row.low) || Number(row.close) || closes[endIndex] || 0));
+  const y0 = Number(closes[startIndex]) || Number(stock?.price) || 0;
+  const y1 = Number(closes[endIndex]) || y0;
+  const range = Math.max(Math.abs(high - low), Math.abs(y1 - y0), Math.max(y1, 1) * 0.03);
+  const base = {
+    id: `draw_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    tool,
+    code: stock.code,
+    at: new Date().toISOString(),
+    x0: x[startIndex],
+    x1: x[endIndex],
+    y0: roundPrice(y0),
+    y1: roundPrice(y1),
+  };
+  if (tool === "水平线") return { ...base, y0: roundPrice(y1), y1: roundPrice(y1), price: roundPrice(y1) };
+  if (tool === "FIB") return { ...base, y0: roundPrice(high), y1: roundPrice(low), levels: [0, 0.236, 0.382, 0.5, 0.618, 1] };
+  if (tool === "GANN") return { ...base, y0: roundPrice(low), y1: roundPrice(low + range), fan: [0.5, 1, 2] };
+  if (tool === "平行线") return { ...base, offset: roundPrice(range * 0.35) };
+  if (tool === "射线") return { ...base, ray: true };
+  return base;
+}
+
+function quoteDrawingLabel(item) {
+  if (!item) return "画图";
+  if (item.tool === "FIB") return `${item.tool} ${formatPrice(Math.min(Number(item.y0) || 0, Number(item.y1) || 0))}~${formatPrice(Math.max(Number(item.y0) || 0, Number(item.y1) || 0))}`;
+  if (item.tool === "水平线" || item.price) return `${item.tool || "水平线"} ${formatPrice(Number(item.price || item.y0 || item.y1) || 0)}`;
+  if (Number.isFinite(Number(item.y0)) && Number.isFinite(Number(item.y1))) return `${item.tool} ${formatPrice(item.y0)}→${formatPrice(item.y1)}`;
+  return item.tool || "画图";
+}
+
+function quoteDrawingOverlays(drawings, stock, rows, x, close) {
+  const shapes = [];
+  const annotations = [];
+  const shapeMap = [];
+  const firstX = x[0] || new Date().toISOString().slice(0, 10);
+  const lastX = x.at(-1) || firstX;
+  const lastClose = close.at(-1) || stock?.price || 0;
+  const addShape = (drawing, shape, part = "primary") => {
+    shapeMap[shapes.length] = { id: drawing.id, part };
+    shapes.push(shape);
+  };
+  const addLine = (drawing, x0, y0, x1, y1, options = {}, part = "primary") => {
+    addShape(
+      drawing,
+      {
+        type: "line",
+        xref: options.xref || "x",
+        yref: "y",
+        x0,
+        x1,
+        y0,
+        y1,
+        line: { color: options.color || "#7c3aed", width: options.width || 1.6, dash: options.dash || "solid" },
+      },
+      part
+    );
+  };
+  drawings
+    .filter((item) => item?.code === stock.code)
+    .forEach((item) => {
+      if (!item.id) item.id = `legacy_${item.tool || "line"}_${item.at || Date.now()}`;
+      const y0 = Number(item.y0 ?? item.price ?? lastClose) || lastClose;
+      const y1 = Number(item.y1 ?? item.price ?? y0) || y0;
+      const x0 = item.x0 || firstX;
+      const x1 = item.x1 || lastX;
+      if (item.tool === "箭头") {
+        annotations.push({ xref: "x", yref: "y", x: x1, y: y1, axref: "x", ayref: "y", ax: x0, ay: y0, showarrow: true, arrowhead: 3, arrowsize: 1.1, arrowwidth: 2, arrowcolor: "#7c3aed", text: "" });
+        return;
+      }
+      if (item.tool === "FIB") {
+        const top = Math.max(y0, y1);
+        const bottom = Math.min(y0, y1);
+        (item.levels || [0, 0.236, 0.382, 0.5, 0.618, 1]).forEach((level) => {
+          const price = roundPrice(top - (top - bottom) * level);
+          addLine(item, firstX, price, lastX, price, { color: level === 0.5 ? "#7c3aed" : "#64748b", dash: level === 0 || level === 1 ? "solid" : "dot", width: level === 0.5 ? 1.8 : 1 }, `fib_${level}`);
+          annotations.push({ xref: "x", yref: "y", x: lastX, y: price, text: `${Math.round(level * 100)}% ${formatPrice(price)}`, showarrow: false, xanchor: "left", font: { size: 10, color: "#475569" } });
+        });
+        return;
+      }
+      if (item.tool === "GANN") {
+        const range = y1 - y0 || Math.max(lastClose * 0.04, 1);
+        (item.fan || [0.5, 1, 2]).forEach((factor) => addLine(item, x0, y0, lastX, roundPrice(y0 + range * factor), { color: factor === 1 ? "#7c3aed" : "#b45309", dash: factor === 1 ? "solid" : "dot" }, `gann_${factor}`));
+        return;
+      }
+      if (item.tool === "平行线") {
+        const offset = Number(item.offset) || Math.max(Math.abs(y1 - y0) * 0.55, Math.max(lastClose * 0.025, 1));
+        addLine(item, x0, y0, x1, y1, { color: "#7c3aed" }, "primary");
+        addLine(item, x0, roundPrice(y0 + offset), x1, roundPrice(y1 + offset), { color: "#7c3aed", dash: "dot" }, "parallel");
+        return;
+      }
+      if (item.tool === "水平线" || item.price) {
+        addLine(item, firstX, y0, lastX, y0, { color: "#7c3aed", width: 1.8 }, "primary");
+        return;
+      }
+      addLine(item, x0, y0, item.ray ? lastX : x1, item.ray ? extrapolateDrawingY(item, rows, y0, y1) : y1, { color: "#7c3aed", dash: item.tool === "射线" ? "dash" : "solid" }, "primary");
+    });
+  return { shapes, annotations, shapeMap };
+}
+
+function extrapolateDrawingY(item, rows, y0, y1) {
+  const total = Math.max(rows.length - 1, 1);
+  const xValues = rows.map((row) => row.time || row.date);
+  const start = Math.max(0, xValues.indexOf(item.x0));
+  const end = Math.max(start + 1, xValues.indexOf(item.x1));
+  const slope = (y1 - y0) / Math.max(end - start, 1);
+  return roundPrice(y0 + slope * (total - start));
+}
+
+function persistEditedQuoteShapes(event, code, shapeMap) {
+  if (!event || !Array.isArray(shapeMap)) return;
+  const updates = new Map();
+  Object.entries(event).forEach(([key, value]) => {
+    const match = key.match(/^shapes\[(\d+)\]\.(x0|x1|y0|y1)$/);
+    if (!match) return;
+    const map = shapeMap[Number(match[1])];
+    if (!map || map.part !== "primary") return;
+    const patch = updates.get(map.id) || {};
+    patch[match[2]] = match[2].startsWith("y") ? roundPrice(value) : value;
+    updates.set(map.id, patch);
+  });
+  if (!updates.size) return;
+  quoteDrawings = quoteDrawings.map((item) => (item.code === code && updates.has(item.id) ? { ...item, ...updates.get(item.id) } : item));
+  persistQuoteState();
+}
+
+function roundPrice(value) {
+  const number = Number(value) || 0;
+  return Math.round(number * 100) / 100;
+}
+
+function formatPrice(value) {
+  return roundPrice(value).toFixed(2);
+}
+
 function normalizeDateValue(value) {
   const match = String(value || "").match(/\d{4}[-/]\d{1,2}[-/]\d{1,2}/);
   if (!match) return "";
@@ -3864,33 +3998,31 @@ function renderCharts() {
       ...quoteIndicatorTrace(quoteIndicator1, quoteRows, x, close, "y2"),
       ...quoteIndicatorTrace(quoteIndicator2, quoteRows, x, close, "y3"),
     ];
-    const shapes = quoteDrawings
-      .filter((item) => item.code === stock.code && Number(item.price))
-      .map((item) => ({
-        type: "line",
-        xref: "paper",
-        x0: 0,
-        x1: 1,
-        yref: "y",
-        y0: Number(item.price),
-        y1: Number(item.price),
-        line: { color: "#7c3aed", width: 1, dash: item.tool === "水平线" ? "solid" : "dot" },
-      }));
-    Plotly.newPlot(
+    const overlays = quoteDrawingOverlays(quoteDrawings, stock, quoteRows, x, close);
+    const plot = Plotly.newPlot(
       "quoteChart",
       traces,
       {
         ...baseLayout,
         showlegend: true,
         height: 470,
+        dragmode: false,
         xaxis: { rangeslider: { visible: false } },
         yaxis: { domain: [0.42, 1], title: "价格" },
         yaxis2: { domain: [0.22, 0.36], title: quoteIndicator1 },
         yaxis3: { domain: [0, 0.16], title: quoteIndicator2 },
-        shapes,
+        shapes: overlays.shapes,
+        annotations: overlays.annotations,
       },
-      plotConfig
+      { ...plotConfig, editable: true, edits: { shapePosition: true, annotationPosition: true } }
     );
+    Promise.resolve(plot).then(() => {
+      const chart = document.querySelector("#quoteChart");
+      if (!chart) return;
+      chart.__quoteShapeMap = overlays.shapeMap;
+      chart.removeAllListeners?.("plotly_relayout");
+      chart.on?.("plotly_relayout", (event) => persistEditedQuoteShapes(event, stock.code, chart.__quoteShapeMap));
+    });
   }
 }
 

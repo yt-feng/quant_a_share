@@ -47,6 +47,9 @@
 - In-app source coverage
   - The 复刻状态 page now shows production-connected sources, cloud-cache sources and reference-only sources side by side.
   - LLM 主题热点/选股池/板块全景/个股矩阵 now reuse the same market payload: Eastmoney board data, stock industry/concept tags, popularity keywords and research metadata.
+- Quote chart overlays
+  - The 行情 page now turns trend line, ray, horizontal line, arrow, FIB, GANN and parallel-line tools into Plotly overlays on top of Eastmoney/BaoStock/Yahoo chart rows.
+  - Drawing records persist in browser storage and legacy single-price records still render as horizontal overlays.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -61,7 +64,7 @@
 
 ## Next Enrichment Targets
 
-- Add more exact intraday drawing geometry for the 行情 page, including draggable line endpoints.
+- Persist industry/LLM date controls so the remaining date fields behave like the market and quote modules.
 
 ## Design
 
