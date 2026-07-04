@@ -7,8 +7,8 @@ const OUTPUT_PATH = path.join(ROOT, "pages", "data", "financial-cache.json");
 const BAOSTOCK_CACHE_PATH = path.join(ROOT, "pages", "data", "baostock-cache.json");
 const MARKET_CACHE_PATH = path.join(ROOT, "pages", "data", "market-cache.json");
 const DEFAULT_SYMBOLS = ["600519", "000001", "300750", "688981", "300059", "002594", "603986", "300308"];
-const MAX_SYMBOLS = Number(process.env.FINANCIAL_CACHE_MAX_SYMBOLS || 40);
-const CONCURRENCY = Number(process.env.FINANCIAL_CACHE_CONCURRENCY || 4);
+const MAX_SYMBOLS = Number(process.env.FINANCIAL_CACHE_MAX_SYMBOLS || 160);
+const CONCURRENCY = Number(process.env.FINANCIAL_CACHE_CONCURRENCY || 5);
 
 function readJson(filePath) {
   try {
@@ -39,10 +39,12 @@ function collectSymbols() {
   (market?.stocks || [])
     .slice()
     .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
-    .slice(0, 24)
+    .slice(0, 80)
     .forEach((stock) => pushSymbol(symbols, stock.code));
-  (market?.popularity?.rank?.items || []).slice(0, 24).forEach((item) => pushSymbol(symbols, item.code));
-  (market?.limitPools?.limitUp || []).slice(0, 24).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.popularity?.rank?.items || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.limitUp || []).slice(0, 60).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.broken || []).slice(0, 30).forEach((item) => pushSymbol(symbols, item.code));
+  (market?.limitPools?.strong || []).slice(0, 30).forEach((item) => pushSymbol(symbols, item.code));
 
   return symbols.slice(0, MAX_SYMBOLS);
 }

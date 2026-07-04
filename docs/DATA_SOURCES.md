@@ -73,8 +73,8 @@
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - Eastmoney report API: now connected for industry-chain research metadata without Python workers or paid data.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney industry/concept boards and board constituents, limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
-- BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 24 symbols from live market context.
-- Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets up to 40 symbols.
+- BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 80 symbols from live market context.
+- Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets up to 160 symbols.
 - yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.
 - efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
 - Tencent/Sina quote endpoints: useful as low-cost online fallbacks for current quote fields; names require GBK/GB18030 decoding for some quote APIs.
@@ -89,6 +89,6 @@
 - Fetch public HTTP endpoints on demand and cache with `s-maxage`.
 - Cache slow financial and board/popularity endpoints in Vercel serverless memory while the function instance is warm.
 - Refresh a compact market snapshot on GitHub Actions during trading days, then use it as bundled read-only fallback in Vercel.
-- Refresh compact BaoStock and financial snapshots in the same workflow, then use them as static read-only fallbacks in Vercel.
+- Refresh market once to collect the current live universe, then refresh compact BaoStock and financial snapshots, then refresh market again so the final `market-cache` includes the newly generated cache coverage.
 - Return compact normalized JSON to the frontend.
 - Use sample data only when every online source fails.

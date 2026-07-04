@@ -15,6 +15,11 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    env:
+      BAOSTOCK_MAX_SYMBOLS: "80"
+      BAOSTOCK_LOOKBACK_DAYS: "520"
+      FINANCIAL_CACHE_MAX_SYMBOLS: "160"
+      FINANCIAL_CACHE_CONCURRENCY: "5"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,14 +40,17 @@ jobs:
       - name: Install Python data dependencies
         run: python -m pip install -r requirements.txt
 
+      - name: Build initial market snapshot
+        run: npm run cache:market
+
       - name: Build BaoStock snapshot
         run: npm run cache:baostock
 
-      - name: Build market snapshot
-        run: npm run cache:market
-
       - name: Build financial snapshot
         run: npm run cache:financial
+
+      - name: Build enriched market snapshot
+        run: npm run cache:market
 
       - name: Commit snapshot
         run: |

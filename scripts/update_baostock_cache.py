@@ -7,8 +7,8 @@ import baostock as bs
 
 
 BASE_SYMBOLS = [item.strip() for item in os.getenv("BAOSTOCK_SYMBOLS", "600519,000001,300750,688981,300059,002594").split(",") if item.strip()]
-MAX_SYMBOLS = int(os.getenv("BAOSTOCK_MAX_SYMBOLS", "24"))
-LOOKBACK_DAYS = int(os.getenv("BAOSTOCK_LOOKBACK_DAYS", "420"))
+MAX_SYMBOLS = int(os.getenv("BAOSTOCK_MAX_SYMBOLS", "80"))
+LOOKBACK_DAYS = int(os.getenv("BAOSTOCK_LOOKBACK_DAYS", "520"))
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "baostock-cache.json"
 MARKET_CACHE_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "market-cache.json"
 FIELDS = (
@@ -40,11 +40,16 @@ def candidate_symbols():
         try:
             market = json.loads(MARKET_CACHE_PATH.read_text(encoding="utf-8"))
             add(market.get("quote", {}).get("code"))
-            for row in market.get("stocks", [])[:16]:
+            stocks = sorted(market.get("stocks", []), key=lambda item: float(item.get("amount") or 0), reverse=True)
+            for row in stocks[:48]:
                 add(row.get("code"))
-            for row in market.get("popularity", {}).get("rank", {}).get("items", [])[:12]:
+            for row in market.get("popularity", {}).get("rank", {}).get("items", [])[:24]:
                 add(row.get("code"))
-            for row in market.get("limitPools", {}).get("limitUp", [])[:8]:
+            for row in market.get("limitPools", {}).get("limitUp", [])[:24]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("broken", [])[:12]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("strong", [])[:12]:
                 add(row.get("code"))
         except (OSError, json.JSONDecodeError):
             pass
