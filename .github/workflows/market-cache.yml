@@ -16,7 +16,7 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     env:
-      BAOSTOCK_MAX_SYMBOLS: "80"
+      BAOSTOCK_MAX_SYMBOLS: "180"
       BAOSTOCK_LOOKBACK_DAYS: "520"
       FINANCIAL_CACHE_MAX_SYMBOLS: "500"
       FINANCIAL_CACHE_CONCURRENCY: "5"
@@ -48,7 +48,7 @@ jobs:
         run: npm run cache:market
 
       - name: Build BaoStock snapshot
-        timeout-minutes: 12
+        timeout-minutes: 20
         run: npm run cache:baostock
 
       - name: Build financial snapshot

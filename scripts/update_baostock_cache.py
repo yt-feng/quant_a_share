@@ -11,6 +11,7 @@ MAX_SYMBOLS = int(os.getenv("BAOSTOCK_MAX_SYMBOLS", "80"))
 LOOKBACK_DAYS = int(os.getenv("BAOSTOCK_LOOKBACK_DAYS", "520"))
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "baostock-cache.json"
 MARKET_CACHE_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "market-cache.json"
+FINANCIAL_CACHE_PATH = Path(__file__).resolve().parents[1] / "pages" / "data" / "financial-cache.json"
 FIELDS = (
     "date,code,open,high,low,close,preclose,volume,amount,adjustflag,turn,"
     "tradestatus,pctChg,peTTM,pbMRQ,psTTM,pcfNcfTTM,isST"
@@ -26,31 +27,80 @@ def normalize_symbol(symbol: str) -> str:
     return "".join(ch for ch in str(symbol) if ch.isdigit())[:6]
 
 
+def supported_symbol(symbol: str) -> bool:
+    return len(symbol) == 6 and symbol[0] in {"0", "3", "6"}
+
+
+def number_value(value):
+    try:
+        return float(value or 0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def ranked_rows(rows, key, limit):
+    return sorted(rows or [], key=key, reverse=True)[:limit]
+
+
+def industry_leaders(rows, per_industry=2):
+    buckets = {}
+    for row in rows or []:
+        code = normalize_symbol(row.get("code"))
+        if not supported_symbol(code):
+            continue
+        industry = row.get("industry") or row.get("sector") or "未归类"
+        buckets.setdefault(industry, []).append(row)
+    leaders = []
+    for items in buckets.values():
+        leaders.extend(ranked_rows(items, lambda item: number_value(item.get("amount")) or number_value(item.get("totalMv")), per_industry))
+    return ranked_rows(leaders, lambda item: number_value(item.get("amount")), len(leaders))
+
+
 def candidate_symbols():
     symbols = []
 
     def add(value):
         code = normalize_symbol(value)
-        if len(code) == 6 and code not in symbols:
+        if supported_symbol(code) and code not in symbols:
             symbols.append(code)
 
     for symbol in BASE_SYMBOLS:
+        add(symbol)
+    previous_payload = load_previous_payload()
+    for symbol in previous_payload.get("symbols", {}).keys():
         add(symbol)
     if MARKET_CACHE_PATH.exists():
         try:
             market = json.loads(MARKET_CACHE_PATH.read_text(encoding="utf-8"))
             add(market.get("quote", {}).get("code"))
-            stocks = sorted(market.get("stocks", []), key=lambda item: float(item.get("amount") or 0), reverse=True)
-            for row in stocks[:48]:
+            stocks = [row for row in market.get("stocks", []) if supported_symbol(normalize_symbol(row.get("code")))]
+            for row in ranked_rows(stocks, lambda item: number_value(item.get("amount")), 140):
                 add(row.get("code"))
-            for row in market.get("popularity", {}).get("rank", {}).get("items", [])[:24]:
+            for row in ranked_rows(stocks, lambda item: abs(number_value(item.get("mainNet"))), 100):
                 add(row.get("code"))
-            for row in market.get("limitPools", {}).get("limitUp", [])[:24]:
+            for row in ranked_rows(stocks, lambda item: number_value(item.get("totalMv")) or number_value(item.get("circMv")), 80):
                 add(row.get("code"))
-            for row in market.get("limitPools", {}).get("broken", [])[:12]:
+            for row in ranked_rows(stocks, lambda item: abs(number_value(item.get("pct"))) * number_value(item.get("amount")), 80):
                 add(row.get("code"))
-            for row in market.get("limitPools", {}).get("strong", [])[:12]:
+            for row in ranked_rows([row for row in stocks if row.get("financialCached")], lambda item: number_value(item.get("amount")), 120):
                 add(row.get("code"))
+            for row in industry_leaders(stocks, 2):
+                add(row.get("code"))
+            for row in market.get("popularity", {}).get("rank", {}).get("items", [])[:80]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("limitUp", [])[:80]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("broken", [])[:40]:
+                add(row.get("code"))
+            for row in market.get("limitPools", {}).get("strong", [])[:40]:
+                add(row.get("code"))
+        except (OSError, json.JSONDecodeError):
+            pass
+    if FINANCIAL_CACHE_PATH.exists():
+        try:
+            financial = json.loads(FINANCIAL_CACHE_PATH.read_text(encoding="utf-8"))
+            for symbol in list(financial.get("symbols", {}).keys())[:MAX_SYMBOLS]:
+                add(symbol)
         except (OSError, json.JSONDecodeError):
             pass
     return symbols[:MAX_SYMBOLS]

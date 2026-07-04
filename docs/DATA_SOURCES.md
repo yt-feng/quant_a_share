@@ -46,7 +46,7 @@
   - CNInfo relation/调研 feed is available as `disclosures.relations` for symbols that have recent investor-relation disclosure records; when the selected symbol has no recent rows, `disclosures.samples` shows clearly marked recent samples from active A-share names so the source remains inspectable.
 - BaoStock cache
   - `scripts/update_baostock_cache.py` queries historical daily K-line, turnover, PE/PB/PS/PCF fields and writes `pages/data/baostock-cache.json`.
-  - The symbol universe is expanded from the bundled market snapshot: default core names, current quote, high-amount stocks, hot-rank stocks and limit-up pool names, capped by `BAOSTOCK_MAX_SYMBOLS`.
+  - The symbol universe is expanded from the bundled market snapshot: default core names, current quote, previous BaoStock rows, high-amount stocks, main-money leaders, large market-cap names, active movers, financial-cache names, industry leaders, hot-rank stocks and limit-pool names, capped by `BAOSTOCK_MAX_SYMBOLS`.
   - `/api/market` exposes the matching symbol cache as `baostock` for quote and LLM context, and also folds MA5/MA20/MA60, pct20/pct60, high60/low60 and historical valuation fields back into the all-stock screener rows.
 - DeepSeek API
   - Server-side `/api/chat` only.
@@ -74,7 +74,7 @@
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - Eastmoney report API: now connected for industry-chain research metadata without Python workers or paid data.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney industry/concept boards and board constituents, limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
-- BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 80 symbols from live market context.
+- BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 180 symbols from live market, financial-cache, hot-rank, fund-flow and industry-leader context.
 - Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets 500 symbols from liquidity, fund-flow, market-cap, active-mover, industry-leader, hot-rank and limit-pool buckets, and preserves previous per-symbol rows when a refresh call fails.
 - yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.
 - efinance: useful open-source Eastmoney wrapper; the production app ports the same Eastmoney-style public endpoints into Node instead of importing Python in Vercel.
