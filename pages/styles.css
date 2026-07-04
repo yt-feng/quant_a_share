@@ -184,9 +184,14 @@ body.sidebar-collapsed .sidebar {
   padding: 4px 6px 0;
 }
 
-.recent-prompts span {
+.recent-prompts > span {
   color: #aab5c8;
   font-size: 12px;
+}
+
+.recent-prompt-list {
+  display: grid;
+  gap: 8px;
 }
 
 .recent-prompts button {
@@ -199,6 +204,25 @@ body.sidebar-collapsed .sidebar {
   cursor: pointer;
   font-size: 13px;
   line-height: 1.35;
+}
+
+.recent-prompts button span,
+.recent-prompts button small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-prompts button span {
+  color: inherit;
+  font-size: 13px;
+}
+
+.recent-prompts button small {
+  margin-top: 3px;
+  color: #94a3b8;
+  font-size: 11px;
 }
 
 .recent-prompts button:hover {

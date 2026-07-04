@@ -21,10 +21,8 @@
       </div>
       <nav id="nav"></nav>
       <div class="recent-prompts" aria-label="最近问题">
-        <span>最近问题</span>
-        <button data-shell-prompt="结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。">宁德时代短线计划</button>
-        <button data-shell-prompt="今天哪些板块资金在持续流入，哪些方向更适合低吸观察？">资金流入方向</button>
-        <button data-shell-prompt="我持有东方财富，当前成本大概18元，盘中该怎么处理？">持仓处理</button>
+        <span>最近</span>
+        <div id="recentPromptList" class="recent-prompt-list"></div>
       </div>
       <div class="sidebar-note">
         <span>数据模式</span>
@@ -61,6 +59,6 @@
       </div>
     </template>
 
-    <script src="./app.js?v=20260704-feature-enrichment"></script>
+    <script src="./app.js?v=20260704-recent-history"></script>
   </body>
 </html>

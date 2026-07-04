@@ -131,6 +131,12 @@ const hotPrompts = [
   "Q12 分析近期大盘涨跌与成交额规律，结合行业/概念轮动、资金流向和人气榜，筛出低吸方向。",
 ];
 
+const shellPromptFallbacks = [
+  "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。",
+  "今天哪些板块资金在持续流入，哪些方向更适合低吸观察？",
+  "我持有东方财富，当前成本大概18元，盘中该怎么处理？",
+];
+
 const aiScenes = [
   {
     id: "stock_plan",
@@ -353,6 +359,7 @@ function mount() {
   attachShellEvents();
   renderRuntimeShell();
   renderNav();
+  renderRecentPrompts();
   render();
   checkBackendStatus();
   loadMarketSnapshot();
@@ -370,6 +377,42 @@ function renderNav() {
       render();
     });
   });
+}
+
+function renderRecentPrompts() {
+  const target = document.querySelector("#recentPromptList");
+  if (!target) return;
+  const historyItems = aiHistory.slice(0, 3).map((item) => ({
+    id: item.id,
+    prompt: item.question,
+    label: recentPromptLabel(item.question),
+    note: `${item.mode || "AI"} · ${item.at || "最近"}`,
+  }));
+  const fallbackItems = shellPromptFallbacks.map((prompt) => ({
+    id: "",
+    prompt,
+    label: recentPromptLabel(prompt),
+    note: "快捷问题",
+  }));
+  const items = historyItems.length ? historyItems : fallbackItems;
+  target.innerHTML = items
+    .map(
+      (item) => `
+        <button ${item.id ? `data-shell-history-id="${escapeHtml(item.id)}"` : ""} data-shell-prompt="${escapeHtml(item.prompt)}" title="${escapeHtml(item.prompt)}">
+          <span>${escapeHtml(item.label)}</span>
+          <small>${escapeHtml(item.note)}</small>
+        </button>
+      `
+    )
+    .join("");
+}
+
+function recentPromptLabel(prompt) {
+  const text = String(prompt || "")
+    .replace(/^Q\d+\s*/, "")
+    .replace(/[【】]/g, "")
+    .replace(/\s+/g, "");
+  return text.length > 26 ? `${text.slice(0, 26)}...` : text || "新对话";
 }
 
 function setTitle() {
@@ -520,15 +563,27 @@ function attachShellEvents() {
   document.querySelector("[data-logout]")?.addEventListener("click", () => {
     showToast("已退出当前演示会话。", "success");
   });
-  document.querySelectorAll("[data-shell-prompt]").forEach((button) => {
-    button.addEventListener("click", () => {
-      currentPage = "ai";
-      renderNav();
-      render();
-      const question = document.querySelector("#question");
-      if (question) question.value = button.dataset.shellPrompt;
+  document.querySelector(".recent-prompts")?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-shell-prompt]");
+    if (!button) return;
+    const historyItem = button.dataset.shellHistoryId ? aiHistory.find((item) => item.id === button.dataset.shellHistoryId) : null;
+    currentPage = "ai";
+    if (historyItem) {
+      aiQuestion = historyItem.question;
+      aiMode = historyItem.mode;
+      aiRealtime = historyItem.realtime;
+      aiCurrentAnswer = historyItem.answer;
+      aiExecution = historyItem.execution;
+      showToast("最近对话已载入。", "success");
+    } else {
+      aiQuestion = button.dataset.shellPrompt || "";
+      aiCurrentAnswer = "";
+      aiExecution = null;
       showToast("最近问题已填入 AI 决策矩阵。", "success");
-    });
+    }
+    persistAiState();
+    renderNav();
+    render();
   });
 }
 
@@ -2754,6 +2809,7 @@ function persistAiState() {
         updatedAt: new Date().toISOString(),
       })
     );
+    renderRecentPrompts();
   } catch (error) {
     showToast("AI 对话状态已更新，浏览器存储暂不可用。", "info");
   }
