@@ -20,6 +20,7 @@ jobs:
       BAOSTOCK_LOOKBACK_DAYS: "520"
       FINANCIAL_CACHE_MAX_SYMBOLS: "160"
       FINANCIAL_CACHE_CONCURRENCY: "5"
+      MARKET_CACHE_STOCK_LIMIT: "8000"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

@@ -89,6 +89,7 @@
 - Fetch public HTTP endpoints on demand and cache with `s-maxage`.
 - Cache slow financial and board/popularity endpoints in Vercel serverless memory while the function instance is warm.
 - Refresh a compact market snapshot on GitHub Actions during trading days, then use it as bundled read-only fallback in Vercel.
-- Refresh market once to collect the current live universe, then refresh compact BaoStock and financial snapshots, then refresh market again so the final `market-cache` includes the newly generated cache coverage.
+- Refresh market once with `MARKET_CACHE_STOCK_LIMIT=8000` to collect the current live universe, then refresh compact BaoStock and financial snapshots, then refresh market again so the final `market-cache` includes the newly generated cache coverage.
+- If a public endpoint returns a much smaller A-share universe than the existing snapshot, the cache script preserves the richer previous market universe instead of shrinking the bundled fallback.
 - Return compact normalized JSON to the frontend.
 - Use sample data only when every online source fails.

@@ -616,6 +616,11 @@ function selectScreenerUniverse(rows, limit) {
 }
 
 function pickStockUniverse(eastmoneyStockResult, sinaStockResult) {
+  const eastRows = eastmoneyStockResult?.all || [];
+  const sinaRows = sinaStockResult?.all || [];
+  if (eastRows.length > 1000 && sinaRows.length > eastRows.length * 1.25) {
+    return mergeStockUniverses(eastmoneyStockResult, sinaStockResult);
+  }
   if (eastmoneyStockResult?.all?.length > 1000) {
     return { ...eastmoneyStockResult, source: "eastmoney-a-share-pages" };
   }
@@ -629,6 +634,31 @@ function pickStockUniverse(eastmoneyStockResult, sinaStockResult) {
     return { ...sinaStockResult, source: "sina-a-share-partial" };
   }
   return { leaders: sampleStocks, all: sampleStocks, source: "sample-stock-fallback" };
+}
+
+function mergeStockUniverses(primary, fallback) {
+  const byCode = new Map();
+  (fallback?.all || []).forEach((row) => {
+    if (row?.code) byCode.set(row.code, row);
+  });
+  (primary?.all || []).forEach((row) => {
+    if (row?.code) byCode.set(row.code, { ...(byCode.get(row.code) || {}), ...row });
+  });
+  const all = Array.from(byCode.values());
+  const leaderCodes = new Set();
+  const leaders = [];
+  [...(primary?.leaders || []), ...(fallback?.leaders || [])].forEach((row) => {
+    if (row?.code && !leaderCodes.has(row.code)) {
+      leaderCodes.add(row.code);
+      leaders.push(byCode.get(row.code) || row);
+    }
+  });
+  return {
+    all,
+    leaders: leaders.length ? leaders : all.slice(0, 800),
+    total: all.length,
+    source: "eastmoney-sina-a-share-merged",
+  };
 }
 
 function pickSectorUniverse(eastmoneySectorResult, sinaSectorResult) {
