@@ -19,6 +19,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Expected output: market emotion metrics and replay statistics.
 - Clone enrichment: ETF资金排行、东财人气榜、涨停池/炸板池、北向资金 are wired into the Vercel market snapshot and LLM context.
 - Clone enrichment: date range and market-state controls now persist and update the replay-stat cards plus amount/index trend charts.
+- Clone enrichment: the market page now shows a live source-coverage table for Eastmoney, ETF, money flow, Stock Connect, financial fields, BaoStock, Yahoo backup, announcements and research feeds.
 
 ## 量化因子选股
 
@@ -136,6 +137,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Clone enrichment: live prompt context includes ETF flow, hot rank, stock popularity, announcements, fundamentals and Yahoo/yfinance-compatible backup quotes.
 - Clone enrichment: the LLM 主题热点 tab now derives topic heat, trend, theme_score, tier, decision, evidence snippets, mapping rows and theme stock candidates from Eastmoney industry/concept boards, A-share industry/concept tags, popularity keywords and Eastmoney research reports. 选股池、板块全景看板 and 个股评估矩阵 now use live market-derived rows instead of fixed sample rows.
 - Clone enrichment: new conversation, realtime-search toggle, mode selection, hot prompts and recent-answer history now persist in browser storage and feed chat context.
+- Clone enrichment: data-source coverage rows now feed the chat context so answers can state which market, money-flow, financial, cache and disclosure feeds are currently populated.
 
 ## 订阅账号与点数
 

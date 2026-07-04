@@ -55,6 +55,8 @@ const data = {
   research: { source: "", reports: [], stats: {} },
   yahooChart: null,
   baostock: { rows: [], latest: null },
+  asOf: "",
+  cacheSnapshot: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
     { code: "002594.SZ", name: "比亚迪", price: 246.7, pct: 2.9, industry: "汽车", rps: 84, fund: 9.7, pe: 24, pb: 2.8, ma20: true, macd: true },
@@ -481,6 +483,10 @@ function renderMarket() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
+      ${panelTitle("数据源实时体检", `${tag(`源 ${sourceCoverageRows().length} 个`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}`)}
+      ${sourceCoverageTable()}
+    </section>
+    <section class="panel" style="margin-top:14px">
       ${panelTitle("复盘数据统计", `<button class="ghost-button" data-refresh-market="1">刷新</button>`)}
       ${simpleTable(["维度", "当前值", "说明"], [...data.metrics.map((m) => [m[0], m[1], m[2]]), ["复盘区间", `${marketStartDate} 至 ${marketEndDate}`, `${rows.length} 个交易样本`], ["区间成交额", `${review.avgAmountYi.toLocaleString()}亿`, "按当前图表样本均值"], ["区间涨跌", `${plainSigned(review.avgPct, 2, "%")}`, marketStateFilter]])}
     </section>
@@ -504,6 +510,37 @@ function marketReviewStats() {
   const avgAmountYi = Math.round((rows.reduce((sum, row) => sum + (Number(row[1]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
   const avgPct = Math.round((rows.reduce((sum, row) => sum + (Number(row[2]) || 0), 0) / Math.max(rows.length, 1)) * 100) / 100;
   return { avgAmountYi, avgPct };
+}
+
+function sourceCoverageRows() {
+  const flowRows = data.moneyFlow?.rows || [];
+  const northRows = data.northbound?.northRows || data.northbound?.rows || [];
+  const fundamentalRows = data.fundamentals?.rows || [];
+  const baoRows = data.baostock?.rows || [];
+  const yahooRows = data.yahooChart?.klines || [];
+  const latestFlow = data.moneyFlow?.latest || flowRows.at(-1);
+  const latestNorth = northRows.at(-1) || data.northbound?.rows?.at?.(-1);
+  const latestBao = data.baostock?.latest || baoRows.at(-1);
+  return [
+    ["东方财富A股池", data.stocks.length ? "核心接入" : "待返回", `${data.stocks.length}只`, data.asOf || data.cacheSnapshot?.generatedAt || "-", "实时股票池、估值、成交额、行业/概念标签"],
+    ["东方财富行业", data.sectors.length ? "核心接入" : "待返回", `${data.sectors.length}个`, data.asOf || "-", "行业涨跌、上涨/下跌家数、资金流向"],
+    ["东方财富概念", data.concepts.length ? "核心接入" : "待返回", `${data.concepts.length}个`, data.asOf || "-", "概念排名、领涨股、成交额"],
+    ["涨停池/炸板池", data.limitPools?.limitUp?.length ? "核心接入" : "待返回", `${data.limitPools?.limitUp?.length || 0}/${data.limitPools?.broken?.length || 0}/${data.limitPools?.strong?.length || 0}`, data.limitPools?.date || "-", "涨停、炸板、强势股三池"],
+    ["ETF资金", data.etfs?.rows?.length ? "核心接入" : "待返回", `${data.etfs?.rows?.length || 0}只`, data.etfs?.stats?.updatedAt || data.asOf || "-", "ETF主力净额、成交额、折溢价"],
+    ["个股资金流", flowRows.length ? "核心接入" : "待返回", `${flowRows.length}日`, latestFlow?.date || "-", "主力、超大单、大单分日资金"],
+    ["北向资金", northRows.length ? "核心接入" : "待返回", `${northRows.length}条`, latestNorth?.tradeDate || "-", "沪股通/深股通净买与宽度"],
+    ["财务字段", fundamentalRows.length ? "核心接入" : "待返回", `${fundamentalRows.length}项`, data.fundamentals?.reportLabel || data.fundamentals?.cachedAt || "-", "营收、利润、EPS、ROE、PB/PE"],
+    ["BaoStock历史", baoRows.length ? "云缓存接入" : "待返回", `${baoRows.length}日`, latestBao?.date || data.baostock?.generatedAt || "-", "历史K线、估值、换手率、均线"],
+    ["Yahoo/yfinance备份", yahooRows.length ? "后端接入" : "待返回", `${yahooRows.length}点`, data.yahooChart?.symbol || "-", "全球行情与备用K线"],
+    ["东财人气榜", data.popularity?.rank?.items?.length ? "核心接入" : "待返回", `${data.popularity?.rank?.items?.length || 0}只`, data.popularity?.rank?.items?.[0]?.calcTime || "-", "热度排名与排名变化"],
+    ["公告/巨潮披露", data.announcements?.items?.length ? "核心接入" : "待返回", `${data.announcements?.items?.length || 0}/${data.disclosures?.relations?.length || 0}`, data.announcements?.items?.[0]?.date || "-", "公司公告、投资者关系、调研披露"],
+    ["东财研报", data.research?.reports?.length ? "后端接入" : "待返回", `${data.research?.reports?.length || 0}篇`, data.research?.reports?.[0]?.date || "-", "产业链和行业研报证据"],
+    ["GitHub Actions缓存", data.cacheSnapshot?.available ? "云缓存接入" : "本轮实时", data.cacheSnapshot?.usedFields?.length ? data.cacheSnapshot.usedFields.join(",") : "live", data.cacheSnapshot?.generatedAt || "-", "market-cache、baostock-cache、financial-cache兜底"],
+  ];
+}
+
+function sourceCoverageTable() {
+  return simpleTable(["来源", "状态", "覆盖", "最近样本", "用途"], sourceCoverageRows().map((row) => [row[0], statusBadge(row[1]), row[2], row[3], row[4]]));
 }
 
 function renderScreener() {
@@ -2289,7 +2326,11 @@ function renderAbout() {
     </section>
     <section class="panel" style="margin-top:14px">
       <h2>数据源覆盖</h2>
-      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}${tag(`财务字段 ${data.fundamentals?.rows?.length || 0} 项`)}</div>
+      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}${tag(`财务字段 ${data.fundamentals?.rows?.length || 0} 项`)}${tag(`源体检 ${sourceCoverageRows().length} 项`)}</div>
+      ${sourceCoverageTable()}
+    </section>
+    <section class="panel" style="margin-top:14px">
+      <h2>数据源路线</h2>
       <div class="table-wrap">
         <table>
           <thead><tr><th>来源</th><th>状态</th><th>用途</th></tr></thead>
@@ -3214,6 +3255,7 @@ function contextForModule(moduleName) {
       mode: aiMode,
       recentQuestions: aiHistory.slice(0, 5).map((item) => ({ at: item.at, mode: item.mode, realtime: item.realtime, question: item.question })),
     },
+    dataSourceCoverage: sourceCoverageRows().map(([source, status, coverage, latest, usage]) => ({ source, status, coverage, latest, usage })),
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
     concepts: data.concepts.slice(0, 8),
@@ -3342,6 +3384,8 @@ async function loadMarketSnapshot() {
     const payload = await response.json();
     if (!payload.ok) return;
     marketSource = payload.source || "公开源";
+    data.asOf = payload.asOf || "";
+    data.cacheSnapshot = payload.cacheSnapshot || null;
     if (payload.market) {
       const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
       data.metrics = [
