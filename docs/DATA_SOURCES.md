@@ -5,6 +5,7 @@
 - Eastmoney public quote APIs
   - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates when the `clist` channel is reachable.
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
+  - Concept board quotes from `m:90+t:3`, including pct/change, amount, fund flow,涨跌家数, constituent count and leading stock fields.
   - Index quotes for 上证指数、深证成指、创业板指、沪深300、中证500.
   - Single-stock quote and daily K-line.
   - Limit-up pool, broken-board pool, strong-stock pool, seal fund, first/last seal time and streak height.
@@ -21,7 +22,7 @@
   - Full A-share stock universe fallback, currently used when Eastmoney paginated lists are unavailable.
   - Provides code, name, price, pct/change, open/high/low/pre-close, volume, amount, turnover, PE, PB, total market cap and float market cap.
   - Sina industry board fallback, providing industry name, company count, pct/change, total volume, total amount and leading stock.
-  - Sina concept board fallback, providing concept name, company count, pct/change, total volume, total amount and leading stock.
+  - Sina concept board fallback, providing concept name, company count, pct/change, total volume, total amount and leading stock when Eastmoney concept boards are unavailable.
   - Sina financial report API, providing report-period financial fields such as revenue, net profit, EPS, BVPS, ROE, ROA, gross margin, net margin and debt ratio.
 - Yahoo Finance chart API
   - yfinance-compatible HTTP source for A-share `.SS/.SZ`, HK, US stocks and ETFs; returned as a global quote/K-line backup.
@@ -50,7 +51,7 @@
 
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
 - Eastmoney report API: now connected for industry-chain research metadata without Python workers or paid data.
-- AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
+- AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney industry/concept boards, limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
 - BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 24 symbols from live market context.
 - Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets up to 40 symbols.
 - yfinance: production app now uses the same Yahoo chart backend directly for global quote/K-line backup; still not enough for A-share涨停、板块、资金流.

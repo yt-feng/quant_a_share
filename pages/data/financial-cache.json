@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "financial-cache",
-  "generatedAt": "2026-07-04T05:35:34.390Z",
+  "generatedAt": "2026-07-04T05:58:05.549Z",
   "symbolCount": 40,
   "requestedSymbolCount": 40,
   "symbols": {
@@ -243,7 +243,7 @@
         }
       ],
       "symbol": "300059",
-      "cachedAt": "2026-07-04T05:35:27.359Z"
+      "cachedAt": "2026-07-04T05:58:00.174Z"
     },
     "300223": {
       "source": "sina-financial-report",
@@ -483,7 +483,7 @@
         }
       ],
       "symbol": "300223",
-      "cachedAt": "2026-07-04T05:35:28.237Z"
+      "cachedAt": "2026-07-04T05:58:00.862Z"
     },
     "300308": {
       "source": "sina-financial-report",
@@ -723,7 +723,7 @@
         }
       ],
       "symbol": "300308",
-      "cachedAt": "2026-07-04T05:35:27.377Z"
+      "cachedAt": "2026-07-04T05:58:00.184Z"
     },
     "300502": {
       "source": "sina-financial-report",
@@ -963,7 +963,7 @@
         }
       ],
       "symbol": "300502",
-      "cachedAt": "2026-07-04T05:35:28.230Z"
+      "cachedAt": "2026-07-04T05:58:00.847Z"
     },
     "300750": {
       "source": "sina-financial-report",
@@ -1203,7 +1203,7 @@
         }
       ],
       "symbol": "300750",
-      "cachedAt": "2026-07-04T05:35:26.479Z"
+      "cachedAt": "2026-07-04T05:57:59.500Z"
     },
     "300821": {
       "source": "sina-financial-report",
@@ -1443,7 +1443,7 @@
         }
       ],
       "symbol": "300821",
-      "cachedAt": "2026-07-04T05:35:33.416Z"
+      "cachedAt": "2026-07-04T05:58:04.824Z"
     },
     "301308": {
       "source": "sina-financial-report",
@@ -1683,7 +1683,7 @@
         }
       ],
       "symbol": "301308",
-      "cachedAt": "2026-07-04T05:35:28.211Z"
+      "cachedAt": "2026-07-04T05:58:00.860Z"
     },
     "600176": {
       "source": "sina-financial-report",
@@ -1923,7 +1923,7 @@
         }
       ],
       "symbol": "600176",
-      "cachedAt": "2026-07-04T05:35:28.262Z"
+      "cachedAt": "2026-07-04T05:58:00.917Z"
     },
     "600183": {
       "source": "sina-financial-report",
@@ -2163,7 +2163,7 @@
         }
       ],
       "symbol": "600183",
-      "cachedAt": "2026-07-04T05:35:32.564Z"
+      "cachedAt": "2026-07-04T05:58:04.159Z"
     },
     "600487": {
       "source": "sina-financial-report",
@@ -2403,7 +2403,7 @@
         }
       ],
       "symbol": "600487",
-      "cachedAt": "2026-07-04T05:35:29.092Z"
+      "cachedAt": "2026-07-04T05:58:01.525Z"
     },
     "600519": {
       "source": "sina-financial-report",
@@ -2643,7 +2643,7 @@
         }
       ],
       "symbol": "600519",
-      "cachedAt": "2026-07-04T05:35:26.501Z"
+      "cachedAt": "2026-07-04T05:57:59.496Z"
     },
     "600522": {
       "source": "sina-financial-report",
@@ -2883,7 +2883,7 @@
         }
       ],
       "symbol": "600522",
-      "cachedAt": "2026-07-04T05:35:32.550Z"
+      "cachedAt": "2026-07-04T05:58:04.161Z"
     },
     "600580": {
       "source": "sina-financial-report",
@@ -3123,7 +3123,7 @@
         }
       ],
       "symbol": "600580",
-      "cachedAt": "2026-07-04T05:35:32.664Z"
+      "cachedAt": "2026-07-04T05:58:04.231Z"
     },
     "600584": {
       "source": "sina-financial-report",
@@ -3363,7 +3363,7 @@
         }
       ],
       "symbol": "600584",
-      "cachedAt": "2026-07-04T05:35:29.104Z"
+      "cachedAt": "2026-07-04T05:58:01.544Z"
     },
     "600667": {
       "source": "sina-financial-report",
@@ -3603,7 +3603,7 @@
         }
       ],
       "symbol": "600667",
-      "cachedAt": "2026-07-04T05:35:34.294Z"
+      "cachedAt": "2026-07-04T05:58:05.485Z"
     },
     "601211": {
       "source": "sina-financial-report",
@@ -3843,7 +3843,7 @@
         }
       ],
       "symbol": "601211",
-      "cachedAt": "2026-07-04T05:35:33.536Z"
+      "cachedAt": "2026-07-04T05:58:04.888Z"
     },
     "601689": {
       "source": "sina-financial-report",
@@ -4083,7 +4083,7 @@
         }
       ],
       "symbol": "601689",
-      "cachedAt": "2026-07-04T05:35:34.351Z"
+      "cachedAt": "2026-07-04T05:58:05.540Z"
     },
     "601899": {
       "source": "sina-financial-report",
@@ -4323,7 +4323,7 @@
         }
       ],
       "symbol": "601899",
-      "cachedAt": "2026-07-04T05:35:29.121Z"
+      "cachedAt": "2026-07-04T05:58:01.522Z"
     },
     "603618": {
       "source": "sina-financial-report",
@@ -4563,7 +4563,7 @@
         }
       ],
       "symbol": "603618",
-      "cachedAt": "2026-07-04T05:35:33.434Z"
+      "cachedAt": "2026-07-04T05:58:04.821Z"
     },
     "603986": {
       "source": "sina-financial-report",
@@ -4803,7 +4803,7 @@
         }
       ],
       "symbol": "603986",
-      "cachedAt": "2026-07-04T05:35:27.358Z"
+      "cachedAt": "2026-07-04T05:58:00.180Z"
     },
     "688008": {
       "source": "sina-financial-report",
@@ -5043,7 +5043,7 @@
         }
       ],
       "symbol": "688008",
-      "cachedAt": "2026-07-04T05:35:29.145Z"
+      "cachedAt": "2026-07-04T05:58:01.575Z"
     },
     "688012": {
       "source": "sina-financial-report",
@@ -5283,7 +5283,7 @@
         }
       ],
       "symbol": "688012",
-      "cachedAt": "2026-07-04T05:35:29.959Z"
+      "cachedAt": "2026-07-04T05:58:02.176Z"
     },
     "688017": {
       "source": "sina-financial-report",
@@ -5523,7 +5523,7 @@
         }
       ],
       "symbol": "688017",
-      "cachedAt": "2026-07-04T05:35:31.782Z"
+      "cachedAt": "2026-07-04T05:58:03.576Z"
     },
     "688256": {
       "source": "sina-financial-report",
@@ -5763,7 +5763,7 @@
         }
       ],
       "symbol": "688256",
-      "cachedAt": "2026-07-04T05:35:29.974Z"
+      "cachedAt": "2026-07-04T05:58:02.182Z"
     },
     "688525": {
       "source": "sina-financial-report",
@@ -6003,7 +6003,7 @@
         }
       ],
       "symbol": "688525",
-      "cachedAt": "2026-07-04T05:35:29.983Z"
+      "cachedAt": "2026-07-04T05:58:02.210Z"
     },
     "688981": {
       "source": "sina-financial-report",
@@ -6243,7 +6243,7 @@
         }
       ],
       "symbol": "688981",
-      "cachedAt": "2026-07-04T05:35:26.487Z"
+      "cachedAt": "2026-07-04T05:57:59.506Z"
     },
     "000001": {
       "source": "sina-financial-report",
@@ -6483,7 +6483,7 @@
         }
       ],
       "symbol": "000001",
-      "cachedAt": "2026-07-04T05:35:26.475Z"
+      "cachedAt": "2026-07-04T05:57:59.505Z"
     },
     "002594": {
       "source": "sina-financial-report",
@@ -6723,7 +6723,7 @@
         }
       ],
       "symbol": "002594",
-      "cachedAt": "2026-07-04T05:35:27.353Z"
+      "cachedAt": "2026-07-04T05:58:00.176Z"
     },
     "000725": {
       "source": "sina-financial-report",
@@ -6963,247 +6963,7 @@
         }
       ],
       "symbol": "000725",
-      "cachedAt": "2026-07-04T05:35:30.025Z"
-    },
-    "002384": {
-      "source": "sina-financial-report",
-      "code": "002384.SZ",
-      "name": "",
-      "reportDate": "20260331",
-      "reportLabel": "2026一季报",
-      "financials": {
-        "parentNetProfit": 1109892942.38,
-        "revenue": 13137636263.36,
-        "netProfit": 1124152991.38,
-        "operatingCashFlow": 1126672373.29,
-        "epsBasic": 0.61,
-        "navps": 12.35947,
-        "roe": 5.05,
-        "roa": 2.362379,
-        "grossMargin": 19.327535,
-        "netMargin": 8.556737,
-        "debtRatio": 63.688751
-      },
-      "rows": [
-        {
-          "field": "PARENETP",
-          "title": "归母净利润",
-          "value": 1109892942.38,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTINCO",
-          "title": "营业总收入",
-          "value": 13137636263.36,
-          "group": 1
-        },
-        {
-          "field": "BIZTOTCOST",
-          "title": "营业成本",
-          "value": 11800615115.09,
-          "group": 1
-        },
-        {
-          "field": "NETPROFIT",
-          "title": "净利润",
-          "value": 1124152991.38,
-          "group": 1
-        },
-        {
-          "field": "NPCUT",
-          "title": "扣非净利润",
-          "value": 1059278407.74,
-          "group": 1
-        },
-        {
-          "field": "RIGHAGGR",
-          "title": "股东权益合计(净资产)",
-          "value": 22892650196.2,
-          "group": 1
-        },
-        {
-          "field": "GOODWILL",
-          "title": "商誉",
-          "value": 4769259362.01,
-          "group": 1
-        },
-        {
-          "field": "MANANETR",
-          "title": "经营现金流量净额",
-          "value": 1126672373.29,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.61,
-          "group": 1
-        },
-        {
-          "field": "NAPS",
-          "title": "每股净资产",
-          "value": 12.35947,
-          "group": 1
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股现金流",
-          "value": 0.615127,
-          "group": 1
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": 5.05,
-          "group": 1
-        },
-        {
-          "field": "ROA",
-          "title": "总资产报酬率(ROA)",
-          "value": 2.362379,
-          "group": 1
-        },
-        {
-          "field": "SGPMARGIN",
-          "title": "毛利率",
-          "value": 19.327535,
-          "group": 1
-        },
-        {
-          "field": "SNPMARGINCONMS",
-          "title": "销售净利率",
-          "value": 8.556737,
-          "group": 1
-        },
-        {
-          "field": "TRIEXPRT",
-          "title": "期间费用率",
-          "value": 8.862895,
-          "group": 1
-        },
-        {
-          "field": "ASSLIABRT",
-          "title": "资产负债率",
-          "value": 63.688751,
-          "group": 1
-        },
-        {
-          "field": "EPSBASIC",
-          "title": "基本每股收益",
-          "value": 0.61,
-          "group": 2
-        },
-        {
-          "field": "EPSFULLDILUTED",
-          "title": "稀释每股收益",
-          "value": 0.61,
-          "group": 2
-        },
-        {
-          "field": "EPSDILUTEDNEWP",
-          "title": "摊薄每股收益_最新股数",
-          "value": 0.605966,
-          "group": 2
-        },
-        {
-          "field": "NAPS",
-          "title": "摊薄每股净资产_期末股数",
-          "value": 12.35947,
-          "group": 2
-        },
-        {
-          "field": "NAPSADJ",
-          "title": "调整每股净资产_期末股数",
-          "value": 8.007555,
-          "group": 2
-        },
-        {
-          "field": "NAPSNEWP",
-          "title": "每股净资产_最新股数",
-          "value": 12.35947,
-          "group": 2
-        },
-        {
-          "field": "OPNCFPS",
-          "title": "每股经营现金流",
-          "value": 0.615127,
-          "group": 2
-        },
-        {
-          "field": "NCFPS",
-          "title": "每股现金流量净额",
-          "value": 0.493224,
-          "group": 2
-        },
-        {
-          "field": "FCFFPS",
-          "title": "每股企业自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "FCFEPS",
-          "title": "每股股东自由现金流量",
-          "value": null,
-          "group": 2
-        },
-        {
-          "field": "UPPS",
-          "title": "每股未分配利润",
-          "value": 6.359604,
-          "group": 2
-        },
-        {
-          "field": "CRPS",
-          "title": "每股资本公积金",
-          "value": 5.096584,
-          "group": 2
-        },
-        {
-          "field": "SRPS",
-          "title": "每股盈余公积金",
-          "value": 0.136028,
-          "group": 2
-        },
-        {
-          "field": "REPS",
-          "title": "每股留存收益",
-          "value": 6.495632,
-          "group": 2
-        },
-        {
-          "field": "OPREVPS",
-          "title": "每股营业收入",
-          "value": 7.172735,
-          "group": 2
-        },
-        {
-          "field": "TOPREVPS",
-          "title": "每股营业总收入",
-          "value": 7.172735,
-          "group": 2
-        },
-        {
-          "field": "EBITPS",
-          "title": "每股息税前利润",
-          "value": 0.795127,
-          "group": 2
-        },
-        {
-          "field": "ROEWEIGHTED",
-          "title": "净资产收益率(ROE)",
-          "value": 5.05,
-          "group": 3
-        },
-        {
-          "field": "ROEDILUTED",
-          "title": "摊薄净资产收益率",
-          "value": 4.902852,
-          "group": 3
-        }
-      ],
-      "symbol": "002384",
-      "cachedAt": "2026-07-04T05:35:30.823Z"
+      "cachedAt": "2026-07-04T05:58:02.235Z"
     },
     "001309": {
       "source": "sina-financial-report",
@@ -7443,176 +7203,176 @@
         }
       ],
       "symbol": "001309",
-      "cachedAt": "2026-07-04T05:35:30.847Z"
+      "cachedAt": "2026-07-04T05:58:02.838Z"
     },
-    "002050": {
+    "002384": {
       "source": "sina-financial-report",
-      "code": "002050.SZ",
+      "code": "002384.SZ",
       "name": "",
       "reportDate": "20260331",
       "reportLabel": "2026一季报",
       "financials": {
-        "parentNetProfit": 927621853.77,
-        "revenue": 7773555419.29,
-        "netProfit": 950867700.26,
-        "operatingCashFlow": 1105790187.12,
-        "epsBasic": 0.22,
-        "navps": 7.753748,
-        "roe": 2.88,
-        "roa": 2.328959,
-        "grossMargin": 27.796688,
-        "netMargin": 12.232082,
-        "debtRatio": 33.277786
+        "parentNetProfit": 1109892942.38,
+        "revenue": 13137636263.36,
+        "netProfit": 1124152991.38,
+        "operatingCashFlow": 1126672373.29,
+        "epsBasic": 0.61,
+        "navps": 12.35947,
+        "roe": 5.05,
+        "roa": 2.362379,
+        "grossMargin": 19.327535,
+        "netMargin": 8.556737,
+        "debtRatio": 63.688751
       },
       "rows": [
         {
           "field": "PARENETP",
           "title": "归母净利润",
-          "value": 927621853.77,
+          "value": 1109892942.38,
           "group": 1
         },
         {
           "field": "BIZTOTINCO",
           "title": "营业总收入",
-          "value": 7773555419.29,
+          "value": 13137636263.36,
           "group": 1
         },
         {
           "field": "BIZTOTCOST",
           "title": "营业成本",
-          "value": 6682627062.75,
+          "value": 11800615115.09,
           "group": 1
         },
         {
           "field": "NETPROFIT",
           "title": "净利润",
-          "value": 950867700.26,
+          "value": 1124152991.38,
           "group": 1
         },
         {
           "field": "NPCUT",
           "title": "扣非净利润",
-          "value": 985709560.79,
+          "value": 1059278407.74,
           "group": 1
         },
         {
           "field": "RIGHAGGR",
           "title": "股东权益合计(净资产)",
-          "value": 32937196859.33,
+          "value": 22892650196.2,
           "group": 1
         },
         {
           "field": "GOODWILL",
           "title": "商誉",
-          "value": null,
+          "value": 4769259362.01,
           "group": 1
         },
         {
           "field": "MANANETR",
           "title": "经营现金流量净额",
-          "value": 1105790187.12,
+          "value": 1126672373.29,
           "group": 1
         },
         {
           "field": "EPSBASIC",
           "title": "基本每股收益",
-          "value": 0.22,
+          "value": 0.61,
           "group": 1
         },
         {
           "field": "NAPS",
           "title": "每股净资产",
-          "value": 7.753748,
+          "value": 12.35947,
           "group": 1
         },
         {
           "field": "OPNCFPS",
           "title": "每股现金流",
-          "value": 0.262781,
+          "value": 0.615127,
           "group": 1
         },
         {
           "field": "ROEWEIGHTED",
           "title": "净资产收益率(ROE)",
-          "value": 2.88,
+          "value": 5.05,
           "group": 1
         },
         {
           "field": "ROA",
           "title": "总资产报酬率(ROA)",
-          "value": 2.328959,
+          "value": 2.362379,
           "group": 1
         },
         {
           "field": "SGPMARGIN",
           "title": "毛利率",
-          "value": 27.796688,
+          "value": 19.327535,
           "group": 1
         },
         {
           "field": "SNPMARGINCONMS",
           "title": "销售净利率",
-          "value": 12.232082,
+          "value": 8.556737,
           "group": 1
         },
         {
           "field": "TRIEXPRT",
           "title": "期间费用率",
-          "value": 13.213179,
+          "value": 8.862895,
           "group": 1
         },
         {
           "field": "ASSLIABRT",
           "title": "资产负债率",
-          "value": 33.277786,
+          "value": 63.688751,
           "group": 1
         },
         {
           "field": "EPSBASIC",
           "title": "基本每股收益",
-          "value": 0.22,
+          "value": 0.61,
           "group": 2
         },
         {
           "field": "EPSFULLDILUTED",
           "title": "稀释每股收益",
-          "value": 0.22,
+          "value": 0.61,
           "group": 2
         },
         {
           "field": "EPSDILUTEDNEWP",
           "title": "摊薄每股收益_最新股数",
-          "value": 0.220441,
+          "value": 0.605966,
           "group": 2
         },
         {
           "field": "NAPS",
           "title": "摊薄每股净资产_期末股数",
-          "value": 7.753748,
+          "value": 12.35947,
           "group": 2
         },
         {
           "field": "NAPSADJ",
           "title": "调整每股净资产_期末股数",
-          "value": 7.384497,
+          "value": 8.007555,
           "group": 2
         },
         {
           "field": "NAPSNEWP",
           "title": "每股净资产_最新股数",
-          "value": 7.753748,
+          "value": 12.35947,
           "group": 2
         },
         {
           "field": "OPNCFPS",
           "title": "每股经营现金流",
-          "value": 0.262781,
+          "value": 0.615127,
           "group": 2
         },
         {
           "field": "NCFPS",
           "title": "每股现金流量净额",
-          "value": -0.240895,
+          "value": 0.493224,
           "group": 2
         },
         {
@@ -7630,60 +7390,60 @@
         {
           "field": "UPPS",
           "title": "每股未分配利润",
-          "value": 3.580646,
+          "value": 6.359604,
           "group": 2
         },
         {
           "field": "CRPS",
           "title": "每股资本公积金",
-          "value": 2.999961,
+          "value": 5.096584,
           "group": 2
         },
         {
           "field": "SRPS",
           "title": "每股盈余公积金",
-          "value": 0.309172,
+          "value": 0.136028,
           "group": 2
         },
         {
           "field": "REPS",
           "title": "每股留存收益",
-          "value": 3.889818,
+          "value": 6.495632,
           "group": 2
         },
         {
           "field": "OPREVPS",
           "title": "每股营业收入",
-          "value": 1.847321,
+          "value": 7.172735,
           "group": 2
         },
         {
           "field": "TOPREVPS",
           "title": "每股营业总收入",
-          "value": 1.847321,
+          "value": 7.172735,
           "group": 2
         },
         {
           "field": "EBITPS",
           "title": "每股息税前利润",
-          "value": 0.273327,
+          "value": 0.795127,
           "group": 2
         },
         {
           "field": "ROEWEIGHTED",
           "title": "净资产收益率(ROE)",
-          "value": 2.88,
+          "value": 5.05,
           "group": 3
         },
         {
           "field": "ROEDILUTED",
           "title": "摊薄净资产收益率",
-          "value": 2.843034,
+          "value": 4.902852,
           "group": 3
         }
       ],
-      "symbol": "002050",
-      "cachedAt": "2026-07-04T05:35:30.865Z"
+      "symbol": "002384",
+      "cachedAt": "2026-07-04T05:58:02.840Z"
     },
     "002747": {
       "source": "sina-financial-report",
@@ -7923,7 +7683,247 @@
         }
       ],
       "symbol": "002747",
-      "cachedAt": "2026-07-04T05:35:30.907Z"
+      "cachedAt": "2026-07-04T05:58:02.902Z"
+    },
+    "002050": {
+      "source": "sina-financial-report",
+      "code": "002050.SZ",
+      "name": "",
+      "reportDate": "20260331",
+      "reportLabel": "2026一季报",
+      "financials": {
+        "parentNetProfit": 927621853.77,
+        "revenue": 7773555419.29,
+        "netProfit": 950867700.26,
+        "operatingCashFlow": 1105790187.12,
+        "epsBasic": 0.22,
+        "navps": 7.753748,
+        "roe": 2.88,
+        "roa": 2.328959,
+        "grossMargin": 27.796688,
+        "netMargin": 12.232082,
+        "debtRatio": 33.277786
+      },
+      "rows": [
+        {
+          "field": "PARENETP",
+          "title": "归母净利润",
+          "value": 927621853.77,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTINCO",
+          "title": "营业总收入",
+          "value": 7773555419.29,
+          "group": 1
+        },
+        {
+          "field": "BIZTOTCOST",
+          "title": "营业成本",
+          "value": 6682627062.75,
+          "group": 1
+        },
+        {
+          "field": "NETPROFIT",
+          "title": "净利润",
+          "value": 950867700.26,
+          "group": 1
+        },
+        {
+          "field": "NPCUT",
+          "title": "扣非净利润",
+          "value": 985709560.79,
+          "group": 1
+        },
+        {
+          "field": "RIGHAGGR",
+          "title": "股东权益合计(净资产)",
+          "value": 32937196859.33,
+          "group": 1
+        },
+        {
+          "field": "GOODWILL",
+          "title": "商誉",
+          "value": null,
+          "group": 1
+        },
+        {
+          "field": "MANANETR",
+          "title": "经营现金流量净额",
+          "value": 1105790187.12,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.22,
+          "group": 1
+        },
+        {
+          "field": "NAPS",
+          "title": "每股净资产",
+          "value": 7.753748,
+          "group": 1
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股现金流",
+          "value": 0.262781,
+          "group": 1
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 2.88,
+          "group": 1
+        },
+        {
+          "field": "ROA",
+          "title": "总资产报酬率(ROA)",
+          "value": 2.328959,
+          "group": 1
+        },
+        {
+          "field": "SGPMARGIN",
+          "title": "毛利率",
+          "value": 27.796688,
+          "group": 1
+        },
+        {
+          "field": "SNPMARGINCONMS",
+          "title": "销售净利率",
+          "value": 12.232082,
+          "group": 1
+        },
+        {
+          "field": "TRIEXPRT",
+          "title": "期间费用率",
+          "value": 13.213179,
+          "group": 1
+        },
+        {
+          "field": "ASSLIABRT",
+          "title": "资产负债率",
+          "value": 33.277786,
+          "group": 1
+        },
+        {
+          "field": "EPSBASIC",
+          "title": "基本每股收益",
+          "value": 0.22,
+          "group": 2
+        },
+        {
+          "field": "EPSFULLDILUTED",
+          "title": "稀释每股收益",
+          "value": 0.22,
+          "group": 2
+        },
+        {
+          "field": "EPSDILUTEDNEWP",
+          "title": "摊薄每股收益_最新股数",
+          "value": 0.220441,
+          "group": 2
+        },
+        {
+          "field": "NAPS",
+          "title": "摊薄每股净资产_期末股数",
+          "value": 7.753748,
+          "group": 2
+        },
+        {
+          "field": "NAPSADJ",
+          "title": "调整每股净资产_期末股数",
+          "value": 7.384497,
+          "group": 2
+        },
+        {
+          "field": "NAPSNEWP",
+          "title": "每股净资产_最新股数",
+          "value": 7.753748,
+          "group": 2
+        },
+        {
+          "field": "OPNCFPS",
+          "title": "每股经营现金流",
+          "value": 0.262781,
+          "group": 2
+        },
+        {
+          "field": "NCFPS",
+          "title": "每股现金流量净额",
+          "value": -0.240895,
+          "group": 2
+        },
+        {
+          "field": "FCFFPS",
+          "title": "每股企业自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "FCFEPS",
+          "title": "每股股东自由现金流量",
+          "value": null,
+          "group": 2
+        },
+        {
+          "field": "UPPS",
+          "title": "每股未分配利润",
+          "value": 3.580646,
+          "group": 2
+        },
+        {
+          "field": "CRPS",
+          "title": "每股资本公积金",
+          "value": 2.999961,
+          "group": 2
+        },
+        {
+          "field": "SRPS",
+          "title": "每股盈余公积金",
+          "value": 0.309172,
+          "group": 2
+        },
+        {
+          "field": "REPS",
+          "title": "每股留存收益",
+          "value": 3.889818,
+          "group": 2
+        },
+        {
+          "field": "OPREVPS",
+          "title": "每股营业收入",
+          "value": 1.847321,
+          "group": 2
+        },
+        {
+          "field": "TOPREVPS",
+          "title": "每股营业总收入",
+          "value": 1.847321,
+          "group": 2
+        },
+        {
+          "field": "EBITPS",
+          "title": "每股息税前利润",
+          "value": 0.273327,
+          "group": 2
+        },
+        {
+          "field": "ROEWEIGHTED",
+          "title": "净资产收益率(ROE)",
+          "value": 2.88,
+          "group": 3
+        },
+        {
+          "field": "ROEDILUTED",
+          "title": "摊薄净资产收益率",
+          "value": 2.843034,
+          "group": 3
+        }
+      ],
+      "symbol": "002050",
+      "cachedAt": "2026-07-04T05:58:02.905Z"
     },
     "002371": {
       "source": "sina-financial-report",
@@ -8163,7 +8163,7 @@
         }
       ],
       "symbol": "002371",
-      "cachedAt": "2026-07-04T05:35:31.686Z"
+      "cachedAt": "2026-07-04T05:58:03.497Z"
     },
     "002475": {
       "source": "sina-financial-report",
@@ -8403,7 +8403,7 @@
         }
       ],
       "symbol": "002475",
-      "cachedAt": "2026-07-04T05:35:31.688Z"
+      "cachedAt": "2026-07-04T05:58:03.500Z"
     },
     "000021": {
       "source": "sina-financial-report",
@@ -8643,7 +8643,7 @@
         }
       ],
       "symbol": "000021",
-      "cachedAt": "2026-07-04T05:35:31.731Z"
+      "cachedAt": "2026-07-04T05:58:03.561Z"
     },
     "002407": {
       "source": "sina-financial-report",
@@ -8883,7 +8883,7 @@
         }
       ],
       "symbol": "002407",
-      "cachedAt": "2026-07-04T05:35:32.608Z"
+      "cachedAt": "2026-07-04T05:58:04.211Z"
     },
     "002472": {
       "source": "sina-financial-report",
@@ -9123,7 +9123,7 @@
         }
       ],
       "symbol": "002472",
-      "cachedAt": "2026-07-04T05:35:33.482Z"
+      "cachedAt": "2026-07-04T05:58:04.866Z"
     },
     "001248": {
       "source": "sina-financial-report",
@@ -9363,7 +9363,7 @@
         }
       ],
       "symbol": "001248",
-      "cachedAt": "2026-07-04T05:35:34.289Z"
+      "cachedAt": "2026-07-04T05:58:05.485Z"
     },
     "002979": {
       "source": "sina-financial-report",
@@ -9603,7 +9603,7 @@
         }
       ],
       "symbol": "002979",
-      "cachedAt": "2026-07-04T05:35:34.390Z"
+      "cachedAt": "2026-07-04T05:58:05.549Z"
     }
   },
   "errors": []

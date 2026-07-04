@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18";
-const SECTOR_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106";
+const STOCK_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f9,f10,f13,f15,f16,f17,f18,f20,f21";
+const BOARD_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106,f128,f136,f140,f141";
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
 const EASTMONEY_A_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23";
 const EASTMONEY_A_SEGMENTS = ["m:1+t:2,m:1+t:23", "m:0+t:6,m:0+t:80"];
@@ -56,7 +56,8 @@ module.exports = async function handler(req, res) {
     sinaStockResult,
     eastmoneySectorResult,
     sinaSectorResult,
-    conceptResult,
+    eastmoneyConceptResult,
+    sinaConceptResult,
     limitPools,
     etfs,
     moneyFlow,
@@ -79,6 +80,7 @@ module.exports = async function handler(req, res) {
     fetchSinaStockUniverse().catch(() => null),
     fetchEastmoneySectors().catch(() => null),
     fetchSinaSectors().catch(() => null),
+    fetchCached("eastmoney:concepts", BOARD_CACHE_MS, fetchEastmoneyConcepts).catch(() => null),
     fetchCached("sina:concepts", BOARD_CACHE_MS, fetchSinaConcepts).catch(() => null),
     fetchCached(`eastmoney:limit:${tradeDate}`, SHORT_CACHE_MS, () => fetchEastmoneyLimitPools(tradeDate)).catch(() => null),
     fetchCached("eastmoney:etfs", BOARD_CACHE_MS, fetchEastmoneyEtfs).catch(() => null),
@@ -100,6 +102,7 @@ module.exports = async function handler(req, res) {
   ]);
   const stockUniverse = pickStockUniverse(eastmoneyStockResult, sinaStockResult);
   const sectorUniverse = pickSectorUniverse(eastmoneySectorResult, sinaSectorResult);
+  const conceptUniverse = pickConceptUniverse(eastmoneyConceptResult, sinaConceptResult);
   const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
   const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
@@ -110,7 +113,7 @@ module.exports = async function handler(req, res) {
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
-    conceptResult?.length ? "sina-concept-boards" : "concept-fallback",
+    conceptUniverse.source,
     limitPools?.source || "limit-pool-fallback",
     etfs?.rows?.length ? "eastmoney-etf-spot" : "etf-fallback",
     moneyFlow?.rows?.length ? "eastmoney-moneyflow" : "moneyflow-fallback",
@@ -136,7 +139,7 @@ module.exports = async function handler(req, res) {
     market,
     stocks: stockUniverse.leaders,
     sectors,
-    concepts: conceptResult?.length ? conceptResult : [],
+    concepts: conceptUniverse.rows,
     limitPools: limitPools || { date: tradeDate, limitUp: [], broken: [], strong: [], stats: {} },
     etfs: etfs || { rows: [], stats: {} },
     moneyFlow: moneyFlow || { rows: [], latest: null, sum5MainYi: 0 },
@@ -361,6 +364,33 @@ function emptyFundamentals(value) {
   return Object.keys(financials).length === 0 && emptyRows(value.rows);
 }
 
+function selectScreenerUniverse(rows, limit) {
+  const selected = new Map();
+  const addRows = (items) => {
+    items.forEach((row) => {
+      if (row?.code && !selected.has(row.code)) selected.set(row.code, row);
+    });
+  };
+  const sorted = (score) =>
+    rows
+      .slice()
+      .filter((row) => row?.code)
+      .sort((a, b) => score(b) - score(a));
+  const lowSorted = (score) =>
+    rows
+      .slice()
+      .filter((row) => row?.code && score(row) > 0)
+      .sort((a, b) => score(a) - score(b));
+
+  addRows(sorted((row) => Number(row.amount) || 0).slice(0, 260));
+  addRows(sorted((row) => Number(row.pct) || 0).slice(0, 160));
+  addRows(sorted((row) => Number(row.turnover) || 0).slice(0, 160));
+  addRows(lowSorted((row) => Number(row.circMv) || Number(row.totalMv) || 0).slice(0, 220));
+  addRows(lowSorted((row) => Number(row.totalMv) || Number(row.circMv) || 0).slice(0, 180));
+  addRows(rows.slice(0, limit));
+  return Array.from(selected.values()).slice(0, limit);
+}
+
 function pickStockUniverse(eastmoneyStockResult, sinaStockResult) {
   if (eastmoneyStockResult?.all?.length > 1000) {
     return { ...eastmoneyStockResult, source: "eastmoney-a-share-pages" };
@@ -381,6 +411,12 @@ function pickSectorUniverse(eastmoneySectorResult, sinaSectorResult) {
   if (eastmoneySectorResult?.length) return { rows: eastmoneySectorResult, source: "eastmoney-sector-flow" };
   if (sinaSectorResult?.length) return { rows: sinaSectorResult, source: "sina-industry-sectors" };
   return { rows: sampleSectors, source: "sample-sector-fallback" };
+}
+
+function pickConceptUniverse(eastmoneyConceptResult, sinaConceptResult) {
+  if (eastmoneyConceptResult?.length) return { rows: eastmoneyConceptResult, source: "eastmoney-concept-boards" };
+  if (sinaConceptResult?.length) return { rows: sinaConceptResult, source: "sina-concept-boards" };
+  return { rows: [], source: "concept-fallback" };
 }
 
 async function fetchJson(url, options = {}) {
@@ -484,10 +520,7 @@ async function fetchEastmoneyStockUniverse() {
     if (row.code && !byCode.has(row.code)) byCode.set(row.code, row);
   });
   const all = Array.from(byCode.values());
-  const leaders = all
-    .slice()
-    .sort((a, b) => (b.amount || 0) - (a.amount || 0))
-    .slice(0, 300);
+  const leaders = selectScreenerUniverse(all, 800);
   return { all, leaders };
 }
 
@@ -544,10 +577,7 @@ async function fetchSinaStockUniverse() {
     if (row.code && !byCode.has(row.code)) byCode.set(row.code, row);
   });
   const all = Array.from(byCode.values());
-  const leaders = all
-    .slice()
-    .sort((a, b) => (b.amount || 0) - (a.amount || 0))
-    .slice(0, 500);
+  const leaders = selectScreenerUniverse(all, 800);
   return { all, leaders };
 }
 
@@ -600,14 +630,60 @@ async function fetchSinaConcepts() {
 }
 
 async function fetchEastmoneySectors() {
-  const url =
-    "https://push2.eastmoney.com/api/qt/clist/get" +
-    `?pn=1&pz=80&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:2&fields=${SECTOR_FIELDS}`;
-  const payload = await fetchJson(url, { attempts: 1, timeoutMs: 1500, headers: { Referer: "https://quote.eastmoney.com/" } });
+  return fetchEastmoneyBoards("m:90+t:2", "industry", 80);
+}
+
+async function fetchEastmoneyConcepts() {
+  return fetchEastmoneyBoards("m:90+t:3", "concept", 500);
+}
+
+async function fetchEastmoneyBoards(fs, type, limit) {
+  const pageSize = Math.min(100, limit);
+  const firstPage = await fetchEastmoneyBoardPage(fs, 1, pageSize);
+  const total = Number(firstPage.total || firstPage.rows.length || limit);
+  const pageCount = Math.min(Math.ceil(total / pageSize), Math.ceil(limit / pageSize));
+  const pages = [firstPage.rows];
+  const pageNumbers = Array.from({ length: pageCount - 1 }, (_, index) => index + 2);
+  const results = await Promise.all(pageNumbers.map((page) => fetchEastmoneyBoardPage(fs, page, pageSize).catch(() => ({ rows: [] }))));
+  pages.push(...results.map((result) => result.rows));
+  return pages
+    .flat()
+    .slice(0, limit)
+    .map((row, index) => normalizeEastmoneyBoardRow(row, index, type));
+}
+
+async function fetchEastmoneyBoardPage(fs, page, pageSize) {
+  const params = new URLSearchParams({
+    pn: String(page),
+    pz: String(pageSize),
+    po: "1",
+    np: "1",
+    ut: "bd1d9ddb04089700cf9c27f6f7426281",
+    fltt: "2",
+    invt: "2",
+    fid: "f3",
+    fs,
+    fields: BOARD_FIELDS,
+  });
+  const payload = await fetchJson(`${EASTMONEY_ETF_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 2500,
+    headers: { Referer: "https://quote.eastmoney.com/" },
+  });
   const rows = payload?.data?.diff || [];
-  return rows.map((row, index) => ({
+  return { total: payload?.data?.total || rows.length, rows };
+}
+
+function normalizeEastmoneyBoardRow(row, index, type) {
+  const upCount = num(row.f104);
+  const downCount = num(row.f105);
+  const flatCount = num(row.f106);
+  const leaderName = clean(row.f128);
+  const leaderCode = clean(row.f140);
+  return {
     code: clean(row.f12),
     name: clean(row.f14),
+    type,
     price: num(row.f2),
     pct: num(row.f3),
     rank: index + 1,
@@ -619,10 +695,19 @@ async function fetchEastmoneySectors() {
     totalMv: num(row.f20),
     circMv: num(row.f21),
     netFund: num(row.f62),
-    upCount: num(row.f104),
-    downCount: num(row.f105),
-    flatCount: num(row.f106),
-  }));
+    upCount,
+    downCount,
+    flatCount,
+    companyCount: upCount + downCount + flatCount,
+    leader:
+      leaderName && leaderName !== "-"
+        ? {
+            code: leaderCode ? formatCode(leaderCode, row.f141) : "",
+            name: leaderName,
+            pct: num(row.f136),
+          }
+        : null,
+  };
 }
 
 async function fetchEastmoneyLimitPools(date) {
@@ -1316,6 +1401,8 @@ function normalizeStockRow(row) {
     low: num(row.f16),
     open: num(row.f17),
     preClose: num(row.f18),
+    totalMv: num(row.f20),
+    circMv: num(row.f21),
   };
 }
 

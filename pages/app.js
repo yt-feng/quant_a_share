@@ -171,8 +171,8 @@ const coverageRows = [
 ];
 
 const dataSourceRows = [
-  ["东方财富", "核心接入", "A股行情、指数、板块、涨停池、炸板池、强势股、ETF、个股资金流、北向资金、人气榜、公告、单股行情与K线。"],
-  ["Sina", "核心接入", "全A兜底、行业/概念兜底、财报字段兜底，补齐东财列表偶发为空时的股票池。"],
+  ["东方财富", "核心接入", "A股行情、指数、行业/概念板块、涨停池、炸板池、强势股、ETF、个股资金流、北向资金、人气榜、公告、单股行情与K线。"],
+  ["Sina", "核心接入", "全A兜底、行业/概念二源兜底、财报字段兜底，补齐东财列表偶发为空时的股票池。"],
   ["CNInfo 巨潮", "核心接入", "公告二源合并、投资者关系/调研披露，已进入行情页和 LLM 上下文。"],
   ["BaoStock", "云缓存接入", "GitHub Actions 批量生成历史K线、换手率、PE/PB/PS/PCF、收益与均线摘要，Vercel 按股票读取。"],
   ["财务字段缓存", "云缓存接入", "GitHub Actions 生成 financial-cache.json，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。"],
@@ -1208,7 +1208,7 @@ function factorPasses(stock, key) {
     rsiV: () => stock.pct < -2 && stock.turnover >= 3,
     vwapScore: () => stock.vwapScore >= 5,
     vwapLong: () => stock.pct >= 0 && stock.rps >= 55,
-    vwapDip: () => stock.pct > -2 && stock.pct < 1 && stock.rps >= 45,
+    vwapDip: () => stock.pct > -3 && stock.pct < 1.5 && (stock.rps >= 30 || stock.amount >= 100000000),
     vwapBreak: () => stock.pct >= 2 && stock.amount >= 1000000000,
     vwapFast: () => stock.pct >= 4,
     vwapPos: () => stock.price >= stock.vwap,
@@ -1775,7 +1775,7 @@ async function loadMarketSnapshot() {
       data.stocks = buildClientStockRows(stockRows);
     }
     if (Array.isArray(payload.sectors) && payload.sectors.length) {
-      data.sectors = payload.sectors.slice(0, 12).map((sector, index) => [
+      data.sectors = payload.sectors.map((sector, index) => [
         sector.name,
         sector.pct || 0,
         sector.rank || index + 1,
@@ -1787,7 +1787,7 @@ async function loadMarketSnapshot() {
       ]);
     }
     if (Array.isArray(payload.concepts) && payload.concepts.length) {
-      data.concepts = payload.concepts.slice(0, 80).map((concept, index) => [
+      data.concepts = payload.concepts.map((concept, index) => [
         concept.name,
         concept.pct || 0,
         concept.rank || index + 1,
@@ -1825,7 +1825,7 @@ async function loadMarketSnapshot() {
 }
 
 function buildClientStockRows(rows) {
-  const baseRows = rows.slice(0, 360);
+  const baseRows = rows.slice(0, 800);
   const pctValues = baseRows.map((stock) => Number(stock.pct) || 0).sort((a, b) => a - b);
   const amountValues = baseRows.map((stock) => Number(stock.amount) || 0).sort((a, b) => a - b);
   const fallbackIndustries = data.stocks.length ? data.stocks.map((stock) => stock.industry || "A股") : ["A股"];
@@ -2027,8 +2027,9 @@ function renderCharts() {
     Plotly.newPlot("indexChart", [{ x: data.indices.map((d) => d[0]), y: data.indices.map((d) => d[1]), type: "bar", marker: { color: data.indices.map((d) => (d[1] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "sectors") {
-    Plotly.newPlot("sectorFundChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[7]), type: "bar", marker: { color: data.sectors.map((d) => (d[7] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
-    Plotly.newPlot("sectorChangeChart", [{ x: data.sectors.map((d) => d[0]), y: data.sectors.map((d) => d[1]), type: "bar", marker: { color: "#b45309" } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    const chartSectors = data.sectors.slice(0, 30);
+    Plotly.newPlot("sectorFundChart", [{ x: chartSectors.map((d) => d[0]), y: chartSectors.map((d) => d[7]), type: "bar", marker: { color: chartSectors.map((d) => (d[7] >= 0 ? "#dc2626" : "#15803d")) } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
+    Plotly.newPlot("sectorChangeChart", [{ x: chartSectors.map((d) => d[0]), y: chartSectors.map((d) => d[1]), type: "bar", marker: { color: "#b45309" } }], { ...baseLayout, xaxis: { type: "category" } }, plotConfig);
   }
   if (currentPage === "quote") {
     const stock = data.stocks.find((item) => item.code.includes(selectedQuote)) || data.stocks[0];

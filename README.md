@@ -41,11 +41,11 @@ npm run cache:market
 
 项目后续按“免费公开源优先、TuShare 作为增强源”的方式接数据：
 
-- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于指数、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、公告等。
+- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于指数、行业/概念板块、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、公告等。
 - `Eastmoney report API`：Vercel `/api/market` 当前用于近 30 日行业研报、宏观策略研报，供 LLM 产业链研报分析 tab 和问答上下文使用。
-- `Sina public endpoint`：当前用于全 A 股票池兜底、行业板块、概念板块和财务报告关键指标。
+- `Sina public endpoint`：当前用于全 A 股票池兜底、行业/概念板块二源兜底和财务报告关键指标。
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。
-- `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括 ETF、涨停池、人气榜、资金流、公告和财务摘要。
+- `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括行业/概念板块、ETF、涨停池、人气榜、资金流、公告和财务摘要。
 - `BaoStock`：通过 GitHub Actions 批量生成 `pages/data/baostock-cache.json`，当前会从市场快照扩展到最多 24 只股票，缓存历史 K 线、换手率、PE/PB/PS/PCF、MA 和区间收益。
 - `Financial cache`：通过 GitHub Actions 批量生成 `pages/data/financial-cache.json`，默认覆盖最多 40 只股票，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
