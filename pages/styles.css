@@ -703,6 +703,19 @@ th {
   font-weight: 650;
 }
 
+.table-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.table-action {
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
 td a {
   color: var(--blue);
   text-decoration: none;

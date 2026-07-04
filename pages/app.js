@@ -364,6 +364,28 @@ function actionGroup(...items) {
   return `<div class="top-actions">${items.filter(Boolean).join("")}</div>`;
 }
 
+function watchActionButton(code, label = "自选") {
+  const normalized = normalizeWatchCode(code);
+  if (!normalized) return "-";
+  return `<button class="ghost-button table-action" data-add-watch="${escapeHtml(normalized)}">${escapeHtml(label)}</button>`;
+}
+
+function quoteActionButton(code, label = "查看") {
+  const normalized = normalizeWatchCode(code);
+  if (!normalized) return "-";
+  return `<button class="ghost-button table-action" data-open-quote="${escapeHtml(normalized)}">${escapeHtml(label)}</button>`;
+}
+
+function stockActionButtons(code) {
+  return `<div class="table-actions">${quoteActionButton(code)}${watchActionButton(code)}</div>`;
+}
+
+function watchListButton(rows, label = "加入本页") {
+  const codes = (rows || []).map((row) => normalizeWatchCode(row?.code || row)).filter(Boolean);
+  if (!codes.length) return "";
+  return `<button class="ghost-button compact-button" data-add-watch-list="${escapeHtml(codes.join(","))}">${escapeHtml(label)}</button>`;
+}
+
 function loadShellState() {
   try {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_shell") || "null");
@@ -820,7 +842,7 @@ function renderScreener() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${stockCoverageLabel()} · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), exportButton("screener")))}
+      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${stockCoverageLabel()} · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), watchListButton(visibleRows.slice(0, 120)), exportButton("screener")))}
       ${filtered.length ? stockTable(visibleRows.slice(0, 120)) : relaxed.length ? screenerRelaxedState(activeLabel, activeFactors.size) + stockTable(visibleRows.slice(0, 120)) : screenerEmptyState(activeLabel)}
       ${visibleRows.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
     </section>
@@ -879,7 +901,7 @@ function renderSectors() {
       ${sectorBoardTable(rows)}
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle("板块成分股", actionGroup(boardConstituentBadge(), exportButton("boardConstituents")))}
+      ${panelTitle("板块成分股", actionGroup(boardConstituentBadge(), watchListButton((data.boardConstituents?.rows || []).slice(0, 120), "成分加自选"), exportButton("boardConstituents")))}
       ${boardConstituentTable()}
     </section>
   `;
@@ -1112,7 +1134,7 @@ function boardConstituentTable() {
   if (!selectedBoardCode) return `<div class="empty-state compact-empty"><strong>选择一个行业或概念</strong><span>点击上方表格里的“成分”即可拉取东财板块成分股。</span></div>`;
   if (!rows.length) return `<div class="empty-state compact-empty"><strong>成分股暂未返回</strong><span>可以点刷新重新拉取公开行情。</span></div>`;
   return simpleTable(
-    ["排名", "代码", "名称", "最新价", "涨跌幅", "成交额", "换手率", "主力净额", "行业", "概念", "行情"],
+    ["排名", "代码", "名称", "最新价", "涨跌幅", "成交额", "换手率", "主力净额", "行业", "概念", "操作"],
     rows.slice(0, 120).map((row) => [
       row.rank,
       row.code,
@@ -1124,7 +1146,7 @@ function boardConstituentTable() {
       `${plainSigned(yi(row.netFund), 2, "亿")}`,
       row.industry || "-",
       row.concepts || "-",
-      `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`,
+      stockActionButtons(row.code),
     ])
   );
 }
@@ -1188,7 +1210,7 @@ function exportRowsFor(key) {
       return exportPayload("llm-sector", table.headers, table.rows);
     }
     case "llmStock": {
-      const table = llmStockTable(filteredLlmStockRows(liveStockMatrixRows()));
+      const table = llmStockExportTable(filteredLlmStockRows(liveStockMatrixRows()));
       return exportPayload("llm-stock", table.headers, table.rows);
     }
     case "researchIndustryStats": {
@@ -1515,9 +1537,9 @@ function renderWatchlist() {
 }
 
 function normalizeWatchEntry(item) {
-  if (typeof item === "string") return { code: item, group: DEFAULT_WATCH_GROUPS[0] };
+  if (typeof item === "string") return { code: normalizeWatchCode(item), group: DEFAULT_WATCH_GROUPS[0] };
   return {
-    code: String(item?.code || "").trim(),
+    code: normalizeWatchCode(item?.code),
     group: String(item?.group || DEFAULT_WATCH_GROUPS[0]).trim() || DEFAULT_WATCH_GROUPS[0],
   };
 }
@@ -2190,28 +2212,82 @@ function aiHistoryTable() {
   );
 }
 
+function exchangeForDigits(digits) {
+  if (/^(4|8|92)/.test(digits)) return "BJ";
+  return digits.startsWith("6") ? "SH" : "SZ";
+}
+
+function stockDigits(value) {
+  const text = String(value || "").trim().toUpperCase();
+  if (!text) return "";
+  const prefixed = text.match(/^(SH|SZ|BJ)(\d{6})$/);
+  if (prefixed) return prefixed[2];
+  return text.match(/\d{6}/)?.[0] || "";
+}
+
+function normalizeWatchCode(code) {
+  const text = String(code || "").trim().toUpperCase();
+  if (!text) return "";
+  if (/^\d{6}\.(SH|SZ|BJ)$/.test(text)) return text;
+  const digits = stockDigits(text);
+  if (!digits) return text;
+  const stock = data.stocks.find((item) => stockDigits(item.code) === digits);
+  return stock?.code || `${digits}.${exchangeForDigits(digits)}`;
+}
+
 function dedupeWatchlist(entries) {
   const seen = new Set();
-  return entries.filter((entry) => {
-    if (!entry.code || seen.has(entry.code)) return false;
-    seen.add(entry.code);
-    return true;
+  return entries
+    .map(normalizeWatchEntry)
+    .filter((entry) => {
+      if (!entry.code || seen.has(entry.code)) return false;
+      seen.add(entry.code);
+      return true;
+    });
+}
+
+function normalizeWatchlistState() {
+  watchGroups = [...new Set([...watchGroups, ...DEFAULT_WATCH_GROUPS].map((item) => String(item).trim()).filter(Boolean))];
+  watchlist = dedupeWatchlist(watchlist).map((entry) => {
+    const group = watchGroups.includes(entry.group) ? entry.group : watchGroups[0] || DEFAULT_WATCH_GROUPS[0];
+    return { ...entry, group };
   });
+  if (!["全部", ...watchGroups].includes(selectedWatchGroup)) selectedWatchGroup = "全部";
 }
 
 function addWatchEntry(code, group) {
+  const normalizedCode = normalizeWatchCode(code);
+  if (!normalizedCode) return "";
   const targetGroup = group && group !== "全部" ? group : watchGroups[0] || DEFAULT_WATCH_GROUPS[0];
   if (!watchGroups.includes(targetGroup)) watchGroups.push(targetGroup);
-  const existing = watchlist.find((entry) => entry.code === code);
+  const existing = watchlist.find((entry) => normalizeWatchCode(entry.code) === normalizedCode);
   if (existing) existing.group = targetGroup;
-  else watchlist.push({ code, group: targetGroup });
-  watchlist = dedupeWatchlist(watchlist);
+  else watchlist.push({ code: normalizedCode, group: targetGroup });
+  normalizeWatchlistState();
   persistWatchlistState();
+  return normalizedCode;
 }
 
 function removeWatchEntry(code) {
-  watchlist = watchlist.filter((entry) => entry.code !== code);
+  const normalizedCode = normalizeWatchCode(code);
+  watchlist = watchlist.filter((entry) => normalizeWatchCode(entry.code) !== normalizedCode);
   persistWatchlistState();
+}
+
+function addWatchEntries(codes, group) {
+  const targetGroup = group && group !== "全部" ? group : watchGroups[0] || DEFAULT_WATCH_GROUPS[0];
+  const before = watchlist.length;
+  (codes || []).forEach((code) => {
+    const normalizedCode = normalizeWatchCode(code);
+    if (!normalizedCode) return;
+    const existing = watchlist.find((entry) => normalizeWatchCode(entry.code) === normalizedCode);
+    if (existing) existing.group = targetGroup;
+    else watchlist.push({ code: normalizedCode, group: targetGroup });
+  });
+  if (!watchGroups.includes(targetGroup)) watchGroups.push(targetGroup);
+  normalizeWatchlistState();
+  persistWatchlistState();
+  return Math.max(0, watchlist.length - before);
 }
 
 function renderAi() {
@@ -2312,7 +2388,7 @@ function renderLlmTab() {
         </div>
         <div class="panel inset">
           ${panelTitle("主题个股", exportButton("llmTopicStocks"))}
-          ${simpleTable(["代码", "名称", "来源", "阶段", "置信度", "操作"], topicStocks.map((row) => [row.code, row.name, row.source, row.stage, row.confidence, `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]))}
+          ${simpleTable(["代码", "名称", "来源", "阶段", "置信度", "操作"], topicStocks.map((row) => [row.code, row.name, row.source, row.stage, row.confidence, stockActionButtons(row.code)]))}
         </div>
       </div>
     `;
@@ -2332,8 +2408,8 @@ function renderLlmTab() {
         <button class="primary-button align-end" data-apply-llm-pool="1">筛选</button>
       </div>
       <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`收益选择：${llmPoolDate}`)}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}${freshnessTag("llm")}</div>
-      <div class="toolbar">${exportButton("llmPool")}</div>
-      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], page.rows.map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
+      <div class="toolbar">${watchListButton(page.rows, "本页加自选")}${exportButton("llmPool")}</div>
+      ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注", "操作"], page.rows.map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch, stockActionButtons(row.code)]))}
       ${llmPager("pool", page)}
     `;
   }
@@ -2372,7 +2448,7 @@ function renderLlmTab() {
         <button class="primary-button align-end" data-apply-llm-stock="1">筛选</button>
       </div>
       <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`股票池 ${stockCoverageLabel()}`)}${freshnessTag("llm")}${freshnessTag("stocks")}</div>
-      <div class="toolbar">${exportButton("llmStock")}</div>
+      <div class="toolbar">${watchListButton(page.rows, "本页加自选")}${exportButton("llmStock")}</div>
       ${simpleTable(table.headers, table.rows)}
       ${llmPager("stock", page)}
     `;
@@ -2503,13 +2579,26 @@ function llmSectorTable(rows) {
 function llmStockTable(rows) {
   if (llmStockControls.columns === "core") {
     return {
-      headers: ["代码", "名称", "行业", "5日资金_亿", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"],
-      rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund5), row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]),
+      headers: ["代码", "名称", "行业", "5日资金_亿", "流通市值（亿）", "5日涨跌", "1日涨跌", "操作"],
+      rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund5), row.floatMv, signed(row.pct5), signed(row.pct1), stockActionButtons(row.code)]),
     };
   }
   return {
-    headers: ["代码", "名称", "行业", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"],
-    rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1), `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]),
+    headers: ["代码", "名称", "行业", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "操作"],
+    rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1), stockActionButtons(row.code)]),
+  };
+}
+
+function llmStockExportTable(rows) {
+  if (llmStockControls.columns === "core") {
+    return {
+      headers: ["代码", "名称", "行业", "5日资金_亿", "流通市值（亿）", "5日涨跌", "1日涨跌"],
+      rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund5), row.floatMv, signed(row.pct5), signed(row.pct1)]),
+    };
+  }
+  return {
+    headers: ["代码", "名称", "行业", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌"],
+    rows: rows.map((row) => [row.code, row.name, row.industry, signed(row.fund1), signed(row.fund5), signed(row.hotGap), row.above5, row.above90, row.above144, row.floatMv, signed(row.pct5), signed(row.pct1)]),
   };
 }
 
@@ -3260,7 +3349,7 @@ function stockTable(rows) {
   return `
     <div class="table-wrap">
       <table>
-        <thead><tr>${hasFactorScore ? "<th>匹配</th>" : ""}<th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th></tr></thead>
+        <thead><tr>${hasFactorScore ? "<th>匹配</th>" : ""}<th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th><th>操作</th></tr></thead>
         <tbody>
           ${rows
             .map((stock, index) => stockTableRow(stock, index, hasFactorScore))
@@ -3276,7 +3365,7 @@ function stockTableRow(stock, index, hasFactorScore = false) {
   const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
   const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
   const scoreCell = hasFactorScore ? `<td>${stock.factorScore}/${stock.factorTotal}</td>` : "";
-  return `<tr>${scoreCell}<td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td></tr>`;
+  return `<tr>${scoreCell}<td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td><td>${stockActionButtons(stock.code)}</td></tr>`;
 }
 
 function sectorMiniTable() {
@@ -3842,8 +3931,16 @@ function attachEvents() {
     button.addEventListener("click", (event) => {
       const code = event.currentTarget.dataset.addWatch;
       const group = event.currentTarget.dataset.watchGroup || selectedWatchGroup;
-      addWatchEntry(code, group);
-      showToast(`已加入自选：${code}`, "success");
+      const normalizedCode = addWatchEntry(code, group);
+      showToast(`已加入自选：${normalizedCode || code}`, "success");
+      render();
+    });
+  });
+  document.querySelectorAll("[data-add-watch-list]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const codes = String(event.currentTarget.dataset.addWatchList || "").split(",").filter(Boolean);
+      const added = addWatchEntries(codes, selectedWatchGroup);
+      showToast(added ? `已加入自选：${added}只` : "已更新已有自选。", "success");
       render();
     });
   });
