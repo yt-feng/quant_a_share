@@ -3,7 +3,8 @@
 ## Current Online Sources
 
 - Eastmoney public quote APIs
-  - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates when the `clist` channel is reachable.
+  - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates and the full frontend stock pool when the `clist` channel is reachable.
+  - `/api/market` now returns `stockUniverse.total/returned/limit/source`; default frontend stock payload limit is 6000 rows and can be adjusted with `MARKET_STOCK_LIMIT`.
   - Industry board quotes and fund flow when the `clist` board channel is reachable.
   - Concept board quotes from `m:90+t:3`, including pct/change, amount, fund flow,涨跌家数, constituent count and leading stock fields.
   - Index quotes for 上证指数、深证成指、创业板指、沪深300、中证500.
@@ -19,7 +20,7 @@
   - `/api/market` exposes normalized report title, institution, author, industry/topic, publish date, pages and detail URL as `research.reports`.
   - The LLM 产业链研报分析 tab and chat context use this feed as low-cost research metadata.
 - Sina public market center API
-  - Full A-share stock universe fallback, currently used when Eastmoney paginated lists are unavailable.
+  - Full A-share stock universe fallback, currently used when Eastmoney paginated lists are unavailable, with the same `stockUniverse` coverage metadata.
   - Provides code, name, price, pct/change, open/high/low/pre-close, volume, amount, turnover, PE, PB, total market cap and float market cap.
   - Sina industry board fallback, providing industry name, company count, pct/change, total volume, total amount and leading stock.
   - Sina concept board fallback, providing concept name, company count, pct/change, total volume, total amount and leading stock when Eastmoney concept boards are unavailable.

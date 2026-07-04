@@ -57,6 +57,7 @@ const data = {
   baostock: { rows: [], latest: null },
   asOf: "",
   tradeDate: "",
+  stockUniverse: { total: 0, returned: 0, limit: 6000, leaderSample: 0, source: "" },
   cacheSnapshot: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
@@ -549,7 +550,7 @@ function renderMarket() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle("数据源实时体检", actionGroup(tag(`源 ${sourceCoverageRows().length} 个`, "info"), tag(`股票池 ${data.stocks.length} 只`), exportButton("sourceCoverage")))}
+      ${panelTitle("数据源实时体检", actionGroup(tag(`源 ${sourceCoverageRows().length} 个`, "info"), tag(`股票池 ${stockCoverageLabel()}`), exportButton("sourceCoverage")))}
       ${sourceCoverageTable()}
     </section>
     <section class="panel" style="margin-top:14px">
@@ -588,7 +589,7 @@ function sourceCoverageRows() {
   const latestNorth = northRows.at(-1) || data.northbound?.rows?.at?.(-1);
   const latestBao = data.baostock?.latest || baoRows.at(-1);
   return [
-    ["东方财富A股池", data.stocks.length ? "核心接入" : "待返回", `${data.stocks.length}只`, data.asOf || data.cacheSnapshot?.generatedAt || "-", "实时股票池、估值、成交额、行业/概念标签"],
+    ["东方财富A股池", data.stocks.length ? "核心接入" : "待返回", stockCoverageLabel(), data.asOf || data.cacheSnapshot?.generatedAt || "-", "实时股票池、估值、成交额、行业/概念标签"],
     ["东方财富行业", data.sectors.length ? "核心接入" : "待返回", `${data.sectors.length}个`, data.asOf || "-", "行业涨跌、上涨/下跌家数、资金流向"],
     ["东方财富概念", data.concepts.length ? "核心接入" : "待返回", `${data.concepts.length}个`, data.asOf || "-", "概念排名、领涨股、成交额"],
     ["涨停池/炸板池", data.limitPools?.limitUp?.length ? "核心接入" : "待返回", `${data.limitPools?.limitUp?.length || 0}/${data.limitPools?.broken?.length || 0}/${data.limitPools?.strong?.length || 0}`, data.limitPools?.date || "-", "涨停、炸板、强势股三池"],
@@ -603,6 +604,13 @@ function sourceCoverageRows() {
     ["东财研报", data.research?.reports?.length ? "后端接入" : "待返回", `${data.research?.reports?.length || 0}篇`, data.research?.reports?.[0]?.date || "-", "产业链和行业研报证据"],
     ["GitHub Actions缓存", data.cacheSnapshot?.available ? "云缓存接入" : "本轮实时", data.cacheSnapshot?.usedFields?.length ? data.cacheSnapshot.usedFields.join(",") : "live", data.cacheSnapshot?.generatedAt || "-", "market-cache、baostock-cache、financial-cache兜底"],
   ];
+}
+
+function stockCoverageLabel() {
+  const total = Number(data.stockUniverse?.total) || data.stocks.length;
+  const returned = Number(data.stockUniverse?.returned) || data.stocks.length;
+  if (total && total !== returned) return `${returned}/${total}只`;
+  return `${data.stocks.length}只`;
 }
 
 function sourceCoverageTable() {
@@ -802,7 +810,7 @@ function renderScreener() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), exportButton("screener")))}
+      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${stockCoverageLabel()} · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), exportButton("screener")))}
       ${filtered.length ? stockTable(visibleRows.slice(0, 120)) : relaxed.length ? screenerRelaxedState(activeLabel, activeFactors.size) + stockTable(visibleRows.slice(0, 120)) : screenerEmptyState(activeLabel)}
       ${visibleRows.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
     </section>
@@ -2284,7 +2292,7 @@ function renderLlmTab() {
         <select id="llmStockPageSize"><option value="20" ${selectedAttr(llmStockControls.pageSize === 20)}>20条/页</option><option value="50" ${selectedAttr(llmStockControls.pageSize === 50)}>50条/页</option><option value="100" ${selectedAttr(llmStockControls.pageSize === 100)}>100条/页</option></select>
         <button class="primary-button align-end" data-apply-llm-stock="1">筛选</button>
       </div>
-      <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`股票池 ${data.stocks.length} 只`)}${freshnessTag("llm")}${freshnessTag("stocks")}</div>
+      <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`股票池 ${stockCoverageLabel()}`)}${freshnessTag("llm")}${freshnessTag("stocks")}</div>
       <div class="toolbar">${exportButton("llmStock")}</div>
       ${simpleTable(table.headers, table.rows)}
       ${llmPager("stock", page)}
@@ -2858,7 +2866,7 @@ function renderAbout() {
     </section>
     <section class="panel" style="margin-top:14px">
       <h2>数据源覆盖</h2>
-      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}${tag(`财务字段 ${data.fundamentals?.rows?.length || 0} 项`)}${tag(`源体检 ${sourceCoverageRows().length} 项`)}</div>
+      <div class="detail-strip">${tag(`当前接口 ${marketSource}`, "info")}${tag(`股票池 ${stockCoverageLabel()}`)}${tag(`概念 ${data.concepts.length} 个`)}${tag(`BaoStock ${data.baostock?.rows?.length || 0} 行`)}${tag(`财务字段 ${data.fundamentals?.rows?.length || 0} 项`)}${tag(`源体检 ${sourceCoverageRows().length} 项`)}</div>
       ${sourceCoverageTable()}
     </section>
     <section class="panel" style="margin-top:14px">
@@ -3150,7 +3158,7 @@ function screenerEmptyState(activeLabel) {
     <div class="empty-state">
       <div>
         <strong>当前组合没有命中</strong>
-        <p>股票池 ${data.stocks.length} 只，条件：${escapeHtml(activeLabel || "未选择因子")}。可以先去掉一个严格条件，或者点“刷新”重新拉取公开行情。</p>
+        <p>股票池 ${stockCoverageLabel()}，条件：${escapeHtml(activeLabel || "未选择因子")}。可以先去掉一个严格条件，或者点“刷新”重新拉取公开行情。</p>
       </div>
     </div>
   `;
@@ -3821,6 +3829,7 @@ function contextForModule(moduleName) {
     },
     dataSourceCoverage: sourceCoverageRows().map(([source, status, coverage, latest, usage]) => ({ source, status, coverage, latest, usage })),
     dataFreshness: sourceFreshnessRows(),
+    stockUniverse: data.stockUniverse,
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
     concepts: data.concepts.slice(0, 8),
@@ -3961,6 +3970,7 @@ async function loadMarketSnapshot() {
     marketSource = payload.source || "公开源";
     data.asOf = payload.asOf || "";
     data.tradeDate = payload.tradeDate || "";
+    data.stockUniverse = payload.stockUniverse || { total: payload.stocks?.length || data.stocks.length, returned: payload.stocks?.length || data.stocks.length, limit: payload.stocks?.length || data.stocks.length, leaderSample: 0, source: "" };
     data.cacheSnapshot = payload.cacheSnapshot || null;
     if (payload.market) {
       const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
@@ -4046,7 +4056,13 @@ function activeLlmTradeDate() {
 }
 
 function buildClientStockRows(rows) {
-  const baseRows = rows.slice(0, 800);
+  const seen = new Set();
+  const baseRows = rows.filter((stock) => {
+    const code = stock?.code;
+    if (!code || seen.has(code)) return false;
+    seen.add(code);
+    return true;
+  });
   const pctValues = baseRows.map((stock) => Number(stock.pct) || 0).sort((a, b) => a - b);
   const amountValues = baseRows.map((stock) => Number(stock.amount) || 0).sort((a, b) => a - b);
   return baseRows.map((stock) => {

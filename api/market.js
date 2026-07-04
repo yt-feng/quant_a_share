@@ -27,6 +27,8 @@ const FINANCIAL_CACHE_MS = 6 * 60 * 60 * 1000;
 const SNAPSHOT_CACHE_FILE = path.join("pages", "data", "market-cache.json");
 const BAOSTOCK_CACHE_FILE = path.join("pages", "data", "baostock-cache.json");
 const FINANCIAL_CACHE_FILE = path.join("pages", "data", "financial-cache.json");
+const DEFAULT_CLIENT_STOCK_LIMIT = 6000;
+const MAX_CLIENT_STOCK_LIMIT = 8000;
 
 const memoryCache = new Map();
 
@@ -50,6 +52,7 @@ module.exports = async function handler(req, res) {
   const symbol = String(req.query?.symbol || "600519").replace(/\D/g, "").slice(0, 6) || "600519";
   const secid = secidFromSymbol(symbol);
   const tradeDate = String(req.query?.date || defaultTradeDate()).replace(/\D/g, "").slice(0, 8) || defaultTradeDate();
+  const stockLimit = clientStockLimit(req);
 
   const [
     eastmoneyStockResult,
@@ -107,7 +110,8 @@ module.exports = async function handler(req, res) {
   const conceptUniverse = pickConceptUniverse(eastmoneyConceptResult, sinaConceptResult);
   const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
-  const selectedQuote = quote || tencentQuote || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders[0] || sampleStocks[0];
+  const clientStocks = selectClientStocks(stockUniverse, stockLimit);
+  const selectedQuote = quote || tencentQuote || clientStocks.find((stock) => stock.code.includes(symbol)) || stockUniverse.leaders.find((stock) => stock.code.includes(symbol)) || clientStocks[0] || stockUniverse.leaders[0] || sampleStocks[0];
   const financialCache = needsFinancialCache(fundamentals) ? await readFinancialCache(symbol, req) : null;
   const enrichedFundamentals = enrichFundamentalsFromQuote(mergeFinancialSources(fundamentals, financialCache), selectedQuote);
   const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
@@ -140,7 +144,14 @@ module.exports = async function handler(req, res) {
     asOf: new Date().toISOString(),
     tradeDate,
     market,
-    stocks: stockUniverse.leaders,
+    stockUniverse: {
+      total: stockUniverse.all?.length || stockUniverse.leaders?.length || 0,
+      returned: clientStocks.length,
+      limit: stockLimit,
+      leaderSample: stockUniverse.leaders?.length || 0,
+      source: stockUniverse.source,
+    },
+    stocks: clientStocks,
     sectors,
     concepts: conceptUniverse.rows,
     limitPools: limitPools || { date: tradeDate, limitUp: [], broken: [], strong: [], stats: {} },
@@ -334,6 +345,17 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   if (usedFields.includes("baostock")) {
     next.source = next.source.replace("baostock-cache-miss", "baostock-history-cache");
   }
+  if (usedFields.includes("stocks") && snapshot.stockUniverse) {
+    next.stockUniverse = snapshot.stockUniverse;
+  } else if (!next.stockUniverse || !next.stockUniverse.returned) {
+    next.stockUniverse = {
+      total: next.stocks?.length || 0,
+      returned: next.stocks?.length || 0,
+      limit: next.stocks?.length || 0,
+      leaderSample: next.stocks?.length || 0,
+      source: next.source,
+    };
+  }
   if (usedFields.length) {
     next.source = `${next.source}+github-action-cache`;
   }
@@ -367,6 +389,18 @@ function emptyFundamentals(value) {
   if (!value) return true;
   const financials = value.financials || {};
   return Object.keys(financials).length === 0 && emptyRows(value.rows);
+}
+
+function clientStockLimit(req) {
+  const raw = req.query?.stockLimit || process.env.MARKET_STOCK_LIMIT || DEFAULT_CLIENT_STOCK_LIMIT;
+  const parsed = Math.round(Number(raw));
+  if (!Number.isFinite(parsed)) return DEFAULT_CLIENT_STOCK_LIMIT;
+  return Math.max(100, Math.min(MAX_CLIENT_STOCK_LIMIT, parsed));
+}
+
+function selectClientStocks(stockUniverse, limit) {
+  const rows = stockUniverse?.all?.length ? stockUniverse.all : stockUniverse?.leaders || [];
+  return rows.slice(0, limit);
 }
 
 function selectScreenerUniverse(rows, limit) {

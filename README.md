@@ -41,9 +41,9 @@ npm run cache:market
 
 项目后续按“免费公开源优先、TuShare 作为增强源”的方式接数据：
 
-- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于指数、行业/概念板块、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、公告等。
+- `Eastmoney public endpoint`：Vercel `/api/market` 当前用于全 A 股票池、指数、行业/概念板块、单股 K 线、涨停/炸板/强势股池、ETF 资金榜、东财人气榜、个股资金流、北向资金、公告等；默认向前端返回最多 6000 只股票，并暴露 `stockUniverse` 覆盖元信息。
 - `Eastmoney report API`：Vercel `/api/market` 当前用于近 30 日行业研报、宏观策略研报，供 LLM 产业链研报分析 tab 和问答上下文使用。
-- `Sina public endpoint`：当前用于全 A 股票池兜底、行业/概念板块二源兜底和财务报告关键指标。
+- `Sina public endpoint`：当前用于全 A 股票池兜底、行业/概念板块二源兜底和财务报告关键指标，沿用同一套 `stockUniverse` 覆盖统计。
 - `Tencent quote`：当前作为单股报价兜底源，东财单股 quote 不通时仍能返回价格、涨跌幅、市值、PE/PB 等核心字段。
 - `AKShare / efinance`：作为公开接口地图使用；生产版已把可用的东财/新浪热路径移植到 Node serverless，包括行业/概念板块、ETF、涨停池、人气榜、资金流、公告和财务摘要。
 - `BaoStock`：通过 GitHub Actions 批量生成 `pages/data/baostock-cache.json`，当前会从市场快照扩展到最多 24 只股票，缓存历史 K 线、换手率、PE/PB/PS/PCF、MA 和区间收益。
@@ -63,7 +63,7 @@ npm run cache:market
 - 原站全量可见功能审计见：`docs/AIWUCHUAN_FULL_AUDIT.md`
 - 数据源路线图见：`docs/DATA_SOURCES.md`
 - 大盘情绪：情绪温度、成交额、涨跌比、涨跌停、真实涨停池/炸板池、连板高度、封板资金、北向资金、ETF 资金、人气榜、指数涨跌、趋势图；日期区间与行情状态会联动复盘统计，并显示 14 类数据源实时体检和表格新鲜度，重点表格支持 CSV 导出。
-- 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选；公开行情股票池会派生 RPS/均线/资金代理字段，严格组合为空时仍展示最接近候选。
+- 量化因子选股：估值、市值、量能、均线、RPS、MACD、KDJ、RSI、VWAP、支撑压力、缠论形态、TD 序列等因子筛选；公开行情股票池默认扩到接近全 A 并派生 RPS/均线/资金代理字段，严格组合为空时仍展示最接近候选。
 - 板块与概念：行业/概念聚合、涨跌幅、排名变化、上涨/下跌家数、涨停家数、成交额、领涨股；板块/概念切换、日期区间、预设、范围、排序、柱状图/饼图会实时影响当前表格和图表，并在刷新时进入公开接口参数。
 - 行情：股票检索、东财 1 分钟分时、日 K/BaoStock/Yahoo 切换、日期范围、复权、近半年/近一年、加载更多历史、均线、MACD、RSI、KDJ、趋势线/射线/水平线/箭头/FIB/GANN/平行线图表覆盖层、自选股、个股资金流、财务快照、BaoStock 历史估值、人气关键词、相关股票、公司公告和巨潮调研/关系披露；各表格显示实时/缓存/备用源新鲜度。
 - 自选：本地分组、自选表、删除与分组管理。
