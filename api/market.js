@@ -3,6 +3,11 @@ const SECTOR_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f7,f8,f20,f21,f62,f104,f105,f106";
 const INDEX_FIELDS = "f12,f14,f2,f3,f4,f5,f6,f13";
 const EASTMONEY_A_FS = "m:0+t:6,m:0+t:80,m:1+t:2,m:1+t:23";
 const EASTMONEY_A_SEGMENTS = ["m:1+t:2,m:1+t:23", "m:0+t:6,m:0+t:80"];
+const SINA_A_STOCK_URL = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeData";
+const SINA_A_COUNT_URL = "http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/Market_Center.getHQNodeStockCount?node=hs_a";
+const SINA_INDUSTRY_URL = "http://vip.stock.finance.sina.com.cn/q/view/newSinaHy.php";
+const SINA_PAGE_SIZE = 80;
+const SINA_MAX_PAGES = 90;
 
 const sampleStocks = [
   { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, amount: 1420000000, volume: 820000, turnover: 3.2, pe: 28 },
@@ -24,20 +29,23 @@ module.exports = async function handler(req, res) {
   const symbol = String(req.query?.symbol || "600519").replace(/\D/g, "").slice(0, 6) || "600519";
   const secid = secidFromSymbol(symbol);
 
-  const [stockResult, sectorResult, klines, marketKlines, quote, indexResult] = await Promise.all([
+  const [eastmoneyStockResult, sinaStockResult, eastmoneySectorResult, sinaSectorResult, klines, marketKlines, quote, indexResult] = await Promise.all([
     fetchEastmoneyStockUniverse().catch(() => null),
+    fetchSinaStockUniverse().catch(() => null),
     fetchEastmoneySectors().catch(() => null),
+    fetchSinaSectors().catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
     fetchEastmoneyQuote(secid).catch(() => null),
     fetchEastmoneyIndices().catch(() => null),
   ]);
-  const stockUniverse = stockResult?.all?.length ? stockResult : { leaders: sampleStocks, all: sampleStocks };
-  const sectors = sectorResult?.length ? sectorResult : sampleSectors;
+  const stockUniverse = pickStockUniverse(eastmoneyStockResult, sinaStockResult);
+  const sectorUniverse = pickSectorUniverse(eastmoneySectorResult, sinaSectorResult);
+  const sectors = sectorUniverse.rows;
   const indices = indexResult?.length ? indexResult : [];
   const source = [
-    stockResult?.all?.length > 1000 ? "eastmoney-a-share-pages" : "sample-stock-fallback",
-    sectorResult?.length ? "eastmoney-sector-flow" : "sample-sector-fallback",
+    stockUniverse.source,
+    sectorUniverse.source,
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
     quote ? "eastmoney-quote" : "quote-fallback",
   ].join("+");
@@ -64,16 +72,80 @@ function setCors(req, res) {
   res.setHeader("Cache-Control", "s-maxage=45, stale-while-revalidate=240");
 }
 
-async function fetchJson(url) {
+function pickStockUniverse(eastmoneyStockResult, sinaStockResult) {
+  if (eastmoneyStockResult?.all?.length > 1000) {
+    return { ...eastmoneyStockResult, source: "eastmoney-a-share-pages" };
+  }
+  if (sinaStockResult?.all?.length > 1000) {
+    return { ...sinaStockResult, source: "sina-a-share-pages" };
+  }
+  if (eastmoneyStockResult?.all?.length) {
+    return { ...eastmoneyStockResult, source: "eastmoney-a-share-partial" };
+  }
+  if (sinaStockResult?.all?.length) {
+    return { ...sinaStockResult, source: "sina-a-share-partial" };
+  }
+  return { leaders: sampleStocks, all: sampleStocks, source: "sample-stock-fallback" };
+}
+
+function pickSectorUniverse(eastmoneySectorResult, sinaSectorResult) {
+  if (eastmoneySectorResult?.length) return { rows: eastmoneySectorResult, source: "eastmoney-sector-flow" };
+  if (sinaSectorResult?.length) return { rows: sinaSectorResult, source: "sina-industry-sectors" };
+  return { rows: sampleSectors, source: "sample-sector-fallback" };
+}
+
+async function fetchJson(url, options = {}) {
+  const text = await fetchText(url, options);
+  return JSON.parse(text);
+}
+
+async function fetchDecodedText(url, encoding, options = {}) {
+  const attempts = options.attempts || 3;
+  const timeoutMs = options.timeoutMs || 5000;
   let lastError;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+      const response = await fetch(url, {
+        headers: { "User-Agent": "Mozilla/5.0", ...(options.headers || {}) },
+        signal: controller.signal,
+      });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      return response.json();
+      const buffer = await response.arrayBuffer();
+      return new TextDecoder(encoding).decode(buffer);
     } catch (error) {
       lastError = error;
       await sleep(180 * (attempt + 1));
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  throw lastError;
+}
+
+async function fetchText(url, options = {}) {
+  const attempts = options.attempts || 3;
+  const timeoutMs = options.timeoutMs || 5000;
+  const headers = {
+    "User-Agent": "Mozilla/5.0",
+    Accept: "application/json,text/plain,*/*",
+    Referer: "https://finance.sina.com.cn/",
+    ...(options.headers || {}),
+  };
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { headers, signal: controller.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return await response.text();
+    } catch (error) {
+      lastError = error;
+      await sleep(180 * (attempt + 1));
+    } finally {
+      clearTimeout(timer);
     }
   }
   throw lastError;
@@ -113,19 +185,89 @@ async function fetchEastmoneyStockSegment(fs) {
 }
 
 async function fetchEastmoneyStockPage(page, fs = EASTMONEY_A_FS) {
-  const url =
-    "https://82.push2.eastmoney.com/api/qt/clist/get" +
-    `?pn=${page}&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f6&fs=${fs}&fields=${STOCK_FIELDS}`;
-  const payload = await fetchJson(url);
+  const params = new URLSearchParams({
+    pn: String(page),
+    pz: "100",
+    po: "1",
+    np: "1",
+    ut: "bd1d9ddb04089700cf9c27f6f7426281",
+    fltt: "2",
+    invt: "2",
+    fid: "f6",
+    fs,
+    fields: STOCK_FIELDS,
+  });
+  const payload = await fetchJson(`https://82.push2.eastmoney.com/api/qt/clist/get?${params}`, {
+    attempts: 1,
+    timeoutMs: 1500,
+    headers: { Referer: "https://quote.eastmoney.com/" },
+  });
   const rows = payload?.data?.diff || [];
   return { total: payload?.data?.total || rows.length, rows: rows.map(normalizeStockRow) };
+}
+
+async function fetchSinaStockUniverse() {
+  const total = await fetchSinaStockCount().catch(() => 5600);
+  const pageCount = Math.min(SINA_MAX_PAGES, Math.ceil(total / SINA_PAGE_SIZE));
+  const pageNumbers = Array.from({ length: pageCount }, (_, index) => index + 1);
+  const pages = [];
+  const chunkSize = 10;
+  for (let index = 0; index < pageNumbers.length; index += chunkSize) {
+    const chunk = pageNumbers.slice(index, index + chunkSize);
+    const results = await Promise.all(chunk.map((page) => fetchSinaStockPage(page).catch(() => [])));
+    pages.push(...results);
+  }
+  const byCode = new Map();
+  pages.flat().forEach((row) => {
+    if (row.code && !byCode.has(row.code)) byCode.set(row.code, row);
+  });
+  const all = Array.from(byCode.values());
+  const leaders = all
+    .slice()
+    .sort((a, b) => (b.amount || 0) - (a.amount || 0))
+    .slice(0, 500);
+  return { all, leaders };
+}
+
+async function fetchSinaStockCount() {
+  const text = await fetchText(SINA_A_COUNT_URL, { attempts: 2, timeoutMs: 3500 });
+  const match = text.match(/\d+/);
+  return match ? Number(match[0]) : 5600;
+}
+
+async function fetchSinaStockPage(page) {
+  const params = new URLSearchParams({
+    page: String(page),
+    num: String(SINA_PAGE_SIZE),
+    sort: "symbol",
+    asc: "1",
+    node: "hs_a",
+    symbol: "",
+    _s_r_a: "page",
+  });
+  const payload = await fetchJson(`${SINA_A_STOCK_URL}?${params}`, { attempts: 2, timeoutMs: 4000 });
+  return Array.isArray(payload) ? payload.map(normalizeSinaStockRow) : [];
+}
+
+async function fetchSinaSectors() {
+  const text = await fetchDecodedText(SINA_INDUSTRY_URL, "gb18030", { attempts: 2, timeoutMs: 3500 });
+  const jsonStart = text.indexOf("{");
+  const jsonEnd = text.lastIndexOf("}");
+  if (jsonStart < 0 || jsonEnd < jsonStart) return [];
+  const payload = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
+  return Object.values(payload)
+    .map(normalizeSinaSectorRow)
+    .filter((row) => row.code && row.name)
+    .sort((a, b) => (b.pct || 0) - (a.pct || 0))
+    .map((row, index) => ({ ...row, rank: index + 1 }))
+    .slice(0, 80);
 }
 
 async function fetchEastmoneySectors() {
   const url =
     "https://push2.eastmoney.com/api/qt/clist/get" +
     `?pn=1&pz=80&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid=f3&fs=m:90+t:2&fields=${SECTOR_FIELDS}`;
-  const payload = await fetchJson(url);
+  const payload = await fetchJson(url, { attempts: 1, timeoutMs: 1500, headers: { Referer: "https://quote.eastmoney.com/" } });
   const rows = payload?.data?.diff || [];
   return rows.map((row, index) => ({
     code: clean(row.f12),
@@ -231,6 +373,54 @@ function normalizeStockRow(row) {
   };
 }
 
+function normalizeSinaStockRow(row) {
+  return {
+    code: formatSinaCode(row.symbol, row.code),
+    name: clean(row.name),
+    price: num(row.trade),
+    pct: num(row.changepercent),
+    change: num(row.pricechange),
+    volume: num(row.volume),
+    amount: num(row.amount),
+    turnover: num(row.turnoverratio),
+    pe: num(row.per),
+    pb: num(row.pb),
+    totalMv: num(row.mktcap) * 10000,
+    circMv: num(row.nmc) * 10000,
+    high: num(row.high),
+    low: num(row.low),
+    open: num(row.open),
+    preClose: num(row.settlement),
+    ticktime: clean(row.ticktime),
+  };
+}
+
+function normalizeSinaSectorRow(value, index) {
+  const [code, name, companyCount, avgPrice, change, pct, volume, amount, leaderCode, leaderPct, leaderPrice, leaderChange, leaderName] = String(value).split(",");
+  return {
+    code: clean(code),
+    name: clean(name),
+    price: num(avgPrice),
+    pct: num(pct),
+    rank: index + 1,
+    change: num(change),
+    volume: num(volume),
+    amount: num(amount),
+    netFund: 0,
+    companyCount: num(companyCount),
+    upCount: 0,
+    downCount: 0,
+    flatCount: 0,
+    leader: {
+      code: formatSinaCode(leaderCode, String(leaderCode || "").replace(/\D/g, "")),
+      name: clean(leaderName),
+      pct: num(leaderPct),
+      price: num(leaderPrice),
+      change: num(leaderChange),
+    },
+  };
+}
+
 function buildMarketMetrics(stocks, sectors = []) {
   const rows = stocks.length ? stocks : sampleStocks;
   const up = rows.filter((row) => row.pct > 0).length;
@@ -262,8 +452,17 @@ function secidFromSymbol(symbol) {
 }
 
 function formatCode(symbol, market) {
-  const suffix = Number(market) === 1 ? "SH" : "SZ";
-  return `${String(symbol || "").padStart(6, "0")}.${suffix}`;
+  const code = String(symbol || "").padStart(6, "0");
+  const suffix = Number(market) === 1 ? "SH" : code.startsWith("8") || code.startsWith("4") || code.startsWith("9") ? "BJ" : "SZ";
+  return `${code}.${suffix}`;
+}
+
+function formatSinaCode(symbol, code) {
+  const raw = String(symbol || "");
+  const cleanCode = String(code || raw.replace(/\D/g, "")).padStart(6, "0");
+  if (raw.startsWith("sh")) return `${cleanCode}.SH`;
+  if (raw.startsWith("bj")) return `${cleanCode}.BJ`;
+  return `${cleanCode}.SZ`;
 }
 
 function clean(value) {

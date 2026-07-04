@@ -270,6 +270,7 @@ function renderMarket() {
 
 function renderScreener() {
   const filtered = filteredStocks();
+  const activeLabel = activeFactorLabels();
   return `
     <div class="panel">
       ${panelTitle("多因子量化模型", `<button class="primary-button" data-toast="已执行筛选">筛选</button>`)}
@@ -320,8 +321,9 @@ function renderScreener() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(`筛选结果 ${filtered.length} 条`, `${tag("点击因子可组合筛选", "info")}`)}
-      ${stockTable(filtered)}
+      ${panelTitle(`筛选结果 ${filtered.length} 条`, `${tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info")}`)}
+      ${filtered.length ? stockTable(filtered.slice(0, 120)) : screenerEmptyState(activeLabel)}
+      ${filtered.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
     </section>
   `;
 }
@@ -770,14 +772,112 @@ function renderAbout() {
 }
 
 function filteredStocks() {
-  return data.stocks.filter((stock) => {
-    if (activeFactors.has("pe") && stock.pe > 30) return false;
-    if (activeFactors.has("ma20") && !stock.ma20) return false;
-    if (activeFactors.has("rps") && stock.rps < 70) return false;
-    if (activeFactors.has("macd") && !stock.macd) return false;
-    if (activeFactors.has("fund") && stock.fund <= 0) return false;
-    return true;
-  });
+  return data.stocks.filter((stock) => Array.from(activeFactors).every((key) => factorPasses(stock, key)));
+}
+
+function factorPasses(stock, key) {
+  const totalMv = stock.totalMv || stock.amount * 18 || 0;
+  const circMv = stock.circMv || stock.amount * 12 || 0;
+  const rpsCombo = Math.round((stock.rps + (stock.sectorRps || stock.rps) + (stock.inSectorRps || stock.rps)) / 3);
+  const upperShadow = stock.high && stock.open ? stock.high > Math.max(stock.open, stock.price) * 1.025 : false;
+  const lowerShadow = stock.low && stock.open ? Math.min(stock.open, stock.price) > stock.low * 1.025 : false;
+  const checks = {
+    pe: () => stock.pe > 0 && stock.pe <= 30,
+    pb: () => stock.pb > 0 && stock.pb <= 3,
+    mv500: () => totalMv >= 50000000000,
+    mv50_200: () => totalMv >= 5000000000 && totalMv <= 20000000000,
+    float100: () => circMv >= 10000000000,
+    float50: () => circMv > 0 && circMv <= 5000000000,
+    limit: () => stock.pct >= 9.8,
+    turn3: () => stock.turnover >= 3,
+    turnLow: () => stock.turnover > 0 && stock.turnover < 1,
+    vr15: () => stock.volumeRatio >= 1.5,
+    amount1: () => stock.amount >= 100000000,
+    doubleVol: () => stock.volumeRatio >= 2 || (stock.pct >= 3 && stock.turnover >= 3),
+    amp8: () => stock.amplitude >= 8,
+    volumeSignal: () => stock.amount >= 1000000000 || stock.pct >= 3,
+    sectorRps: () => stock.sectorRps >= 80,
+    inSectorRps: () => stock.inSectorRps >= 80,
+    ma5: () => stock.pct >= -0.3,
+    ma10: () => stock.pct >= -0.8,
+    ma20: () => stock.ma20,
+    ma60: () => stock.rps >= 55,
+    ma90: () => stock.rps >= 60,
+    ma144: () => stock.rps >= 65,
+    rps: () => stock.rps >= 70,
+    rps120: () => stock.rps120 >= 70,
+    rpsCombo: () => rpsCombo >= 80,
+    ema: () => stock.pct >= 0.5,
+    macd: () => stock.macd,
+    kdj: () => stock.pct >= 1.2,
+    rsiLow: () => stock.pct <= -3,
+    rsiHigh: () => stock.pct >= 5,
+    upperShadow: () => upperShadow,
+    lowerShadow: () => lowerShadow,
+    dealer: () => stock.rps >= 75 && stock.turnover >= 2,
+    absorb: () => stock.fund > 0,
+    strongAbsorb: () => stock.fund > 0 && stock.rps >= 70,
+    strongAbsorb3: () => stock.fund > 0 && stock.rps >= 70 && stock.turnover >= 2,
+    attack: () => stock.pct >= 3 && stock.amount >= 1000000000,
+    trigger: () => stock.pct >= 1 && stock.fund > 0,
+    fundRsi: () => stock.fundRsi >= 50,
+    cost20: () => stock.price >= stock.cost20,
+    cost60: () => stock.price >= stock.cost60,
+    rsiV: () => stock.pct < -2 && stock.turnover >= 3,
+    vwapScore: () => stock.vwapScore >= 5,
+    vwapLong: () => stock.pct >= 0 && stock.rps >= 55,
+    vwapDip: () => stock.pct > -2 && stock.pct < 1 && stock.rps >= 45,
+    vwapBreak: () => stock.pct >= 2 && stock.amount >= 1000000000,
+    vwapFast: () => stock.pct >= 4,
+    vwapPos: () => stock.price >= stock.vwap,
+    entry: () => stock.pct >= 0 && stock.fund > 0 && stock.rps >= 60,
+    gaussUp: () => stock.rps >= 60,
+    gaussStart: () => stock.rps >= 70 && stock.pct >= 0,
+    gaussTurn: () => stock.pct > 1 && stock.rps >= 55,
+    superRes: () => stock.rps >= 82 && stock.fund > 0 && stock.macd,
+    resAttack: () => stock.pct >= 3 && stock.fund > 0,
+    resStart: () => stock.rps >= 70 && stock.fund > 0,
+    auction: () => stock.pct >= 5 && stock.turnover >= 3,
+    support60: () => stock.rps >= 45 && stock.rps <= 65,
+    support144: () => stock.rps >= 40 && stock.rps <= 60,
+    break60: () => stock.rps >= 72,
+    break144: () => stock.rps >= 78,
+    chanBottom: () => lowerShadow || stock.pct <= -3,
+    chanTop: () => upperShadow || stock.pct >= 6,
+    chanBuy3: () => stock.pct >= 1 && stock.rps >= 65,
+    chanSell3: () => stock.pct <= -2,
+    centerStart: () => Math.abs(stock.pct) <= 1.5,
+    centerEnd: () => Math.abs(stock.pct) >= 3,
+    centerBreak: () => stock.pct >= 3,
+    gann11: () => stock.rps >= 50 && stock.rps <= 70,
+    gann12: () => stock.rps >= 45 && stock.rps <= 65,
+    gann21: () => stock.rps >= 60 && stock.rps <= 80,
+    bullEngulf: () => stock.pct >= 2,
+    morningStar: () => lowerShadow && stock.pct >= 0,
+    tdBuy9: () => stock.pct <= -3,
+    tdBuy13: () => stock.pct <= -5,
+    tdSell9: () => stock.pct >= 5,
+    tdSell13: () => stock.pct >= 8,
+  };
+  return checks[key] ? checks[key]() : true;
+}
+
+function activeFactorLabels() {
+  const labels = new Map(factorGroups.flatMap(([, chips]) => chips));
+  return Array.from(activeFactors)
+    .map((key) => labels.get(key) || key)
+    .join(" + ");
+}
+
+function screenerEmptyState(activeLabel) {
+  return `
+    <div class="empty-state">
+      <div>
+        <strong>当前组合没有命中</strong>
+        <p>股票池 ${data.stocks.length} 只，条件：${escapeHtml(activeLabel || "未选择因子")}。可以先去掉一个严格条件，或者点“刷新”重新拉取公开行情。</p>
+      </div>
+    </div>
+  `;
 }
 
 function stockTable(rows) {
@@ -788,15 +888,19 @@ function stockTable(rows) {
         <thead><tr><th>代码</th><th>名称</th><th>最新价</th><th>涨跌幅</th><th>量能信号</th><th>MACD</th><th>流通市值</th><th>行业整体RPS_50</th><th>行业RPS_50</th><th>行业</th><th>K线形态</th><th>趋势支撑线_次日</th><th>趋势压力线_60</th></tr></thead>
         <tbody>
           ${rows
-            .map(
-              (stock, index) =>
-                `<tr><td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${Math.max(30, Math.round((stock.amount || 4000000000) / 100000000)).toLocaleString()}亿</td><td>${Math.min(98, stock.rps + 4)}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${index % 2 === 0 ? "看涨吞没" : "中继整理"}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td></tr>`
-            )
+            .map((stock, index) => stockTableRow(stock, index))
             .join("")}
         </tbody>
       </table>
     </div>
   `;
+}
+
+function stockTableRow(stock, index) {
+  const floatMvYi = Math.round(((stock.circMv || stock.totalMv || stock.amount * 12 || 0) / 100000000) * 10) / 10;
+  const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
+  const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
+  return `<tr><td>${stock.code}</td><td>${stock.name}</td><td>${stock.price.toFixed(2)}</td><td>${signed(stock.pct)}%</td><td>${stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量"}</td><td>${stock.macd ? "金叉区" : "观察"}</td><td>${floatMvYi.toLocaleString()}亿</td><td>${sectorRps}</td><td>${stock.rps}</td><td>${stock.industry}</td><td>${pattern}</td><td>${(stock.price * 0.96).toFixed(2)}</td><td>${(stock.price * 1.08).toFixed(2)}</td></tr>`;
 }
 
 function sectorMiniTable() {
@@ -1030,21 +1134,7 @@ async function loadMarketSnapshot() {
     }
     if (Array.isArray(payload.stocks) && payload.stocks.length) {
       const stockRows = payload.quote ? [payload.quote, ...payload.stocks.filter((stock) => stock.code !== payload.quote.code)] : payload.stocks;
-      data.stocks = stockRows.slice(0, 16).map((stock, index) => ({
-        code: stock.code,
-        name: stock.name,
-        price: stock.price || 0,
-        pct: stock.pct || 0,
-        industry: data.stocks[index % data.stocks.length]?.industry || "A股",
-        rps: Math.max(30, Math.min(99, 50 + (stock.pct || 0) * 4 + index)),
-        fund: Math.round(((stock.amount || 0) / 1000000000 - 1) * 100) / 100,
-        pe: stock.pe || 0,
-        pb: data.stocks[index % data.stocks.length]?.pb || 2.8,
-        ma20: (stock.pct || 0) >= 0,
-        macd: (stock.pct || 0) >= 1,
-        amount: stock.amount || 0,
-        turnover: stock.turnover || 0,
-      }));
+      data.stocks = buildClientStockRows(stockRows);
     }
     if (Array.isArray(payload.sectors) && payload.sectors.length) {
       data.sectors = payload.sectors.slice(0, 12).map((sector, index) => [
@@ -1072,6 +1162,63 @@ async function loadMarketSnapshot() {
   } catch (error) {
     showToast("公开行情暂未更新，继续使用内置样本。", "info");
   }
+}
+
+function buildClientStockRows(rows) {
+  const baseRows = rows.slice(0, 360);
+  const pctValues = baseRows.map((stock) => Number(stock.pct) || 0).sort((a, b) => a - b);
+  const amountValues = baseRows.map((stock) => Number(stock.amount) || 0).sort((a, b) => a - b);
+  const fallbackIndustries = data.stocks.length ? data.stocks.map((stock) => stock.industry || "A股") : ["A股"];
+  return baseRows.map((stock, index) => {
+    const pct = Number(stock.pct) || 0;
+    const amount = Number(stock.amount) || 0;
+    const price = Number(stock.price) || 0;
+    const rps = Math.max(20, Math.min(99, Math.round(percentileRank(pct, pctValues) * 100)));
+    const amountRank = percentileRank(amount, amountValues);
+    const fund = Math.round(((amount / 100000000) * (pct >= 0 ? Math.min(1.5, pct / 6 + 0.25) : Math.max(-1.5, pct / 6 - 0.25))) * 100) / 100;
+    const sectorRps = Math.max(20, Math.min(99, Math.round((rps * 0.75 + amountRank * 100 * 0.25))));
+    const vwap = price && stock.open ? Math.round(((price * 2 + Number(stock.open)) / 3) * 100) / 100 : price;
+    return {
+      code: stock.code,
+      name: stock.name,
+      price,
+      pct,
+      change: Number(stock.change) || 0,
+      industry: stock.industry || fallbackIndustries[index % fallbackIndustries.length] || "A股",
+      rps,
+      rps120: Math.max(20, Math.min(99, Math.round((rps + amountRank * 100) / 2))),
+      sectorRps,
+      inSectorRps: Math.max(20, Math.min(99, Math.round((rps * 0.65 + sectorRps * 0.35)))),
+      fund,
+      fundRsi: Math.max(0, Math.min(99, Math.round(50 + fund * 1.6))),
+      pe: Number(stock.pe) || 0,
+      pb: Number(stock.pb) || 0,
+      ma20: pct >= -0.8 || rps >= 55,
+      macd: pct >= 1 || (pct >= 0 && amountRank >= 0.65),
+      amount,
+      volume: Number(stock.volume) || 0,
+      turnover: Number(stock.turnover) || 0,
+      volumeRatio: Number(stock.volumeRatio) || Math.max(0.5, Math.round((0.8 + amountRank * 1.8) * 100) / 100),
+      amplitude: Number(stock.amplitude) || Math.abs(pct) * 1.35,
+      totalMv: Number(stock.totalMv) || 0,
+      circMv: Number(stock.circMv) || 0,
+      high: Number(stock.high) || price,
+      low: Number(stock.low) || price,
+      open: Number(stock.open) || price,
+      preClose: Number(stock.preClose) || price,
+      cost20: Math.round(price * 0.985 * 100) / 100,
+      cost60: Math.round(price * 0.96 * 100) / 100,
+      vwap,
+      vwapScore: Math.max(0, Math.min(10, Math.round((rps / 12 + amountRank * 2) * 10) / 10)),
+    };
+  });
+}
+
+function percentileRank(value, sortedValues) {
+  if (!sortedValues.length) return 0.5;
+  let index = sortedValues.findIndex((item) => item >= value);
+  if (index === -1) index = sortedValues.length - 1;
+  return sortedValues.length === 1 ? 1 : index / (sortedValues.length - 1);
 }
 
 function setBackendStatus(text, state) {

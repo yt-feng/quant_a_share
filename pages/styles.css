@@ -569,6 +569,12 @@ p {
   color: var(--ink);
 }
 
+.table-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
