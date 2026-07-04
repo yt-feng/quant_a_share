@@ -98,6 +98,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
   - Row action: 查看.
 - 产业链研报分析:
   - Empty state visible in the audited account.
+  - Clone enrichment: Eastmoney research-report metadata now fills this tab with recent industry/macro report titles, institutions, authors, dates, industries and links, and adds the same context to LLM prompts.
 
 ## 奇门遁甲
 

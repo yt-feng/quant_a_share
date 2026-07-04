@@ -13,6 +13,10 @@
   - ETF spot quote/fund-flow list from the same Eastmoney ETF grid endpoints used by AKShare `fund_etf_spot_em`.
   - Stock popularity rank, single-stock latest rank, hot concepts/keywords and related stocks from Eastmoney Guba rank endpoints.
   - Single-stock announcements from Eastmoney notice search.
+- Eastmoney research report API
+  - Industry research and macro/strategy report lists from `reportapi.eastmoney.com/report/list`.
+  - `/api/market` exposes normalized report title, institution, author, industry/topic, publish date, pages and detail URL as `research.reports`.
+  - The LLM 产业链研报分析 tab and chat context use this feed as low-cost research metadata.
 - Sina public market center API
   - Full A-share stock universe fallback, currently used when Eastmoney paginated lists are unavailable.
   - Provides code, name, price, pct/change, open/high/low/pre-close, volume, amount, turnover, PE, PB, total market cap and float market cap.
@@ -45,6 +49,7 @@
 ## Recommended Free / Low-Cost Sources
 
 - Eastmoney public endpoints: best default for this Vercel app because Node serverless can fetch them directly without Python workers.
+- Eastmoney report API: now connected for industry-chain research metadata without Python workers or paid data.
 - AKShare: used as the endpoint map for the production Node adapters now covering Sina A-share universe, Sina boards, Eastmoney limit pools, ETF spot/fund-flow, stock popularity, money flow, Stock Connect and Sina financial reports.
 - BaoStock: now connected through GitHub Actions batch JSON cache for historical K-line, valuation, turnover and MA/return summaries; the default cloud cache expands to 24 symbols from live market context.
 - Financial cache: now connected through GitHub Actions batch JSON cache for revenue, profit, EPS, ROE, gross margin, debt ratio and other report fields; the default cache targets up to 40 symbols.

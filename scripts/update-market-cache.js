@@ -61,6 +61,7 @@ function callMarketApi() {
         etfs: snapshot.etfs?.rows?.length || 0,
         hotRank: snapshot.popularity?.rank?.items?.length || 0,
         announcements: snapshot.announcements?.items?.length || 0,
+        researchReports: snapshot.research?.reports?.length || 0,
       },
       null,
       2

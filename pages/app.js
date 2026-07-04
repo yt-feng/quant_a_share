@@ -51,6 +51,7 @@ const data = {
   popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
   announcements: { items: [] },
   disclosures: { relations: [] },
+  research: { source: "", reports: [], stats: {} },
   yahooChart: null,
   baostock: { rows: [], latest: null },
   stocks: [
@@ -163,7 +164,7 @@ const coverageRows = [
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、云端财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
-  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab。"],
+  ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab，产业链页已接入东财研报线索。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
@@ -175,6 +176,7 @@ const dataSourceRows = [
   ["CNInfo 巨潮", "核心接入", "公告二源合并、投资者关系/调研披露，已进入行情页和 LLM 上下文。"],
   ["BaoStock", "云缓存接入", "GitHub Actions 批量生成历史K线、换手率、PE/PB/PS/PCF、收益与均线摘要，Vercel 按股票读取。"],
   ["财务字段缓存", "云缓存接入", "GitHub Actions 生成 financial-cache.json，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。"],
+  ["东财研报中心", "后端接入", "近30日行业研报、宏观策略报告、机构、作者、行业和页数，进入产业链研报分析与 LLM 上下文。"],
   ["Yahoo/yfinance-compatible", "后端接入", "用 Yahoo chart API 作为 A股 .SS/.SZ、港美股和 ETF 的全球行情/K线备用源。"],
   ["Tencent", "后端接入", "个股报价兜底，用于东财单股报价不可用时补价格、涨跌幅、成交额等字段。"],
   ["GitHub Actions", "云缓存接入", "定时生成 market-cache、baostock-cache 和 financial-cache，Vercel 线上读取静态缓存兜底。"],
@@ -790,7 +792,43 @@ function renderLlmTab() {
       ${simpleTable(["代码", "名称", "当日资金_亿", "5日资金_亿", "收盘_早盘(负数=更热)", "大于等于5日线", "大于等于90日线", "大于等于144日线", "流通市值（亿）", "5日涨跌", "1日涨跌", "行情"], llmStockMatrix.map((row) => [...row.map((cell, index) => typeof cell === "number" && [2, 3, 9, 10].includes(index) ? signed(cell) : cell), `<button class="ghost-button table-action" data-toast="已打开行情">查看</button>`]))}
     `;
   }
-  return `<div class="empty-state"><strong>产业链研报分析</strong><span>当前账号下暂无研报数据；已保留入口、空状态和后续表格承载区。</span></div>`;
+  const reports = researchReports();
+  const stats = data.research?.stats || {};
+  const topIndustries = stats.byIndustry?.length ? stats.byIndustry : researchIndustryStats(reports);
+  if (!reports.length) {
+    return `<div class="empty-state"><strong>产业链研报分析</strong><span>公开研报源暂未返回数据；入口、筛选和表格承载区已保留。</span></div>`;
+  }
+  return `
+    <section class="grid metrics">
+      ${metric("研报数量", stats.total || reports.length, data.research?.source || "公开研报")}
+      ${metric("覆盖机构", stats.orgCount || new Set(reports.map((row) => row.orgSName)).size, "近30日")}
+      ${metric("最新日期", stats.latestDate || reports[0]?.publishDate || "-", "发布日期")}
+      ${metric("热门方向", topIndustries[0]?.name || "-", `${topIndustries[0]?.count || 0} 篇`)}
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel inset">
+        <h3>行业/主题分布</h3>
+        ${simpleTable(["方向", "报告数"], topIndustries.slice(0, 10).map((row) => [row.name, row.count]))}
+      </div>
+      <div class="panel inset">
+        <h3>产业链线索</h3>
+        <div class="detail-strip">${reports.slice(0, 10).map((row) => tag(row.industryName || row.category, row.category === "行业研报" ? "info" : "")).join("")}</div>
+        <p class="table-note">报告来自东财研报中心，已进入 LLM 分析上下文。</p>
+      </div>
+    </section>
+    ${simpleTable(
+      ["日期", "类型", "行业/主题", "标题", "机构", "作者", "页数"],
+      reports.slice(0, 30).map((row) => [
+        row.publishDate || "-",
+        row.category || "-",
+        row.industryName || "-",
+        row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${escapeHtml(row.title)}</a>` : escapeHtml(row.title),
+        row.orgSName || row.orgName || "-",
+        row.researcher || "-",
+        row.pages || "-",
+      ])
+    )}
+  `;
 }
 
 function liveTopics() {
@@ -806,6 +844,21 @@ function liveTopics() {
     score: Math.max(30, Math.min(95, Math.round(60 + Number(row[1] || 0) * 5))),
   }));
   return concepts.length ? concepts : llmTopics;
+}
+
+function researchReports() {
+  return (data.research?.reports || []).filter((row) => row.title);
+}
+
+function researchIndustryStats(reports) {
+  const counts = new Map();
+  reports.forEach((row) => {
+    const key = row.industryName || row.category || "未归类";
+    counts.set(key, (counts.get(key) || 0) + 1);
+  });
+  return Array.from(counts.entries())
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
 }
 
 function renderQimen() {
@@ -1384,6 +1437,10 @@ function contextForModule(moduleName) {
     disclosures: {
       relations: data.disclosures.relations?.slice(0, 8) || [],
     },
+    research: {
+      stats: data.research.stats || {},
+      reports: data.research.reports?.slice(0, 12) || [],
+    },
     yahooChart: data.yahooChart,
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
@@ -1502,6 +1559,7 @@ async function loadMarketSnapshot() {
     if (payload.popularity) data.popularity = payload.popularity;
     if (payload.announcements) data.announcements = payload.announcements;
     if (payload.disclosures) data.disclosures = payload.disclosures;
+    if (payload.research) data.research = payload.research;
     if (payload.yahooChart) data.yahooChart = payload.yahooChart;
     if (payload.baostock) data.baostock = payload.baostock;
     if (Array.isArray(payload.indices) && payload.indices.length) {

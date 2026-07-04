@@ -15,6 +15,7 @@ const EASTMONEY_HSGT_URL = "https://datacenter-web.eastmoney.com/api/data/v1/get
 const EASTMONEY_ETF_URL = "https://push2delay.eastmoney.com/api/qt/clist/get";
 const EASTMONEY_STOCK_RANK_URL = "https://emappdata.eastmoney.com/stockrank";
 const EASTMONEY_ANNOUNCEMENT_URL = "https://np-anotice-stock.eastmoney.com/api/security/ann";
+const EASTMONEY_REPORT_URL = "https://reportapi.eastmoney.com/report/list";
 const CNINFO_STOCK_URL = "http://www.cninfo.com.cn/new/data/szse_stock.json";
 const CNINFO_ANNOUNCEMENT_URL = "http://www.cninfo.com.cn/new/hisAnnouncement/query";
 const TENCENT_QUOTE_URL = "https://qt.gtimg.cn/q=";
@@ -66,6 +67,7 @@ module.exports = async function handler(req, res) {
     eastmoneyAnnouncements,
     cninfoAnnouncements,
     cninfoRelations,
+    researchReports,
     yahooChart,
     klines,
     marketKlines,
@@ -88,6 +90,7 @@ module.exports = async function handler(req, res) {
     fetchCached(`eastmoney:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchEastmoneyAnnouncements(symbol)).catch(() => null),
     fetchCached(`cninfo:announcements:${symbol}`, BOARD_CACHE_MS, () => fetchCninfoAnnouncements(symbol)).catch(() => null),
     fetchCached(`cninfo:relations:${symbol}`, BOARD_CACHE_MS, () => fetchCninfoRelations(symbol)).catch(() => null),
+    fetchCached("eastmoney:research-reports", BOARD_CACHE_MS, fetchEastmoneyResearchReports).catch(() => null),
     fetchYahooChart(symbol).catch(() => null),
     fetchEastmoneyKlines(secid).catch(() => []),
     fetchEastmoneyKlines("1.000001").catch(() => []),
@@ -117,6 +120,7 @@ module.exports = async function handler(req, res) {
     stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
     announcements?.items?.length ? announcements.source : "announcement-fallback",
     cninfoRelations?.items?.length ? "cninfo-relations" : "relation-fallback",
+    researchReports?.reports?.length ? "eastmoney-research-reports" : "research-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
     baostock?.rows?.length ? "baostock-history-cache" : "baostock-cache-miss",
     indices.length ? "eastmoney-index-quotes" : "index-fallback",
@@ -147,6 +151,7 @@ module.exports = async function handler(req, res) {
       source: cninfoRelations?.source || "",
       relations: cninfoRelations?.items || [],
     },
+    research: researchReports || { source: "", reports: [], stats: {} },
     yahooChart,
     baostock,
     indices,
@@ -300,6 +305,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
   fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
   fill("disclosures", (value) => emptyRows(value?.relations), (value) => hasRows(value?.relations), true);
+  fill("research", (value) => emptyRows(value?.reports), (value) => hasRows(value?.reports));
   fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
   fill("baostock", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
 
@@ -312,7 +318,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
     usedFields.push("popularity.stock");
   }
 
-  const marketFields = new Set(["stocks", "sectors", "concepts", "limitPools", "etfs", "northbound", "indices", "marketKlines"]);
+  const marketFields = new Set(["stocks", "sectors", "concepts", "limitPools", "etfs", "northbound", "indices", "marketKlines", "research"]);
   if (snapshot.market && usedFields.some((field) => marketFields.has(field))) {
     next.market = snapshot.market;
     usedFields.push("market");
@@ -844,6 +850,101 @@ async function fetchCninfoAnnouncements(symbol) {
 
 async function fetchCninfoRelations(symbol) {
   return fetchCninfoDisclosure(symbol, "relation", "cninfo-relations", normalizeCninfoRelation);
+}
+
+async function fetchEastmoneyResearchReports() {
+  const beginTime = formatCompactDate(compactChinaDate(-30));
+  const endTime = formatCompactDate(compactChinaDate());
+  const groups = await Promise.all(
+    [
+      [1, "行业研报"],
+      [2, "宏观策略"],
+    ].map(([qType, label]) => fetchEastmoneyResearchGroup(qType, label, beginTime, endTime).catch(() => []))
+  );
+  const reports = groups
+    .flat()
+    .sort((a, b) => String(b.publishDate).localeCompare(String(a.publishDate)))
+    .slice(0, 80);
+  return {
+    source: "eastmoney-research-reports",
+    range: { beginTime, endTime },
+    reports,
+    stats: buildResearchStats(reports),
+  };
+}
+
+async function fetchEastmoneyResearchGroup(qType, label, beginTime, endTime) {
+  const params = new URLSearchParams({
+    cb: "",
+    pageNo: "1",
+    pageSize: "40",
+    industryCode: "*",
+    rating: "",
+    ratingChange: "",
+    beginTime,
+    endTime,
+    fields: "",
+    qType: String(qType),
+    orgCode: "",
+    rcode: "",
+    p: "1",
+    pageNum: "1",
+    pageNumber: "1",
+  });
+  const payload = await fetchJson(`${EASTMONEY_REPORT_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 5000,
+    headers: { Referer: "https://data.eastmoney.com/report/" },
+  });
+  return (payload?.data || []).map((row) => normalizeResearchReport(row, qType, label));
+}
+
+function normalizeResearchReport(row, qType, label) {
+  const encodeUrl = clean(row.encodeUrl);
+  const detailPath = qType === 1 ? "zw_industry.jshtml" : "zw_macresearch.jshtml";
+  const industry = clean(row.industryName || row.indvInduName || row.stockName || label);
+  const researcher = Array.isArray(row.author) && row.author.length ? row.author.map((item) => clean(item).split(".").pop()).join(",") : clean(row.researcher);
+  return {
+    title: clean(row.title),
+    category: label,
+    qType,
+    reportType: num(row.reportType),
+    publishDate: clean(row.publishDate).slice(0, 10),
+    orgName: clean(row.orgName),
+    orgSName: clean(row.orgSName || row.orgName),
+    researcher,
+    industryCode: clean(row.industryCode || row.emIndustryCode || row.indvInduCode),
+    industryName: industry,
+    stockCode: clean(row.stockCode),
+    stockName: clean(row.stockName),
+    ratingName: clean(row.emRatingName || row.sRatingName),
+    ratingChange: clean(row.ratingChange),
+    pages: num(row.attachPages),
+    sizeKb: num(row.attachSize),
+    infoCode: clean(row.infoCode),
+    encodeUrl,
+    url: encodeUrl ? `https://data.eastmoney.com/report/${detailPath}?encodeUrl=${encodeURIComponent(encodeUrl)}` : "https://data.eastmoney.com/report/",
+    snippet: [industry, clean(row.orgSName || row.orgName), researcher, row.attachPages ? `${row.attachPages}页` : ""].filter(Boolean).join(" · "),
+  };
+}
+
+function buildResearchStats(reports) {
+  const byIndustry = new Map();
+  const orgs = new Set();
+  reports.forEach((report) => {
+    const industry = report.industryName || report.category || "未归类";
+    byIndustry.set(industry, (byIndustry.get(industry) || 0) + 1);
+    if (report.orgSName) orgs.add(report.orgSName);
+  });
+  return {
+    total: reports.length,
+    orgCount: orgs.size,
+    latestDate: reports[0]?.publishDate || "",
+    byIndustry: Array.from(byIndustry.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 12),
+  };
 }
 
 async function fetchCninfoDisclosure(symbol, tabName, sourceName, normalizeRow) {
