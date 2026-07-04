@@ -48,7 +48,7 @@ const data = {
   limitPools: { date: "-", limitUp: [], broken: [], strong: [], stats: {} },
   etfs: { rows: [], stats: {} },
   moneyFlow: { rows: [], latest: null, sum5MainYi: 0 },
-  northbound: { rows: [], northRows: [], northNetBuyYi: 0, northNetInYi: 0 },
+  northbound: { rows: [], northRows: [], holdings: [], northNetBuyYi: 0, northNetInYi: 0 },
   fundamentals: null,
   popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
   announcements: { items: [] },
@@ -739,6 +739,10 @@ function renderMarket() {
         ${panelTitle("北向资金", actionGroup(tag(`净买 ${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"), tag(`成交 ${plainSigned(data.northbound.northTurnoverYi || 0, 2, "亿")}`), freshnessTag("northbound"), exportButton("northbound")))}
         ${simpleTable(["通道", "方向", "净买额", "成交额", "月净流入", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${plainSigned(yi(row.netBuyAmt), 2, "亿")}`, `${plainSigned(yi(row.turnoverAmt), 2, "亿")}`, `${plainSigned(yi(row.monthNetAmtIn), 2, "亿")}`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
       </div>
+      <div class="panel">
+        ${panelTitle("北向持股前排", actionGroup(tag(`${data.northbound.holdings?.length || 0} 只`, "info"), exportButton("northboundHoldings")))}
+        ${simpleTable(["排名", "代码", "名称", "通道", "持股市值", "A股占比", "涨跌幅"], (data.northbound.holdings || []).slice(0, 8).map((row) => [row.rank, row.code, row.name, row.type, `${yi(row.holdMarketCap)}亿`, `${plainSigned(row.aShareRatio || 0, 2, "%")}`, `${signed(row.pct)}%`]))}
+      </div>
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
@@ -811,6 +815,7 @@ function limitLadderMaxStreak() {
 function sourceCoverageRows() {
   const flowRows = data.moneyFlow?.rows || [];
   const northRows = data.northbound?.northRows || data.northbound?.rows || [];
+  const northHoldings = data.northbound?.holdings || [];
   const fundamentalRows = data.fundamentals?.rows || [];
   const baoRows = data.baostock?.rows || [];
   const yahooRows = data.yahooChart?.klines || [];
@@ -825,7 +830,7 @@ function sourceCoverageRows() {
     ["涨停池/炸板池", data.limitPools?.limitUp?.length ? "核心接入" : "待返回", `${data.limitPools?.limitUp?.length || 0}/${data.limitPools?.broken?.length || 0}/${data.limitPools?.strong?.length || 0}`, data.limitPools?.date || "-", "涨停、炸板、强势股三池"],
     ["ETF资金", data.etfs?.rows?.length ? "核心接入" : "待返回", `${data.etfs?.rows?.length || 0}只`, data.etfs?.stats?.updatedAt || data.asOf || "-", "ETF主力净额、成交额、折溢价"],
     ["个股资金流", flowRows.length ? "核心接入" : "待返回", `${flowRows.length}日`, latestFlow?.date || "-", "主力、超大单、大单分日资金"],
-    ["北向资金", northRows.length ? "核心接入" : "待返回", `${northRows.length}条`, latestNorth?.tradeDate || "-", "沪股通/深股通净买与宽度"],
+    ["北向资金", northRows.length ? "核心接入" : "待返回", `${northRows.length}条 / 持股${northHoldings.length}只`, latestNorth?.tradeDate || northHoldings[0]?.tradeDate || "-", "沪股通/深股通净买、成交、累计流入与持股前排"],
     ["财务字段", fundamentalRows.length ? "核心接入" : "待返回", `${fundamentalRows.length}项`, data.fundamentals?.reportLabel || data.fundamentals?.cachedAt || "-", "营收、利润、EPS、ROE、PB/PE"],
     ["BaoStock历史", baoRows.length ? "云缓存接入" : "待返回", `${baoRows.length}日`, latestBao?.date || data.baostock?.generatedAt || "-", "历史K线、估值、换手率、均线"],
     ["Yahoo/yfinance备份", yahooRows.length ? "后端接入" : "待返回", `${yahooRows.length}点`, data.yahooChart?.symbol || "-", "全球行情与备用K线"],
@@ -1828,6 +1833,8 @@ function exportRowsFor(key) {
       return exportPayload("limit-ladder", ["交易日", "梯队", "家数", "封板资金_亿", "代表个股"], limitLadderExportRows());
     case "northbound":
       return exportPayload("northbound", ["交易日", "通道", "方向", "板块", "指数", "指数涨跌幅", "上涨家数", "下跌家数", "平盘家数", "净买额_亿", "净流入_亿", "成交额_亿", "买入额_亿", "卖出额_亿", "月净流入_亿", "年净流入_亿", "累计净流入_亿", "剩余额度_亿", "额度阈值_亿"], northboundExportRows());
+    case "northboundHoldings":
+      return exportPayload("northbound-holdings", ["排名", "日期", "代码", "名称", "通道", "收盘价", "涨跌幅", "持股数", "持股市值_亿", "A股占比", "持股占比", "流通股占比", "总股本占比"], northboundHoldingExportRows());
     case "etfs":
       return exportPayload("etf-flow", ["排名", "代码", "名称", "价格", "涨跌幅", "成交额_亿", "主力净额_亿", "超大单_亿", "大单_亿", "主力占比", "折价率", "日期"], etfExportRows());
     case "hotRank":
@@ -1993,7 +2000,7 @@ function productionCoverageRows() {
     ["主力资金字段", ratio(feature.mainMoney), "Eastmoney clist 主/超/大/中/小单", "因子选股资金字段覆盖"],
     ["涨停/炸板/强势池", `${pools.limitUp || 0}/${pools.broken || 0}/${pools.strong || 0}`, `连板高度 ${pools.maxStreak || 0} · 封板资金 ${pools.sealFundYi || 0}亿`, "Eastmoney 三池明细"],
     ["行业/概念", `${coverage.sectors || data.sectors.length}/${coverage.concepts || data.concepts.length}`, "行业 / 概念", "板块排名、概念热度和 LLM 主题来源"],
-    ["ETF/北向", `${coverage.etfs || data.etfs?.rows?.length || 0}/${coverage.northboundRows || data.northbound?.rows?.length || 0}`, "ETF 行 / 北向行", "大盘情绪与资金复盘"],
+    ["ETF/北向", `${coverage.etfs || data.etfs?.rows?.length || 0}/${coverage.northboundRows || data.northbound?.rows?.length || 0}/${coverage.northboundHoldings || data.northbound?.holdings?.length || 0}`, "ETF 行 / 北向行 / 持股", "大盘情绪与资金复盘"],
     ["个股资金流", coverage.moneyFlowRows || data.moneyFlow?.rows?.length || 0, "日资金流行数", "行情页个股主力/超大单/大单趋势"],
     ["财务字段缓存", `${feature.financialCache || 0}股 / ${coverage.fundamentalsRows || data.fundamentals?.rows?.length || 0}项`, "GitHub Actions financial-cache + 实时财务", "估值、盈利、ROE 等财报字段"],
     ["BaoStock历史缓存", `${feature.baostockCache || 0}股 / ${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "GitHub Actions baostock-cache", "历史K线、估值、换手、均线和收益"],
@@ -2013,7 +2020,7 @@ function dataSourceMappingRows() {
     ["AKShare board constituent APIs", "东方财富 fs=b:BKxxxx 成分股", "fetchEastmoneyBoardConstituents", `${coverage.boardConstituents || data.boardConstituents?.rows?.length || 0}只当前板块`, "按需接入"],
     ["AKShare stock_zt_pool_em / strong / zbgc", "东方财富涨停池/炸板池/强势池", "fetchEastmoneyLimitPools / fetchEastmoneyPool", `${pools.limitUp || 0}/${pools.broken || 0}/${pools.strong || 0}`, "核心接入"],
     ["AKShare stock_individual_fund_flow", "东方财富个股资金流 daykline", "fetchEastmoneyMoneyFlow", `${coverage.moneyFlowRows || data.moneyFlow?.rows?.length || 0}日`, "核心接入"],
-    ["AKShare stock_hsgt_*", "东方财富沪深港通资金", "fetchEastmoneyNorthbound", `${coverage.northboundRows || data.northbound?.rows?.length || 0}条`, "核心接入"],
+    ["AKShare stock_hsgt_*", "东方财富沪深港通资金与北向持股", "fetchEastmoneyNorthbound / fetchEastmoneyNorthboundHoldings", `${coverage.northboundRows || data.northbound?.rows?.length || 0}条 / ${coverage.northboundHoldings || data.northbound?.holdings?.length || 0}只持股`, "核心接入"],
     ["AKShare fund_etf_spot_em", "东方财富 ETF grid", "fetchEastmoneyEtfs", `${coverage.etfs || data.etfs?.rows?.length || 0}只`, "核心接入"],
     ["BaoStock query_history_k_data_plus", "GitHub Actions BaoStock 缓存", "scripts/update_baostock_cache.py + readBaoStockCache", `${feature.baostockCache || 0}股/${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "云缓存接入"],
     ["yfinance history/download", "Yahoo chart HTTP", "fetchYahooChart", `${coverage.yahooKlines || data.yahooChart?.klines?.length || 0}点`, "后端接入"],
@@ -2073,6 +2080,24 @@ function northboundExportRows() {
     yi(row.allNetAmtIn),
     yi(row.dayAmtRemain),
     yi(row.threshold),
+  ]);
+}
+
+function northboundHoldingExportRows() {
+  return (data.northbound.holdings || []).map((row) => [
+    row.rank,
+    row.tradeDate,
+    row.code,
+    row.name,
+    row.type,
+    row.close,
+    row.pct,
+    row.holdShares,
+    yi(row.holdMarketCap),
+    row.aShareRatio,
+    row.holdSharesRatio,
+    row.freeSharesRatio,
+    row.totalSharesRatio,
   ]);
 }
 

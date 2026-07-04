@@ -395,6 +395,7 @@ function attachPayloadCoverage(payload) {
     etfs: payload.etfs?.rows?.length || 0,
     moneyFlowRows: payload.moneyFlow?.rows?.length || 0,
     northboundRows: payload.northbound?.rows?.length || 0,
+    northboundHoldings: payload.northbound?.holdings?.length || 0,
     fundamentalsRows: payload.fundamentals?.rows?.length || 0,
     hotRank: payload.popularity?.rank?.items?.length || 0,
     announcements: payload.announcements?.items?.length || 0,
@@ -1500,13 +1501,18 @@ async function fetchEastmoneyMoneyFlow(secid) {
 }
 
 async function fetchEastmoneyNorthbound() {
-  const [quotaPayload, kamtPayload] = await Promise.all([fetchEastmoneyNorthboundQuota(), fetchEastmoneyKamt().catch(() => null)]);
+  const [quotaPayload, kamtPayload, holdings] = await Promise.all([
+    fetchEastmoneyNorthboundQuota(),
+    fetchEastmoneyKamt().catch(() => null),
+    fetchEastmoneyNorthboundHoldings().catch(() => []),
+  ]);
   const rows = mergeKamtRows((quotaPayload?.result?.data || []).map(normalizeNorthboundRow), kamtPayload?.rows || []);
   const northRows = rows.filter((row) => row.direction === "北向");
   return {
-    source: kamtPayload?.rows?.length ? "eastmoney-northbound+eastmoney-kamt" : "eastmoney-northbound",
+    source: [kamtPayload?.rows?.length ? "eastmoney-northbound+eastmoney-kamt" : "eastmoney-northbound", holdings.length ? "eastmoney-northbound-holdings" : ""].filter(Boolean).join("+"),
     rows,
     northRows,
+    holdings,
     northNetBuyYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.netBuyAmt) || 0), 0)),
     northNetInYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.dayNetAmtIn) || 0), 0)),
     northTurnoverYi: roundYi(northRows.reduce((sum, row) => sum + (Number(row.turnoverAmt) || 0), 0)),
@@ -1553,6 +1559,25 @@ async function fetchEastmoneyKamt() {
     normalizeKamtRow(payload?.data?.sz2hk, "港股通(深)", "深港通", "南向"),
   ].filter(Boolean);
   return { source: "eastmoney-kamt", rows };
+}
+
+async function fetchEastmoneyNorthboundHoldings() {
+  const params = new URLSearchParams({
+    reportName: "RPT_MUTUAL_HOLDSTOCKNORTH_STA",
+    columns: "ALL",
+    pageNumber: "1",
+    pageSize: "80",
+    sortColumns: "TRADE_DATE,HOLD_MARKET_CAP",
+    sortTypes: "-1,-1",
+    source: "WEB",
+    client: "WEB",
+  });
+  const payload = await fetchJson(`${EASTMONEY_HSGT_URL}?${params}`, {
+    attempts: 2,
+    timeoutMs: 5000,
+    headers: { Referer: "https://data.eastmoney.com/hsgt/index.html" },
+  });
+  return (payload?.result?.data || []).map((row, index) => normalizeNorthboundHoldingRow(row, index + 1));
 }
 
 async function fetchYahooChart(symbol) {
@@ -2077,6 +2102,28 @@ function mergeKamtRows(quotaRows = [], kamtRows = []) {
     if (!existingKeys.has(keyOf(row))) merged.push(row);
   });
   return merged;
+}
+
+function normalizeNorthboundHoldingRow(row, rank) {
+  const type = clean(row.MUTUAL_TYPE);
+  return {
+    rank,
+    tradeDate: clean(row.TRADE_DATE).slice(0, 10),
+    code: formatCode(row.SECURITY_CODE, String(row.SECUCODE || "").endsWith(".SH") ? 1 : 0),
+    name: clean(row.SECURITY_NAME),
+    type: type === "001" ? "沪股通" : type === "003" ? "深股通" : type,
+    close: num(row.CLOSE_PRICE),
+    pct: num(row.CHANGE_RATE),
+    holdShares: num(row.HOLD_SHARES),
+    holdMarketCap: num(row.HOLD_MARKET_CAP),
+    aShareRatio: num(row.A_SHARES_RATIO),
+    holdSharesRatio: num(row.HOLD_SHARES_RATIO),
+    freeSharesRatio: num(row.FREE_SHARES_RATIO),
+    totalSharesRatio: num(row.TOTAL_SHARES_RATIO),
+    marketCapChange1: num(row.HOLD_MARKETCAP_CHG1),
+    marketCapChange5: num(row.HOLD_MARKETCAP_CHG5),
+    marketCapChange10: num(row.HOLD_MARKETCAP_CHG10),
+  };
 }
 
 function normalizeFundamentals(row, secid) {
