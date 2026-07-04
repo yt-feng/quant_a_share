@@ -43,7 +43,7 @@
   - `/api/market` uses this file as a static financial-field fallback when live financial endpoints are unavailable.
 - CNInfo announcements
   - Secondary announcement source using `www.cninfo.com.cn/new/hisAnnouncement/query`; merged with Eastmoney announcements and deduplicated by date/title.
-  - CNInfo relation/调研 feed is available as `disclosures.relations` for symbols that have recent investor-relation disclosure records.
+  - CNInfo relation/调研 feed is available as `disclosures.relations` for symbols that have recent investor-relation disclosure records; when the selected symbol has no recent rows, `disclosures.samples` shows clearly marked recent samples from active A-share names so the source remains inspectable.
 - BaoStock cache
   - `scripts/update_baostock_cache.py` queries historical daily K-line, turnover, PE/PB/PS/PCF fields and writes `pages/data/baostock-cache.json`.
   - The symbol universe is expanded from the bundled market snapshot: default core names, current quote, high-amount stocks, hot-rank stocks and limit-up pool names, capped by `BAOSTOCK_MAX_SYMBOLS`.

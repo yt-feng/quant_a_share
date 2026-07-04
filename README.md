@@ -50,7 +50,7 @@ npm run cache:market
 - `Financial cache`：通过 GitHub Actions 批量生成 `pages/data/financial-cache.json`，默认覆盖最多 160 只股票，缓存营收、利润、EPS、ROE、毛利率、资产负债率等财报字段。
 - `yfinance / Yahoo chart`：生产版已直接接 Yahoo chart HTTP，作为 A 股 `.SS/.SZ`、港美股和 ETF 的全球行情/K 线备份。
 - `GitHub Actions market cache`：`.github/workflows/market-cache.yml` 会在云端以 8000 股票上限生成 `market-cache`、`baostock-cache` 和 `financial-cache`，并在公开端点偶发只返回半截股票池时保留更完整旧快照，必要时向线上 Vercel API 回补完整全 A 股票池和主力资金字段；Vercel 后端在公开源返回空数据时自动读这些静态快照兜底。
-- `CNInfo`：作为公司公告二源，和东财公告合并去重；同时接入调研/关系披露作为 `disclosures.relations`。
+- `CNInfo`：作为公司公告二源，和东财公告合并去重；同时接入调研/关系披露作为 `disclosures.relations`，当当前个股暂无记录时返回 `disclosures.samples` 展示近期公开调研样本。
 - `TuShare Pro`：保留为高一致性、标准化字段和更完整特色数据的可选增强源。
 - `演示数据`：所有在线源不可用时继续兜底，保证应用可打开、可调试。
 - `数据源体检`：大盘情绪、因子选股和复刻状态页会直接展示各源覆盖数量、最近样本、实时/缓存模式、云缓存命中字段，并把覆盖明细与新鲜度明细传入 DeepSeek 上下文。

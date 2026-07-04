@@ -128,6 +128,7 @@ module.exports = async function handler(req, res) {
   const enrichedFundamentals = enrichFundamentalsFromQuote(mergeFinancialSources(fundamentals, financialCache), selectedQuote);
   const announcements = mergeAnnouncementSources(eastmoneyAnnouncements, cninfoAnnouncements);
   const baostock = await readBaoStockCache(symbol, req, baostockCachePayload);
+  const relationSamples = cninfoRelations?.items?.length ? [] : await fetchCninfoRelationSamples(symbol, clientStocks).catch(() => []);
   const source = [
     stockUniverse.source,
     sectorUniverse.source,
@@ -141,7 +142,7 @@ module.exports = async function handler(req, res) {
     popularityRank?.items?.length ? "eastmoney-hot-rank" : "hot-rank-fallback",
     stockPopularity?.latest ? "eastmoney-stock-popularity" : "stock-popularity-fallback",
     announcements?.items?.length ? announcements.source : "announcement-fallback",
-    cninfoRelations?.items?.length ? "cninfo-relations" : "relation-fallback",
+    cninfoRelations?.items?.length ? "cninfo-relations" : relationSamples.length ? "cninfo-relation-samples" : "relation-fallback",
     researchReports?.reports?.length ? "eastmoney-research-reports" : "research-fallback",
     yahooChart?.klines?.length ? "yahoo-chart-yfinance-compatible" : "yahoo-fallback",
     minuteKlines?.length ? "eastmoney-minute-trends" : "minute-fallback",
@@ -182,6 +183,9 @@ module.exports = async function handler(req, res) {
     disclosures: {
       source: cninfoRelations?.source || "",
       relations: cninfoRelations?.items || [],
+      samples: relationSamples,
+      sampleSource: relationSamples.length ? "cninfo-relations-sample" : "",
+      requestedSymbol: selectedQuote?.code || formatCode(symbol, symbol.startsWith("6") ? 1 : 0),
     },
     research: researchReports || { source: "", reports: [], stats: {} },
     yahooChart,
@@ -400,6 +404,7 @@ function attachPayloadCoverage(payload) {
     hotRank: payload.popularity?.rank?.items?.length || 0,
     announcements: payload.announcements?.items?.length || 0,
     disclosures: payload.disclosures?.relations?.length || 0,
+    disclosureSamples: payload.disclosures?.samples?.length || 0,
     researchReports: payload.research?.reports?.length || 0,
     yahooKlines: payload.yahooChart?.klines?.length || 0,
     minuteKlines: payload.minuteKlines?.length || 0,
@@ -490,7 +495,7 @@ function applySnapshotFallback(payload, snapshot, symbol) {
   fill("moneyFlow", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
   fill("fundamentals", emptyFundamentals, (value) => !emptyFundamentals(value), true);
   fill("announcements", (value) => emptyRows(value?.items), (value) => hasRows(value?.items), true);
-  fill("disclosures", (value) => emptyRows(value?.relations), (value) => hasRows(value?.relations), true);
+  fill("disclosures", (value) => emptyRows(value?.relations) && emptyRows(value?.samples), (value) => hasRows(value?.relations) || hasRows(value?.samples), true);
   fill("research", (value) => emptyRows(value?.reports), (value) => hasRows(value?.reports));
   fill("yahooChart", (value) => emptyRows(value?.klines), (value) => hasRows(value?.klines), true);
   fill("baostock", (value) => emptyRows(value?.rows), (value) => hasRows(value?.rows), true);
@@ -1260,6 +1265,28 @@ async function fetchCninfoAnnouncements(symbol) {
 
 async function fetchCninfoRelations(symbol) {
   return fetchCninfoDisclosure(symbol, "relation", "cninfo-relations", normalizeCninfoRelation);
+}
+
+async function fetchCninfoRelationSamples(symbol, stocks = []) {
+  const selected = stockKey(symbol);
+  const liveCandidates = (stocks || [])
+    .slice()
+    .sort((a, b) => (Number(b.hotRank) > 0 ? 100000 - Number(b.hotRank) : 0) - (Number(a.hotRank) > 0 ? 100000 - Number(a.hotRank) : 0) || (Number(b.amount) || 0) - (Number(a.amount) || 0))
+    .map((stock) => stockKey(stock.code));
+  const candidates = Array.from(new Set(["300750", "002156", "000001", "300059", "688981", "000725", ...liveCandidates]))
+    .filter((code) => code && code.length === 6 && code !== selected)
+    .slice(0, 8);
+  const groups = await Promise.all(candidates.map((code) => fetchCninfoRelations(code).catch(() => null)));
+  return groups
+    .flatMap((group) => group?.items || [])
+    .map((row) => ({
+      ...row,
+      sample: true,
+      sampleReason: "当前个股暂无近期调研披露，展示公开源近期样本",
+      requestedSymbol: selected,
+    }))
+    .sort((a, b) => String(b.sortDate || b.date || "").localeCompare(String(a.sortDate || a.date || "")))
+    .slice(0, 12);
 }
 
 async function fetchEastmoneyResearchReports() {

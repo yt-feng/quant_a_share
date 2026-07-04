@@ -52,7 +52,7 @@ const data = {
   fundamentals: null,
   popularity: { rank: { items: [] }, stock: { latest: null, keywords: [], related: [], realtime: [] } },
   announcements: { items: [] },
-  disclosures: { relations: [] },
+  disclosures: { relations: [], samples: [] },
   research: { source: "", reports: [], stats: {} },
   yahooChart: null,
   baostock: { rows: [], latest: null },
@@ -835,7 +835,7 @@ function sourceCoverageRows() {
     ["BaoStock历史", baoRows.length ? "云缓存接入" : "待返回", `${baoRows.length}日`, latestBao?.date || data.baostock?.generatedAt || "-", "历史K线、估值、换手率、均线"],
     ["Yahoo/yfinance备份", yahooRows.length ? "后端接入" : "待返回", `${yahooRows.length}点`, data.yahooChart?.symbol || "-", "全球行情与备用K线"],
     ["东财人气榜", data.popularity?.rank?.items?.length ? "核心接入" : "待返回", `${data.popularity?.rank?.items?.length || 0}只`, data.popularity?.rank?.items?.[0]?.calcTime || "-", "热度排名与排名变化"],
-    ["公告/巨潮披露", data.announcements?.items?.length ? "核心接入" : "待返回", `${data.announcements?.items?.length || 0}/${data.disclosures?.relations?.length || 0}`, data.announcements?.items?.[0]?.date || "-", "公司公告、投资者关系、调研披露"],
+    ["公告/巨潮披露", data.announcements?.items?.length || disclosureRows().length ? "核心接入" : "待返回", `${data.announcements?.items?.length || 0}/${data.disclosures?.relations?.length || 0}/${data.disclosures?.samples?.length || 0}`, data.announcements?.items?.[0]?.date || disclosureRows()[0]?.date || "-", "公司公告、投资者关系、调研披露"],
     ["东财研报", data.research?.reports?.length ? "后端接入" : "待返回", `${data.research?.reports?.length || 0}篇`, data.research?.reports?.[0]?.date || "-", "产业链和行业研报证据"],
     ["GitHub Actions缓存", data.cacheSnapshot?.available ? "云缓存接入" : "本轮实时", data.cacheSnapshot?.usedFields?.length ? data.cacheSnapshot.usedFields.join(",") : "live", data.cacheSnapshot?.generatedAt || "-", "market-cache、baostock-cache、financial-cache兜底"],
   ];
@@ -933,7 +933,7 @@ function sourceFreshnessInfo(key) {
     yahooChart: data.yahooChart?.klines?.at?.(-1)?.date || data.yahooChart?.symbol,
     popularity: data.popularity?.rank?.items?.[0]?.calcTime || data.asOf,
     announcements: data.announcements?.items?.[0]?.date,
-    disclosures: data.disclosures?.relations?.[0]?.date,
+    disclosures: disclosureRows()[0]?.date,
     research: data.research?.stats?.latestDate || data.research?.reports?.[0]?.publishDate,
     cacheSnapshot: data.cacheSnapshot?.generatedAt,
     llm: activeLlmTradeDate(),
@@ -1672,7 +1672,7 @@ function renderQuote() {
         ${panelTitle("公司公告", actionGroup(freshnessTag("announcements"), exportButton("announcements")))}
         ${simpleTable(["来源", "日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.provider === "cninfo" ? "巨潮" : "东财", row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
         <div class="panel-title" style="margin-top:16px"><h2>调研/关系披露</h2>${actionGroup(freshnessTag("disclosures"), exportButton("disclosures"))}</div>
-        ${simpleTable(["来源", "日期", "标题"], (data.disclosures.relations || []).slice(0, 6).map((row) => ["巨潮", row.date, row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
+        ${disclosureTable()}
       </div>
     </section>
   `;
@@ -1860,7 +1860,7 @@ function exportRowsFor(key) {
     case "announcements":
       return exportPayload(`announcements-${selectedQuote}`, ["来源", "日期", "代码", "名称", "分类", "标题", "链接"], announcementExportRows(data.announcements.items || []));
     case "disclosures":
-      return exportPayload(`disclosures-${selectedQuote}`, ["来源", "日期", "代码", "名称", "分类", "标题", "链接"], announcementExportRows(data.disclosures.relations || []));
+      return exportPayload(`disclosures-${selectedQuote}`, ["来源", "日期", "代码", "名称", "分类", "标题", "链接"], announcementExportRows(disclosureRows()));
     case "llmTopicFields":
       return exportPayload(`llm-topic-fields-${activeTopicName()}`, ["字段", "值"], topicFieldRows(currentLlmTopic() || {}).map((row) => row));
     case "llmTopicMapping":
@@ -2004,7 +2004,7 @@ function productionCoverageRows() {
     ["个股资金流", coverage.moneyFlowRows || data.moneyFlow?.rows?.length || 0, "日资金流行数", "行情页个股主力/超大单/大单趋势"],
     ["财务字段缓存", `${feature.financialCache || 0}股 / ${coverage.fundamentalsRows || data.fundamentals?.rows?.length || 0}项`, "GitHub Actions financial-cache + 实时财务", "估值、盈利、ROE 等财报字段"],
     ["BaoStock历史缓存", `${feature.baostockCache || 0}股 / ${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "GitHub Actions baostock-cache", "历史K线、估值、换手、均线和收益"],
-    ["人气/公告/研报", `${coverage.hotRank || 0}/${coverage.announcements || 0}/${coverage.researchReports || 0}`, "人气榜 / 公告 / 研报", "热点、事件和产业链证据"],
+    ["人气/公告/披露/研报", `${coverage.hotRank || 0}/${coverage.announcements || 0}/${coverage.disclosures || 0}+${coverage.disclosureSamples || 0}/${coverage.researchReports || 0}`, "人气榜 / 公告 / 当前披露+样本 / 研报", "热点、事件和产业链证据"],
     ["K线备份", `${coverage.minuteKlines || data.minuteKlines.length}/${coverage.yahooKlines || data.yahooChart?.klines?.length || 0}`, "东财分钟线 / Yahoo日线", "行情页图表和全球备份"],
   ];
 }
@@ -2200,6 +2200,22 @@ function stockPopularityExportRows() {
 
 function announcementExportRows(rows) {
   return rows.map((row) => [row.provider || row.source || "-", row.date || row.sortDate || "-", row.code || "", row.name || "", row.category || "", row.title || "", row.url || row.pdfUrl || ""]);
+}
+
+function disclosureRows() {
+  return (data.disclosures?.relations?.length ? data.disclosures.relations : data.disclosures?.samples || []).filter((row) => row?.title);
+}
+
+function disclosureTable() {
+  const rows = disclosureRows();
+  const usingSamples = !data.disclosures?.relations?.length && rows.length;
+  if (!rows.length) return `<div class="empty-state compact-empty"><strong>当前个股暂无近期调研披露</strong><span>可切换到宁德时代、通富微电或平安银行等高披露样本继续查看巨潮调研源。</span></div>`;
+  const headers = usingSamples ? ["来源", "日期", "代码", "名称", "标题"] : ["来源", "日期", "标题"];
+  const tableRows = rows.slice(0, 6).map((row) => {
+    const title = row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title;
+    return usingSamples ? ["巨潮样本", row.date, row.code, row.name, title] : ["巨潮", row.date, title];
+  });
+  return `${usingSamples ? `<div class="detail-strip">${tag("当前个股暂无记录，展示近期调研样本", "info")}</div>` : ""}${simpleTable(headers, tableRows)}`;
 }
 
 function currentLlmTopic() {
@@ -5980,6 +5996,7 @@ function contextForModule(moduleName) {
     announcements: data.announcements.items?.slice(0, 8) || [],
     disclosures: {
       relations: data.disclosures.relations?.slice(0, 8) || [],
+      samples: data.disclosures.samples?.slice(0, 8) || [],
     },
     research: {
       stats: data.research.stats || {},
