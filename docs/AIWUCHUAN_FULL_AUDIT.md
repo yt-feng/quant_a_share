@@ -167,6 +167,8 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 
 - Chat controls: 新对话, 钱包, 实时搜索, 快速模式, 专家模式, 深度思考.
 - Textarea placeholder: 请输入你的问题，AI将基于多维数据为你解答...
+- Prompt generator: 输入股票, 股票名称或代码, 当前大概成本价, 选择分析周期, 操作方向, 关键均线; supports single or multiple stocks separated by comma/dunhao/semicolon/slash/newline.
+- Prompt templates: 现价还能不能参与, 超短轻仓试错, 持仓先拿还是减, 持仓按成本处理, 回踩低吸判断, 快速下跌还是回踩, 回踩均线还能吸吗, 跌破均线怎么办, 灵活策略模板.
 - Hot prompts Q1-Q12:
   - Buy/hold/low-absorb/do-T prompts by stock/sector and horizon.
   - Market, volume, sector rotation, fund flow, popularity list prompts.
@@ -174,6 +176,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Wallet page: 钱包账单, 刷新, 兑换码充值, 立即充值, 可用点数, 冻结点数, 累计充值, 累计消费, 管理员流水, 点数变化.
 - Clone enrichment: live prompt context includes ETF flow, hot rank, stock popularity, announcements, fundamentals and Yahoo/yfinance-compatible backup quotes.
 - Clone enrichment: AI wallet is now an independent in-app route with persisted local ledger, recharge input, account summary and CSV export instead of only routing to subscription status.
+- Clone enrichment: the AI prompt generator now includes five horizon buckets, more action directions, MA5/10/20/60/90/144, multi-stock parsing and one-click strategy templates.
 - Clone enrichment: the LLM 主题热点 tab now derives topic heat, trend, theme_score, tier, decision, evidence snippets, mapping rows and theme stock candidates from Eastmoney industry/concept boards, A-share industry/concept tags, popularity keywords and Eastmoney research reports. 选股池、板块全景看板 and 个股评估矩阵 now use live market-derived rows instead of fixed sample rows.
 - Clone enrichment: new conversation, realtime-search toggle, mode selection, hot prompts and recent-answer history now persist in browser storage and feed chat context.
 - Clone enrichment: data-source coverage rows now feed the chat context so answers can state which market, money-flow, financial, cache and disclosure feeds are currently populated.

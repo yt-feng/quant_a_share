@@ -188,6 +188,21 @@ const aiScenes = [
   },
 ];
 
+const aiHorizonOptions = ["超短线/盘中 1-3个交易日", "短线 1-5个交易日", "短中期 1-3周", "中期/波段 1-8周", "长期/趋势配置 2-6个月"];
+const aiActionOptions = ["买入", "低吸", "持仓处理", "做T", "减仓", "观察", "卖点", "布局"];
+const aiMaOptions = ["MA5", "MA10", "MA20", "MA60", "MA90", "MA144"];
+const aiTemplateOptions = [
+  ["participate", "现价还能不能参与"],
+  ["ultra", "超短轻仓试错"],
+  ["hold", "持仓先拿还是减"],
+  ["cost", "持仓按成本处理"],
+  ["pullback", "回踩低吸判断"],
+  ["falling", "快速下跌还是回踩"],
+  ["ma", "回踩均线还能吸吗"],
+  ["breakdown", "跌破均线怎么办"],
+  ["flex", "灵活策略模板"],
+];
+
 const DEFAULT_WALLET_LEDGER = [
   ["2026-07-03 21:48:38", "退款", 16.5, 86.5, 0, "AI决策矩阵 V2 结算退回剩余冻结"],
   ["2026-07-03 21:48:38", "消费", -13.5, 70, 16.5, "AI决策矩阵 V2 结算"],
@@ -344,7 +359,7 @@ let quoteDrawings = [];
 let aiRealtime = true;
 let aiMode = "快速模式";
 let activeAiScene = "stock_plan";
-let aiComposer = { stock: "东方财富", cost: "", horizon: "短线3-5天", action: "买入/低吸", ma: "MA20" };
+let aiComposer = { stock: "东方财富", cost: "", horizon: "短线 1-5个交易日", action: "买入", ma: "MA20" };
 let aiQuestion = "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。";
 let aiHistory = [];
 let aiCurrentAnswer = "";
@@ -2969,12 +2984,14 @@ function resetAiConversation() {
 }
 
 function normalizeAiComposer(value) {
+  const legacyHorizon = value?.horizon === "超短1-2天" ? "超短线/盘中 1-3个交易日" : value?.horizon === "短线3-5天" ? "短线 1-5个交易日" : value?.horizon === "短中期1-3周" ? "短中期 1-3周" : value?.horizon === "中线1-2个月" ? "中期/波段 1-8周" : value?.horizon;
+  const legacyAction = value?.action === "买入/低吸" ? "买入" : value?.action;
   return {
-    stock: String(value?.stock || aiComposer.stock || "东方财富").slice(0, 40),
+    stock: String(value?.stock || aiComposer.stock || "东方财富").slice(0, 120),
     cost: String(value?.cost || "").slice(0, 20),
-    horizon: ["超短1-2天", "短线3-5天", "短中期1-3周", "中线1-2个月"].includes(value?.horizon) ? value.horizon : aiComposer.horizon || "短线3-5天",
-    action: ["买入/低吸", "持仓处理", "做T", "减仓", "观察"].includes(value?.action) ? value.action : aiComposer.action || "买入/低吸",
-    ma: ["MA5", "MA10", "MA20", "MA60"].includes(value?.ma) ? value.ma : aiComposer.ma || "MA20",
+    horizon: aiHorizonOptions.includes(legacyHorizon) ? legacyHorizon : aiComposer.horizon || "短线 1-5个交易日",
+    action: aiActionOptions.includes(legacyAction) ? legacyAction : aiComposer.action || "买入",
+    ma: aiMaOptions.includes(value?.ma) ? value.ma : aiComposer.ma || "MA20",
   };
 }
 
@@ -2992,11 +3009,37 @@ function readAiComposer() {
 function composeAiQuestion() {
   const composer = readAiComposer();
   const costText = composer.cost ? `，当前成本大概${composer.cost}元` : "";
+  const stockText = normalizeAiStockText(composer.stock);
   if (composer.action === "持仓处理") return `我持有${composer.stock}${costText}。盘中该继续拿、减仓还是做T？按${composer.horizon}思路给我操作计划、仓位控制和失效条件。`;
   if (composer.action === "做T") return `结合实时行情，分析${composer.stock}${costText}现在能不能做T？按${composer.horizon}思路给我高抛低吸区间、触发条件和失效条件。`;
   if (composer.action === "减仓") return `我持有${composer.stock}${costText}，如果盘中跌破${composer.ma}该不该减仓？请给我减仓条件、止损纪律和后续观察点。`;
   if (composer.action === "观察") return `请把${composer.stock}放入观察池，按${composer.horizon}思路跟踪趋势、量能、资金和${composer.ma}附近的低吸条件。`;
-  return `结合实时行情，分析${composer.stock}现在能不能${composer.action}，按${composer.horizon}思路，重点看${composer.ma}、量能承接和资金流，给我买点、止损位、仓位建议和注意点。`;
+  return `结合实时行情，分析${stockText}现在能不能${composer.action}，按${composer.horizon}思路，重点看${composer.ma}、量能承接和资金流，给我买点、卖点、触发条件、失效条件、仓位建议和注意点。`;
+}
+
+function normalizeAiStockText(value) {
+  const parts = String(value || "")
+    .split(/[，,、;；/\\n]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 8);
+  return parts.length > 1 ? parts.join("、") : parts[0] || "目标股票";
+}
+
+function composeAiTemplate(kind) {
+  const composer = readAiComposer();
+  const stockText = normalizeAiStockText(composer.stock);
+  const costText = composer.cost ? `，当前成本大概${composer.cost}元` : "";
+  const horizon = composer.horizon;
+  if (kind === "participate") return `${stockText}现价还能不能参与？按${horizon}看，给我操作计划、买点、注意点和仓位安排。`;
+  if (kind === "ultra") return `我想做${stockText}的1到3个交易日超短，当前能不能轻仓试错博反弹？请直接告诉我能不能做、怎么买、哪里止损。`;
+  if (kind === "hold") return `我现在持有${stockText}，盘中该继续拿还是先减一点？结合实时行情给我减仓条件、失效条件和仓位建议。`;
+  if (kind === "cost") return `我持有${stockText}${costText}。盘中该怎么处理？请直接给我操作计划、仓位控制和失效条件。`;
+  if (kind === "pullback") return `${stockText}现在回踩到关键位了，盘中能不能低吸？请结合实时行情、量能承接和资金流告诉我触发条件、失效条件、仓位上限。`;
+  if (kind === "falling") return `${stockText}现在是接快速下跌还是接回踩？请结合实时走势、量能、承接和资金流给我低吸纪律。`;
+  if (kind === "ma") return `${stockText}回踩${composer.ma}附近，现在还能不能吸一口？结合盘中实时行情给我低吸策略和注意点。`;
+  if (kind === "breakdown") return `如果${stockText}盘中跌破${composer.ma}怎么办？请给我明确的持仓纪律、止损条件和后续观察点。`;
+  return `结合实时行情，分析${stockText}现在能不能${composer.action}，按${horizon}思路，给我买点、卖点、触发条件、失效条件、仓位建议和注意点。`;
 }
 
 function aiBillingCost(mode = aiMode, realtime = aiRealtime) {
@@ -3187,13 +3230,17 @@ function renderAi() {
         <div class="panel inset">
           <h3>问句生成器</h3>
           <div class="form-grid">
-            <label><span class="label">股票/板块</span><input id="aiComposerStock" placeholder="例如：东方财富 / 机器人板块" value="${escapeHtml(aiComposer.stock)}" /></label>
+            <label><span class="label">股票/板块</span><input id="aiComposerStock" placeholder="例如：东方财富 / 机器人板块 / 宁德时代，比亚迪" value="${escapeHtml(aiComposer.stock)}" /></label>
             <label><span class="label">成本价</span><input id="aiComposerCost" placeholder="可选，例如：18.60" value="${escapeHtml(aiComposer.cost)}" /></label>
-            <label><span class="label">周期</span><select id="aiComposerHorizon"><option ${selectedAttr(aiComposer.horizon === "超短1-2天")}>超短1-2天</option><option ${selectedAttr(aiComposer.horizon === "短线3-5天")}>短线3-5天</option><option ${selectedAttr(aiComposer.horizon === "短中期1-3周")}>短中期1-3周</option><option ${selectedAttr(aiComposer.horizon === "中线1-2个月")}>中线1-2个月</option></select></label>
-            <label><span class="label">操作方向</span><select id="aiComposerAction"><option ${selectedAttr(aiComposer.action === "买入/低吸")}>买入/低吸</option><option ${selectedAttr(aiComposer.action === "持仓处理")}>持仓处理</option><option ${selectedAttr(aiComposer.action === "做T")}>做T</option><option ${selectedAttr(aiComposer.action === "减仓")}>减仓</option><option ${selectedAttr(aiComposer.action === "观察")}>观察</option></select></label>
-            <label><span class="label">关键均线</span><select id="aiComposerMa"><option ${selectedAttr(aiComposer.ma === "MA5")}>MA5</option><option ${selectedAttr(aiComposer.ma === "MA10")}>MA10</option><option ${selectedAttr(aiComposer.ma === "MA20")}>MA20</option><option ${selectedAttr(aiComposer.ma === "MA60")}>MA60</option></select></label>
+            <label><span class="label">周期</span><select id="aiComposerHorizon">${optionTags(aiHorizonOptions, aiComposer.horizon)}</select></label>
+            <label><span class="label">操作方向</span><select id="aiComposerAction">${optionTags(aiActionOptions, aiComposer.action)}</select></label>
+            <label><span class="label">关键均线</span><select id="aiComposerMa">${optionTags(aiMaOptions, aiComposer.ma)}</select></label>
             <button class="ghost-button align-end" data-compose-ai-prompt="1">生成问句</button>
           </div>
+          <div class="toolbar" style="margin-top:10px">
+            ${aiTemplateOptions.map(([key, label]) => `<button class="chip" data-ai-template="${escapeHtml(key)}">${escapeHtml(label)}</button>`).join("")}
+          </div>
+          <p class="table-note">支持单只或多只股票/板块，逗号、顿号、分号、斜杠或换行分隔，最多 8 个。</p>
         </div>
         <div class="toolbar">
           <label class="toggle"><input type="checkbox" data-ai-realtime ${aiRealtime ? "checked" : ""} />实时搜索</label>
@@ -5149,6 +5196,16 @@ function attachEvents() {
     persistAiState();
     showToast("问句已生成。", "success");
     render();
+  });
+  document.querySelectorAll("[data-ai-template]").forEach((button) => {
+    button.addEventListener("click", () => {
+      aiQuestion = composeAiTemplate(button.dataset.aiTemplate);
+      aiCurrentAnswer = "";
+      aiExecution = null;
+      persistAiState();
+      showToast("模板问句已生成。", "success");
+      render();
+    });
   });
   document.querySelectorAll("[data-mode-pick]").forEach((button) => {
     button.addEventListener("click", () => {
