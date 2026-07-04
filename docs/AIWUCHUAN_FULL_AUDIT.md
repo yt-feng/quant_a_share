@@ -42,6 +42,31 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Table columns: 代码, 名称, 最新价, 涨跌幅, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
 - Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area, including the all-zero case for over-strict custom filters.
 
+## 策略回测
+
+- Page title: 策略回测.
+- Notice: historical backtest output is not an investment recommendation.
+- Entry link: 跨策略实验页.
+- Reuses the full factor-condition panel from 量化因子选股.
+- Custom condition controls: 选择字段, 操作符, 值, 添加.
+- Recent-N condition controls: 近N日累计涨跌幅, operator, value(%), 添加近N日条件.
+- Strategy controls: 策略名称, 保存策略, 我的策略.
+- My strategy view: 搜索策略名/创建者, 仅看我创建的, 点赞, 点踩, 应用.
+- Date range controls: 开始日期, 结束日期, 近三个月, 近半年, 近一年.
+- Trading rules: 最大持仓数, 买入排序依据, 动态仓位管理, 持有天数, 止损比例(%).
+- System status: 无需排队, running count and queue capacity.
+- Actions: 开始历史回测, 重置.
+- Clone enrichment: these trading-rule controls are now active in the local backtest model. 最大持仓数 limits signal count, 买入排序 changes candidate order, 持有天数 scales expected return, 止损比例 caps downside, and 动态仓位 changes per-signal position sizing. Version records and CSV exports include the rule summary.
+
+## 策略对比
+
+- Page title: 跨策略实验页.
+- Description: 面向不同 strategy_id 的最新版本对比、队列预算查看与盘后离线批处理入口.
+- Actions: 返回策略回测, 刷新, 开始对比, 预演计划, 提交盘后批量.
+- Metrics: 队列等待, 最大并发, 队列预算, 自动拒绝阈值.
+- Sections: 跨 strategy_id 对比, 盘后批量离线评估, 最近实验记录.
+- Clone enrichment: compare page now exposes queue metrics, selected strategy comparison, batch-plan preview/submit state and experiment records.
+
 ## 行业
 
 - Page title: 板块与概念分析.

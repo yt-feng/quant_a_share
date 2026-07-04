@@ -225,7 +225,7 @@ const pages = [
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜；日期区间会联动趋势图和复盘统计。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
-  ["策略回测", "已对齐", "独立策略回测页、日期范围、至少3个条件提示、命中信号、收益/胜率/回撤/夏普、版本记录、进化候选和策略应用。"],
+  ["策略回测", "已对齐", "独立策略回测页、日期范围、近三个月/半年/一年快捷区间、最大持仓数、买入排序、动态仓位、持有天数、止损比例、系统状态、命中信号、收益/胜率/回撤/夏普、版本记录、进化候选和策略应用。"],
   ["策略对比", "已对齐", "跨 strategy_id 最新版本比较、综合评分、赢家、队列预算、盘后批量预演/提交和实验记录。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表；筛选条件会实时影响表格与图表。"],
   ["行情", "已对齐", "股票查询、日期、复权、近半年/近一年、加载更多历史、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
@@ -262,12 +262,20 @@ let screenerSort = { field: "rps_120", direction: "desc" };
 let selectedBacktestStrategyId = "current";
 let backtestStartDate = "2026-04-01";
 let backtestEndDate = "2026-07-04";
+let backtestMaxHoldings = 10;
+let backtestBuySort = "default";
+let backtestDynamicPosition = false;
+let backtestHoldDays = 5;
+let backtestStopLoss = -10;
 let backtestRuns = [];
 let evolvedStrategy = null;
 let compareStrategyIds = [];
 let compareExperiments = [];
 let batchPlan = null;
+let strategySearchQuery = "";
+let strategyOnlyMine = false;
 const DEFAULT_WATCH_GROUPS = ["短线观察", "中线持有", "题材跟踪"];
+const CURRENT_ACCOUNT = "u_dtfrwm";
 let watchGroups = [...DEFAULT_WATCH_GROUPS];
 let selectedWatchGroup = "全部";
 let watchlist = [
@@ -923,18 +931,39 @@ function renderBacktest() {
   const result = buildBacktestResult(strategy);
   const enough = strategyConditionCount(strategy) >= 3;
   const latestRuns = backtestRuns.slice(0, 8);
+  const queue = queueBudget(strategyOptions().length);
   return `
     <section class="panel">
       ${panelTitle("策略回测", actionGroup(tag(`策略 ${strategy.name}`, "info"), tag(`条件 ${strategyConditionCount(strategy)} 个`), exportButton("backtestRuns")))}
+      <p class="table-note">所示结果仅为历史数据回测，不构成任何投资建议。</p>
       <div class="form-grid">
         <label><span class="label">回测策略</span><select id="backtestStrategySelect">${strategyOptions().map((item) => `<option value="${escapeHtml(item.id)}" ${selectedAttr(item.id === selectedBacktestStrategyId)}>${escapeHtml(item.name)}</option>`).join("")}</select></label>
         <label><span class="label">开始日期</span><input id="backtestStartDate" type="date" value="${escapeHtml(backtestStartDate)}" /></label>
         <label><span class="label">结束日期</span><input id="backtestEndDate" type="date" value="${escapeHtml(backtestEndDate)}" /></label>
-        <button class="primary-button align-end" data-run-backtest="1">运行回测</button>
         <button class="ghost-button align-end" data-template-strategy="1">套用三因子模板</button>
         <button class="ghost-button align-end" data-goto-page="compare">跨策略实验页</button>
       </div>
-      <div class="detail-strip">${tag(`股票池 ${stockCoverageLabel()}`)}${freshnessTag("stocks")}${freshnessTag("baostock")}${tag(`信号 ${result.signals.length} 条`, "info")}${tag(result.dataMode)}</div>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="chip" data-backtest-range="quarter">近三个月</button>
+        <button class="chip" data-backtest-range="half">近半年</button>
+        <button class="chip" data-backtest-range="year">近一年</button>
+      </div>
+      <div class="panel inset">
+        <h3>交易规则</h3>
+        <div class="form-grid">
+          <label><span class="label">最大持仓数</span><input id="backtestMaxHoldings" type="number" min="1" max="60" value="${backtestMaxHoldings}" /></label>
+          <label><span class="label">买入排序依据</span><select id="backtestBuySort">${backtestSortOptions().map(([value, label]) => `<option value="${value}" ${selectedAttr(backtestBuySort === value)}>${label}</option>`).join("")}</select></label>
+          <label class="toggle align-end"><input id="backtestDynamicPosition" type="checkbox" ${backtestDynamicPosition ? "checked" : ""} />动态仓位管理</label>
+          <label><span class="label">持有天数</span><input id="backtestHoldDays" type="number" min="1" max="60" value="${backtestHoldDays}" /></label>
+          <label><span class="label">止损比例(%)</span><input id="backtestStopLoss" type="number" min="-40" max="0" value="${backtestStopLoss}" /></label>
+          <div class="metric compact-metric"><span>系统状态</span><strong>无需排队</strong><small>${queue.waiting}/${queue.concurrency} 运行中</small></div>
+        </div>
+        <div class="toolbar" style="margin-top:12px">
+          <button class="primary-button" data-run-backtest="1">开始历史回测</button>
+          <button class="ghost-button" data-reset-backtest="1">重置</button>
+        </div>
+      </div>
+      <div class="detail-strip">${tag(`股票池 ${stockCoverageLabel()}`)}${freshnessTag("stocks")}${freshnessTag("baostock")}${tag(`信号 ${result.signals.length} 条`, "info")}${tag(`持有 ${backtestHoldDays}天`)}${tag(`止损 ${backtestStopLoss}%`)}${tag(result.dataMode)}</div>
       ${!enough ? `<div class="empty-state compact-empty"><strong>至少选择 3 个条件后才能开始回测</strong><span>当前策略条件偏少，可以在量化因子选股页继续添加，或直接套用 MA20 + MACD + RPS 三因子模板。</span></div>` : ""}
     </section>
     <section class="grid metrics" style="margin-top:14px">
@@ -957,7 +986,7 @@ function renderBacktest() {
     </section>
     <section class="panel" style="margin-top:14px">
       ${panelTitle("版本记录", actionGroup(tag(`${backtestRuns.length} 个版本`), `<button class="ghost-button compact-button" data-generate-evolution="1">生成进化候选</button>`))}
-      ${latestRuns.length ? simpleTable(["版本", "策略", "日期范围", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], latestRuns.map(backtestRunRow)) : `<div class="empty-state compact-empty"><strong>暂无回测版本</strong><span>点击“运行回测”后会保存最近 20 个版本。</span></div>`}
+      ${latestRuns.length ? simpleTable(["版本", "策略", "日期范围", "交易规则", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], latestRuns.map(backtestRunRow)) : `<div class="empty-state compact-empty"><strong>暂无回测版本</strong><span>点击“运行回测”后会保存最近 20 个版本。</span></div>`}
     </section>
   `;
 }
@@ -1070,6 +1099,11 @@ function strategyRows(strategy) {
 }
 
 function sortStrategyRows(a, b, strategy) {
+  if (backtestBuySort && backtestBuySort !== "default") {
+    const av = backtestSortValue(a, backtestBuySort);
+    const bv = backtestSortValue(b, backtestBuySort);
+    return bv - av || (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
+  }
   const sort = normalizeSort(strategy?.sort);
   const av = screenerSortValue(a, sort.field);
   const bv = screenerSortValue(b, sort.field);
@@ -1077,10 +1111,30 @@ function sortStrategyRows(a, b, strategy) {
   return primary || (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
 }
 
+function backtestSortOptions() {
+  return [
+    ["default", "默认(策略排序)"],
+    ["random", "默认(随机)"],
+    ["rps_120", "RPS120"],
+    ["change_pct", "当日涨跌幅"],
+    ["fund", "主力资金"],
+    ["amount", "成交额"],
+    ["sector_rps_50", "行业RPS50"],
+  ];
+}
+
+function backtestSortValue(stock, field) {
+  if (field === "random") return hashString(`${stock.code || stock.name || ""}:${backtestStartDate}:${backtestEndDate}`) % 10000;
+  if (field === "fund") return Number(stock.fund) || 0;
+  if (field === "amount") return Number(stock.amount) || 0;
+  return screenerSortValue(stock, field);
+}
+
 function buildBacktestResult(strategy) {
-  const rows = strategyRows(strategy).slice(0, 120);
+  const maxHoldings = clampInt(backtestMaxHoldings, 1, 60, 10);
+  const rows = strategyRows(strategy).slice(0, maxHoldings);
   const signals = rows.map((stock, index) => strategySignal(stock, index, strategy));
-  const returns = signals.map((row) => row.expectedReturn);
+  const returns = signals.map((row) => row.weightedReturn);
   const avg = average(returns);
   const winCount = returns.filter((value) => value > 0).length;
   const winRate = returns.length ? (winCount / returns.length) * 100 : 0;
@@ -1103,6 +1157,7 @@ function buildBacktestResult(strategy) {
     score,
     leaderLabel: leaderLabel(avg, winRate, maxDrawdown, sharpe),
     dataMode: data.baostock?.rows?.length ? "BaoStock/东财混合仿真" : "东财快照仿真",
+    rules: backtestRuleSummary(),
   };
 }
 
@@ -1112,7 +1167,13 @@ function strategySignal(stock, index, strategy) {
   const rpsScore = ((Number(stock.rps) || 50) - 50) / 14;
   const trendScore = stock.ma20 ? 0.9 : -0.4;
   const liquidityPenalty = Number(stock.amount || 0) < 100000000 ? -0.8 : 0;
-  const expectedReturn = Number((Number(stock.pct || 0) * 0.28 + fundScore + rpsScore + trendScore + factorBonus + liquidityPenalty - index * 0.015).toFixed(2));
+  const holdScale = Math.sqrt(clampInt(backtestHoldDays, 1, 60, 5) / 5);
+  const stopLoss = Math.abs(Number(backtestStopLoss) || 10);
+  const rawReturn = Number(stock.pct || 0) * 0.28 + fundScore + rpsScore + trendScore + factorBonus + liquidityPenalty - index * 0.015;
+  const expectedReturn = Number(Math.max(-stopLoss, rawReturn * holdScale).toFixed(2));
+  const confidence = Math.max(0, Math.min(1, ((Number(stock.rps) || 50) - 35) / 55 + (Number(stock.fund || 0) > 0 ? 0.12 : 0)));
+  const equalPosition = 100 / clampInt(backtestMaxHoldings, 1, 60, 10);
+  const positionPct = Number((backtestDynamicPosition ? Math.max(2, Math.min(20, equalPosition * (0.65 + confidence))) : equalPosition).toFixed(1));
   return {
     date: backtestEndDate || data.tradeDate || data.asOf || "-",
     code: stock.code,
@@ -1122,9 +1183,17 @@ function strategySignal(stock, index, strategy) {
     pct: Number(stock.pct || 0),
     rps: Number(stock.rps || 0),
     expectedReturn,
-    stop: Number((Number(stock.price || 0) * 0.94).toFixed(2)),
-    take: Number((Number(stock.price || 0) * 1.08).toFixed(2)),
+    weightedReturn: Number((expectedReturn * positionPct / 100).toFixed(3)),
+    holdDays: clampInt(backtestHoldDays, 1, 60, 5),
+    positionPct,
+    stop: Number((Number(stock.price || 0) * (1 - stopLoss / 100)).toFixed(2)),
+    take: Number((Number(stock.price || 0) * (1 + Math.max(6, stopLoss * 0.8) / 100)).toFixed(2)),
   };
+}
+
+function backtestRuleSummary() {
+  const sortLabel = backtestSortOptions().find(([value]) => value === backtestBuySort)?.[1] || "默认(策略排序)";
+  return `最大持仓${clampInt(backtestMaxHoldings, 1, 60, 10)}只 / ${sortLabel} / ${backtestDynamicPosition ? "动态仓位" : "等权仓位"} / 持有${clampInt(backtestHoldDays, 1, 60, 5)}天 / 止损${backtestStopLoss}%`;
 }
 
 function backtestCurve(returns) {
@@ -1182,6 +1251,7 @@ function createBacktestRun(strategy = selectedBacktestStrategy()) {
     maxDrawdown: result.maxDrawdown.toFixed(2),
     sharpe: result.sharpe.toFixed(2),
     score: result.score.toFixed(1),
+    rules: result.rules,
     at: new Date().toLocaleString("zh-CN", { hour12: false }),
   };
   backtestRuns = [run, ...backtestRuns].slice(0, 20);
@@ -1190,14 +1260,14 @@ function createBacktestRun(strategy = selectedBacktestStrategy()) {
 }
 
 function backtestRunRow(run) {
-  return [run.version, escapeHtml(run.strategyName), run.range, run.signalCount, `${run.totalReturn}%`, `${run.winRate}%`, `${run.maxDrawdown}%`, run.sharpe, run.score, run.at];
+  return [run.version, escapeHtml(run.strategyName), run.range, escapeHtml(run.rules || "-"), run.signalCount, `${run.totalReturn}%`, `${run.winRate}%`, `${run.maxDrawdown}%`, run.sharpe, run.score, run.at];
 }
 
 function strategySignalTable(rows) {
   if (!rows.length) return `<div class="empty-state compact-empty"><strong>未命中任何回测信号</strong><span>请检查日期范围、筛选条件或数据源返回。</span></div>`;
   return simpleTable(
-    ["日期", "代码", "名称", "行业", "价格", "当日涨跌", "RPS", "预期收益", "止损", "止盈", "操作"],
-    rows.map((row) => [row.date, row.code, row.name, row.industry, row.price.toFixed(2), plainSigned(row.pct, 2, "%"), row.rps, plainSigned(row.expectedReturn, 2, "%"), row.stop, row.take, stockActionButtons(row.code)])
+    ["日期", "代码", "名称", "行业", "价格", "当日涨跌", "RPS", "持有", "仓位", "预期收益", "加权收益", "止损", "止盈", "操作"],
+    rows.map((row) => [row.date, row.code, row.name, row.industry, row.price.toFixed(2), plainSigned(row.pct, 2, "%"), row.rps, `${row.holdDays}天`, `${row.positionPct}%`, plainSigned(row.expectedReturn, 2, "%"), plainSigned(row.weightedReturn, 2, "%"), row.stop, row.take, stockActionButtons(row.code)])
   );
 }
 
@@ -1629,7 +1699,7 @@ function exportRowsFor(key) {
     case "screener":
       return exportPayload("factor-screener", screenerExportHeaders(), screenerExportRows());
     case "backtestRuns":
-      return exportPayload("strategy-backtest", ["版本", "策略", "日期范围", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], backtestRuns.map(backtestRunRow));
+      return exportPayload("strategy-backtest", ["版本", "策略", "日期范围", "交易规则", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], backtestRuns.map(backtestRunRow));
     case "compareLab":
       return exportPayload("strategy-compare", ["时间", "实验", "赢家", "参与策略", "平均评分", "状态"], compareExperiments.map((item) => [item.at, item.name, item.winner, item.count, item.avgScore, item.status]));
     case "sectors":
@@ -3594,18 +3664,33 @@ function renderModal() {
 
 function modalBody() {
   if (modal.type === "strategy") {
-    if (!savedStrategies.length) return `<div class="empty-state"><strong>暂无已保存策略</strong><span>在量化因子选股页设置条件后点击保存策略。</span></div>`;
-    return `${simpleTable(
-      ["策略名称", "因子", "自定义条件", "排序", "最近保存", "操作"],
-      savedStrategies.map((strategy) => [
+    const rows = filteredSavedStrategies();
+    return `
+      <div class="form-grid">
+        <label><span class="label">搜索策略名/创建者</span><input id="strategySearchQuery" placeholder="搜索策略名/创建者" value="${escapeHtml(strategySearchQuery)}" /></label>
+        <label class="toggle align-end"><input id="strategyOnlyMine" type="checkbox" ${strategyOnlyMine ? "checked" : ""} />仅看我创建的</label>
+        <button class="primary-button align-end" data-apply-strategy-filter="1">筛选</button>
+      </div>
+      <div class="detail-strip">${tag(`全部 ${savedStrategies.length}`)}${tag(`当前 ${rows.length}`, "info")}${tag(`账号 ${CURRENT_ACCOUNT}`)}</div>
+      ${
+        rows.length
+          ? simpleTable(
+      ["策略名称", "创建者", "因子", "自定义条件", "排序", "点赞", "点踩", "最近保存", "操作"],
+      rows.map((strategy) => [
         escapeHtml(strategy.name),
+        escapeHtml(strategy.creator || CURRENT_ACCOUNT),
         strategy.factors.length,
         strategy.conditions.length,
         `${strategy.sort.field}/${strategy.sort.direction === "asc" ? "升序" : "降序"}`,
+        strategy.likes || 0,
+        strategy.dislikes || 0,
         strategy.savedAt?.slice(0, 10) || "-",
-        `<button class="ghost-button table-action" data-apply-strategy="${strategy.id}">应用</button><button class="ghost-button table-action" data-delete-strategy="${strategy.id}">删除</button>`,
+        `<button class="ghost-button table-action" data-vote-strategy="${strategy.id}" data-vote-kind="like">点赞</button><button class="ghost-button table-action" data-vote-strategy="${strategy.id}" data-vote-kind="dislike">点踩</button><button class="ghost-button table-action" data-apply-strategy="${strategy.id}">应用</button><button class="ghost-button table-action" data-delete-strategy="${strategy.id}">删除</button>`,
       ])
-    )}`;
+    )
+          : `<div class="empty-state"><strong>${savedStrategies.length ? "没有匹配策略" : "暂无已保存策略"}</strong><span>在量化因子选股页设置条件后点击保存策略。</span></div>`
+      }
+    `;
   }
   if (modal.type === "wallet") {
     const summary = walletSummary();
@@ -3927,11 +4012,18 @@ function loadStrategyLabState() {
     selectedBacktestStrategyId = stored.selectedBacktestStrategyId || selectedBacktestStrategyId;
     backtestStartDate = normalizeDateValue(stored.backtestStartDate) || backtestStartDate;
     backtestEndDate = normalizeDateValue(stored.backtestEndDate) || backtestEndDate;
+    backtestMaxHoldings = clampInt(stored.backtestMaxHoldings, 1, 60, backtestMaxHoldings);
+    backtestBuySort = normalizeBacktestBuySort(stored.backtestBuySort);
+    backtestDynamicPosition = Boolean(stored.backtestDynamicPosition);
+    backtestHoldDays = clampInt(stored.backtestHoldDays, 1, 60, backtestHoldDays);
+    backtestStopLoss = clampStopLoss(stored.backtestStopLoss, backtestStopLoss);
     backtestRuns = Array.isArray(stored.backtestRuns) ? stored.backtestRuns.slice(0, 20) : [];
     evolvedStrategy = stored.evolvedStrategy || null;
     compareStrategyIds = Array.isArray(stored.compareStrategyIds) ? stored.compareStrategyIds.slice(0, 8) : [];
     compareExperiments = Array.isArray(stored.compareExperiments) ? stored.compareExperiments.slice(0, 20) : [];
     batchPlan = stored.batchPlan || null;
+    strategySearchQuery = String(stored.strategySearchQuery || "").slice(0, 40);
+    strategyOnlyMine = Boolean(stored.strategyOnlyMine);
   } catch (error) {
     // Bad local storage should not block strategy lab.
   }
@@ -3945,17 +4037,46 @@ function persistStrategyLabState() {
         selectedBacktestStrategyId,
         backtestStartDate,
         backtestEndDate,
+        backtestMaxHoldings,
+        backtestBuySort,
+        backtestDynamicPosition,
+        backtestHoldDays,
+        backtestStopLoss,
         backtestRuns,
         evolvedStrategy,
         compareStrategyIds,
         compareExperiments,
         batchPlan,
+        strategySearchQuery,
+        strategyOnlyMine,
         updatedAt: new Date().toISOString(),
       })
     );
   } catch (error) {
     showToast("策略实验记录已更新，浏览器存储暂不可用。", "info");
   }
+}
+
+function normalizeBacktestBuySort(value) {
+  const allowed = new Set(backtestSortOptions().map(([key]) => key));
+  return allowed.has(value) ? value : "default";
+}
+
+function clampStopLoss(value, fallback = -10) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return Math.max(-40, Math.min(0, number));
+}
+
+function syncBacktestRuleInputs() {
+  backtestStartDate = normalizeDateValue(document.querySelector("#backtestStartDate")?.value) || backtestStartDate;
+  backtestEndDate = normalizeDateValue(document.querySelector("#backtestEndDate")?.value) || backtestEndDate;
+  backtestMaxHoldings = clampInt(document.querySelector("#backtestMaxHoldings")?.value, 1, 60, backtestMaxHoldings);
+  backtestBuySort = normalizeBacktestBuySort(document.querySelector("#backtestBuySort")?.value || backtestBuySort);
+  backtestDynamicPosition = Boolean(document.querySelector("#backtestDynamicPosition")?.checked);
+  backtestHoldDays = clampInt(document.querySelector("#backtestHoldDays")?.value, 1, 60, backtestHoldDays);
+  backtestStopLoss = clampStopLoss(document.querySelector("#backtestStopLoss")?.value, backtestStopLoss);
+  persistStrategyLabState();
 }
 
 function normalizeSort(sort) {
@@ -3982,9 +4103,12 @@ function normalizeStrategy(strategy) {
   return {
     id: strategy.id || `s_${Date.now()}_${Math.random().toString(16).slice(2)}`,
     name: String(strategy.name).slice(0, 32),
+    creator: String(strategy.creator || CURRENT_ACCOUNT).slice(0, 32),
     factors: Array.isArray(strategy.factors) ? strategy.factors : [],
     conditions: Array.isArray(strategy.conditions) ? strategy.conditions.map(normalizeCondition).filter(Boolean) : [],
     sort: normalizeSort(strategy.sort),
+    likes: Math.max(0, Number(strategy.likes) || 0),
+    dislikes: Math.max(0, Number(strategy.dislikes) || 0),
     savedAt: strategy.savedAt || new Date().toISOString(),
   };
 }
@@ -3993,14 +4117,37 @@ function saveCurrentStrategy(name) {
   const strategy = normalizeStrategy({
     id: `s_${Date.now()}`,
     name: name || `策略 ${new Date().toLocaleDateString("zh-CN")}`,
+    creator: CURRENT_ACCOUNT,
     factors: Array.from(activeFactors),
     conditions: customConditions,
     sort: screenerSort,
+    likes: 0,
+    dislikes: 0,
     savedAt: new Date().toISOString(),
   });
   savedStrategies = [strategy, ...savedStrategies.filter((item) => item.name !== strategy.name)].slice(0, 20);
   persistScreenerState();
   return strategy;
+}
+
+function filteredSavedStrategies() {
+  const query = normalizeTopicName(strategySearchQuery);
+  return savedStrategies.filter((strategy) => {
+    if (strategyOnlyMine && (strategy.creator || CURRENT_ACCOUNT) !== CURRENT_ACCOUNT) return false;
+    if (!query) return true;
+    return [strategy.name, strategy.creator || CURRENT_ACCOUNT].some((value) => normalizeTopicName(value).includes(query));
+  });
+}
+
+function voteStrategy(id, kind) {
+  savedStrategies = savedStrategies.map((strategy) => {
+    if (strategy.id !== id) return strategy;
+    const next = { ...strategy };
+    if (kind === "dislike") next.dislikes = (Number(next.dislikes) || 0) + 1;
+    else next.likes = (Number(next.likes) || 0) + 1;
+    return normalizeStrategy(next);
+  });
+  persistScreenerState();
 }
 
 function screenerEmptyState(activeLabel) {
@@ -4577,9 +4724,43 @@ function attachEvents() {
       render();
     });
   });
+  document.querySelectorAll("[data-vote-strategy]").forEach((button) => {
+    button.addEventListener("click", () => {
+      voteStrategy(button.dataset.voteStrategy, button.dataset.voteKind);
+      showToast(button.dataset.voteKind === "dislike" ? "已记录点踩。" : "已记录点赞。", "success");
+      render();
+    });
+  });
+  document.querySelector("[data-apply-strategy-filter]")?.addEventListener("click", () => {
+    strategySearchQuery = String(document.querySelector("#strategySearchQuery")?.value || "").trim().slice(0, 40);
+    strategyOnlyMine = Boolean(document.querySelector("#strategyOnlyMine")?.checked);
+    persistStrategyLabState();
+    render();
+  });
   document.querySelector("#backtestStrategySelect")?.addEventListener("change", (event) => {
     selectedBacktestStrategyId = event.currentTarget.value || "current";
     persistStrategyLabState();
+    render();
+  });
+  document.querySelectorAll("[data-backtest-range]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const days = button.dataset.backtestRange === "year" ? 365 : button.dataset.backtestRange === "half" ? 183 : 92;
+      backtestEndDate = new Date().toISOString().slice(0, 10);
+      backtestStartDate = shiftDate(days);
+      persistStrategyLabState();
+      render();
+    });
+  });
+  document.querySelector("[data-reset-backtest]")?.addEventListener("click", () => {
+    backtestStartDate = "2026-04-01";
+    backtestEndDate = "2026-07-04";
+    backtestMaxHoldings = 10;
+    backtestBuySort = "default";
+    backtestDynamicPosition = false;
+    backtestHoldDays = 5;
+    backtestStopLoss = -10;
+    persistStrategyLabState();
+    showToast("回测规则已重置。", "success");
     render();
   });
   document.querySelector("[data-template-strategy]")?.addEventListener("click", () => {
@@ -4593,8 +4774,7 @@ function attachEvents() {
     render();
   });
   document.querySelector("[data-run-backtest]")?.addEventListener("click", () => {
-    backtestStartDate = normalizeDateValue(document.querySelector("#backtestStartDate")?.value) || backtestStartDate;
-    backtestEndDate = normalizeDateValue(document.querySelector("#backtestEndDate")?.value) || backtestEndDate;
+    syncBacktestRuleInputs();
     const strategy = selectedBacktestStrategy();
     if (strategyConditionCount(strategy) < 3) {
       persistStrategyLabState();
