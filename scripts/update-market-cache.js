@@ -4,6 +4,9 @@ const handler = require("../api/market");
 
 const symbol = String(process.env.MARKET_CACHE_SYMBOL || "600519").replace(/\D/g, "").slice(0, 6) || "600519";
 const outputPath = path.join(__dirname, "..", "pages", "data", "market-cache.json");
+const stockLimit = process.env.MARKET_CACHE_STOCK_LIMIT || "8000";
+const remoteFallbackUrl = process.env.MARKET_CACHE_REMOTE_FALLBACK_URL || "https://quant-a-share.vercel.app/api/market";
+const remoteFallbackMinStocks = Number(process.env.MARKET_CACHE_REMOTE_FALLBACK_MIN_STOCKS || 4000);
 
 function readExistingSnapshot() {
   try {
@@ -14,7 +17,7 @@ function readExistingSnapshot() {
 }
 
 function callMarketApi() {
-  const req = { method: "GET", query: { symbol, stockLimit: process.env.MARKET_CACHE_STOCK_LIMIT || "8000" } };
+  const req = { method: "GET", query: { symbol, stockLimit } };
   return new Promise((resolve, reject) => {
     const res = {
       statusCode: 200,
@@ -41,6 +44,23 @@ function callMarketApi() {
   });
 }
 
+async function fetchRemoteFallback() {
+  if (!remoteFallbackUrl) return null;
+  const url = new URL(remoteFallbackUrl);
+  url.searchParams.set("symbol", symbol);
+  url.searchParams.set("stockLimit", stockLimit);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), Number(process.env.MARKET_CACHE_REMOTE_TIMEOUT_MS || 35000));
+  try {
+    const response = await fetch(url, { signal: controller.signal, headers: { Accept: "application/json" } });
+    if (!response.ok) throw new Error(`remote fallback returned ${response.status}`);
+    const payload = await response.json();
+    return payload?.ok ? payload : null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function preserveRicherMarketUniverse(snapshot, previous) {
   const currentCount = snapshot.stocks?.length || 0;
   const previousCount = previous?.stocks?.length || 0;
@@ -65,11 +85,47 @@ function preserveRicherMarketUniverse(snapshot, previous) {
   };
 }
 
+async function preserveRemoteMarketUniverse(snapshot) {
+  const currentCount = snapshot.stocks?.length || 0;
+  if (currentCount >= remoteFallbackMinStocks) return snapshot;
+  try {
+    const remote = await fetchRemoteFallback();
+    const remoteCount = remote?.stocks?.length || 0;
+    if (!remote?.ok || remoteCount <= currentCount * 1.25) return snapshot;
+    return {
+      ...snapshot,
+      source: `${snapshot.source}+remote-market-universe-preserved`,
+      stocks: remote.stocks,
+      stockUniverse: remote.stockUniverse,
+      featureCoverage: remote.featureCoverage || remote.stockUniverse?.featureCoverage || snapshot.featureCoverage,
+      dataCoverage: {
+        ...(snapshot.dataCoverage || {}),
+        stocks: remoteCount,
+        stockUniverseTotal: remote.stockUniverse?.total || remoteCount,
+      },
+      cacheSnapshot: {
+        ...(snapshot.cacheSnapshot || {}),
+        preservedMarketUniverseFromRemote: remote.cacheSnapshot?.generatedAt || remote.asOf || "",
+        preservedRemoteStockCount: remoteCount,
+        replacedStockCount: currentCount,
+      },
+    };
+  } catch (error) {
+    return {
+      ...snapshot,
+      cacheSnapshot: {
+        ...(snapshot.cacheSnapshot || {}),
+        remoteFallbackError: error.message,
+      },
+    };
+  }
+}
+
 (async () => {
   const previous = readExistingSnapshot();
   const payload = await callMarketApi();
   if (!payload?.ok) throw new Error("market api did not return ok payload");
-  const snapshot = preserveRicherMarketUniverse({
+  const localSnapshot = preserveRicherMarketUniverse({
     ...payload,
     cacheSnapshot: {
       available: true,
@@ -80,6 +136,7 @@ function preserveRicherMarketUniverse(snapshot, previous) {
       symbol,
     },
   }, previous);
+  const snapshot = await preserveRemoteMarketUniverse(localSnapshot);
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`);
   console.log(`Wrote ${outputPath}`);
