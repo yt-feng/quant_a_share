@@ -36,7 +36,7 @@
   - GB18030 quote fallback for selected A-share symbols when the Eastmoney single-stock quote channel is unavailable.
 - GitHub Actions market snapshot
   - `.github/workflows/market-cache.yml` runs the same Node adapters in the cloud and writes `pages/data/market-cache.json`.
-  - `/api/market` reads this bundled snapshot when live public endpoints return empty data, preserving market breadth, concept, limit-pool, ETF, popularity, announcement and financial fields.
+  - `/api/market` reads this bundled snapshot when live public endpoints return empty data or a noticeably smaller A-share universe, preserving market breadth, concept, limit-pool, ETF, popularity, announcement and financial fields while merging fresher live quote/rank fields by code.
 - GitHub Actions financial snapshot
   - `scripts/update-financial-cache.js` reuses the production Eastmoney/Sina financial adapters and writes `pages/data/financial-cache.json`.
   - The cache universe is collected from BaoStock symbols, current market-cache leaders, hot-rank names and limit-up pool names, capped by `FINANCIAL_CACHE_MAX_SYMBOLS`.
@@ -91,6 +91,6 @@
 - Cache slow financial and board/popularity endpoints in Vercel serverless memory while the function instance is warm.
 - Refresh a compact market snapshot on GitHub Actions during trading days, then use it as bundled read-only fallback in Vercel.
 - Refresh market once with `MARKET_CACHE_STOCK_LIMIT=8000` to collect the current live universe, then refresh compact BaoStock and financial snapshots, then refresh market again so the final `market-cache` includes the newly generated cache coverage.
-- If a public endpoint returns a much smaller A-share universe than the existing snapshot, the cache script preserves the richer previous market universe instead of shrinking the bundled fallback; if the current repository snapshot is already small or has weak main-money coverage, it can also pull the deployed Vercel `/api/market` payload as a richer full-market and stock-feature recovery source.
+- If a public endpoint returns a smaller A-share universe than the existing snapshot, both the cache script and `/api/market` preserve the richer market universe instead of shrinking the bundled fallback; if the current repository snapshot is already small or has weak main-money coverage, the cache script can also pull the deployed Vercel `/api/market` payload as a richer full-market and stock-feature recovery source.
 - Return compact normalized JSON to the frontend.
 - Use sample data only when every online source fails.
