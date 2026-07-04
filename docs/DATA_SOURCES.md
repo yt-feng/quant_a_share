@@ -2,6 +2,8 @@
 
 ## Current Online Sources
 
+- GitHub Pages frontend
+  - `pages/app.js` now points `VERCEL_BACKEND_URL` at `https://quant-a-share.vercel.app`, so the Pages deployment uses the same Vercel `/api/market` and `/api/chat` backend instead of staying on local sample data.
 - Eastmoney public quote APIs
   - A-share paginated spot quotes for market breadth, amount,涨跌停, watchlist candidates and the full frontend stock pool when the `clist` channel is reachable.
   - `/api/market` now returns `stockUniverse.total/returned/limit/source`; default frontend stock payload limit is 6000 rows and can be adjusted with `MARKET_STOCK_LIMIT`.

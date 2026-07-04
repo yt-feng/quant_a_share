@@ -72,7 +72,7 @@ const data = {
   ],
 };
 
-const VERCEL_BACKEND_URL = "";
+const VERCEL_BACKEND_URL = "https://quant-a-share.vercel.app";
 
 const factorGroups = [
   ["估值市值", [["pe", "市盈率≤30"], ["pb", "市净率≤3"], ["mv500", "总市值≥500亿"], ["mv50_200", "总市值50亿-200亿"], ["float100", "流通市值≥100亿"], ["float50", "流通市值≤50亿"]]],
@@ -855,13 +855,14 @@ function renderScreener() {
   const relaxed = filtered.length ? [] : relaxedStocks();
   const visibleRows = filtered.length ? filtered : relaxed;
   const activeLabel = activeFactorLabels();
+  const diagnostics = screenerDiagnostics(filtered, relaxed);
   const factorCounts = factorHitCounts();
   const conditionSummary = customConditions.length ? customConditions.map(conditionLabel).join(" + ") : "未添加自定义条件";
   return `
     <div class="panel">
       ${panelTitle(
         "多因子量化模型",
-        `<div class="top-actions"><button class="ghost-button compact-button" data-clear-factors="1">清空因子</button><button class="primary-button" data-toast="已执行筛选">筛选</button></div>`
+        `<div class="top-actions"><button class="ghost-button compact-button" data-clear-factors="1">清空因子</button><button class="primary-button" data-run-screener="1">筛选</button></div>`
       )}
       <div class="factor-grid">
         ${factorGroups
@@ -917,6 +918,9 @@ function renderScreener() {
           <button class="ghost-button" data-open-modal="strategy">我的策略 ${savedStrategies.length}</button>
         </div>
       </div>
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${renderScreenerDiagnostics(diagnostics)}
     </section>
     <section class="panel" style="margin-top:14px">
       ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${stockCoverageLabel()} · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), watchListButton(visibleRows.slice(0, 120)), exportButton("screener")))}
@@ -3795,6 +3799,52 @@ function relaxedStocks() {
   return (positives.length ? positives : ranked).slice(0, 120);
 }
 
+function screenerDiagnostics(filteredRows, relaxedRows) {
+  const rows = screenerStocks();
+  const filters = activeFilterPredicates();
+  const bottlenecks = filters
+    .map((filter) => ({
+      label: filter.label,
+      hits: rows.filter((stock) => filter.pass(stock)).length,
+    }))
+    .sort((a, b) => a.hits - b.hits)
+    .slice(0, 4);
+  const coverage = [
+    ["PE/PB", rows.filter((stock) => Number(stock.pe) > 0 || Number(stock.pb) > 0).length],
+    ["市值", rows.filter((stock) => Number(stock.totalMv) > 0 || Number(stock.circMv) > 0).length],
+    ["量价", rows.filter((stock) => Number(stock.amount) > 0 && Number(stock.volumeRatio) > 0).length],
+    ["行业/概念", rows.filter((stock) => stock.industry || stock.concepts).length],
+    ["资金/RPS", rows.filter((stock) => Number.isFinite(Number(stock.fund)) && Number.isFinite(Number(stock.rps))).length],
+  ];
+  const fieldTotal = Math.max(1, rows.length);
+  return {
+    total: rows.length,
+    strict: filteredRows.length,
+    similar: filteredRows.length ? 0 : relaxedRows.length,
+    filters: filters.length,
+    bottlenecks,
+    coverage: coverage.map(([label, hits]) => ({ label, hits, pct: Math.round((hits / fieldTotal) * 100) })),
+  };
+}
+
+function renderScreenerDiagnostics(info) {
+  const bottleneckText = info.bottlenecks.length
+    ? info.bottlenecks.map((item) => `${escapeHtml(item.label)} ${item.hits}`).join(" / ")
+    : "无额外条件";
+  return `
+    ${panelTitle("筛选诊断", actionGroup(tag(`数据源 ${escapeHtml(marketSource)}`, "info"), tag(`更新时间 ${formatFreshnessDate(data.asOf || data.tradeDate || "-")}`)))}
+    <div class="metrics">
+      ${metric("股票池", info.total, stockCoverageLabel())}
+      ${metric("严格命中", info.strict, info.filters ? `${info.filters} 个条件交集` : "未选择条件")}
+      ${metric("相似候选", info.strict ? "-" : info.similar, info.strict ? "严格命中已展示" : "按匹配度兜底")}
+      ${metric("最卡条件", info.bottlenecks[0] ? `${escapeHtml(info.bottlenecks[0].label)} ${info.bottlenecks[0].hits}` : "-", bottleneckText)}
+    </div>
+    <div class="detail-strip" style="margin-top:12px">
+      ${info.coverage.map((item) => tag(`${item.label} ${item.hits}/${info.total} (${item.pct}%)`, item.pct >= 80 ? "info" : "")).join("")}
+    </div>
+  `;
+}
+
 function factorHitCounts() {
   const counts = new Map();
   const rows = screenerStocks();
@@ -3824,7 +3874,7 @@ function stockPassesAllFilters(stock) {
 
 function activeFilterPredicates() {
   return [
-    ...Array.from(activeFactors).map((key) => ({ label: key, pass: (stock) => factorPasses(stock, key) })),
+    ...Array.from(activeFactors).map((key) => ({ label: factorLabel(key), pass: (stock) => factorPasses(stock, key) })),
     ...customConditions.map((condition) => ({ label: conditionLabel(condition), pass: (stock) => conditionPasses(stock, condition) })),
   ];
 }
@@ -4644,6 +4694,28 @@ function attachEvents() {
     persistScreenerState();
     render();
   });
+  document.querySelector("[data-run-screener]")?.addEventListener("click", async () => {
+    persistScreenerState();
+    const progressBar = document.querySelector("#globalProgress");
+    progressBar?.classList.add("active");
+    setGlobalProgress(18);
+    showToast("正在刷新公开行情并重新筛选。", "info");
+    try {
+      if (isVercel() || isGithubPages()) {
+        setGlobalProgress(45);
+        await loadMarketSnapshot();
+      } else {
+        render();
+      }
+      setGlobalProgress(100);
+      showToast("筛选结果已更新。", "success");
+    } catch (error) {
+      render();
+      showToast("已按当前缓存数据筛选。", "info");
+    } finally {
+      window.setTimeout(() => progressBar?.classList.remove("active"), 450);
+    }
+  });
   document.querySelector("[data-add-custom-condition]")?.addEventListener("click", () => {
     const condition = normalizeCondition({
       id: `c_${Date.now()}`,
@@ -5129,10 +5201,10 @@ function renderRuntimeShell() {
   const source = document.querySelector("#source-label");
   const note = document.querySelector("#source-note");
   if (isGithubPages()) {
-    runtime.textContent = "GitHub Pages 展示版";
-    source.textContent = "演示数据";
-    note.textContent = "问答模块请打开 Vercel 后端版。";
-    setBackendStatus("展示版", "muted");
+    runtime.textContent = VERCEL_BACKEND_URL ? "GitHub Pages + Vercel 后端" : "GitHub Pages 展示版";
+    source.textContent = VERCEL_BACKEND_URL ? marketSource : "演示数据";
+    note.textContent = VERCEL_BACKEND_URL ? "静态前端已连接 Vercel /api/market 与 /api/chat。" : "问答模块请打开 Vercel 后端版。";
+    if (!VERCEL_BACKEND_URL) setBackendStatus("展示版", "muted");
     return;
   }
   if (isVercel()) {

@@ -41,6 +41,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Run controls: 交易日(不填则最新日), sort field, sort order, display columns, 筛选.
 - Table columns: 代码, 名称, 最新价, 涨跌幅, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
 - Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area, including the all-zero case for over-strict custom filters.
+- Clone enrichment: the screener now shows a live diagnosis strip with stock-pool size, strict hits, similar candidates, tightest conditions and PE/PB/market-cap/volume/industry/fund/RPS field coverage. The 筛选 action refreshes Vercel market data on both Vercel and GitHub Pages before re-rendering results.
 
 ## 策略回测
 

@@ -4,11 +4,11 @@
 
 ## GitHub Pages
 
-静态演示版地址：
+静态前端地址：
 
 https://yt-feng.github.io/quant_a_share/
 
-Pages 由 `.github/workflows/pages.yml` 自动部署，静态文件位于 `pages/`。这个版本不包含服务端密钥；需要 TuShare 实时数据时运行 Streamlit，本地或服务器端再读取 `.env`。
+Pages 由 `.github/workflows/pages.yml` 自动部署，静态文件位于 `pages/`。这个版本不包含服务端密钥，但前端会跨域调用 `https://quant-a-share.vercel.app` 的 `/api/market` 和 `/api/chat`，因此行情、因子选股和问答都走 Vercel 后端。
 
 ## Vercel 后端版
 
