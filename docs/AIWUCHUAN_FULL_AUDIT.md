@@ -9,6 +9,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Recent prompt area.
 - User identity display, logout, theme switch.
 - Clone enrichment: shell now includes sidebar collapse, recent prompt shortcuts, user pill, logout action and persisted light/dark theme state.
+- Clone enrichment: current-view CSV export is now available for the main research tables, including market review, source coverage, limit pools, Stock Connect, ETF flow, hot rank, factor screener, boards, quote money flow, fundamentals, BaoStock rows, popularity, announcements, disclosures, LLM tables, research reports and AI history.
 
 ## 大盘情绪
 

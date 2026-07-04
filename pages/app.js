@@ -353,6 +353,14 @@ function panelTitle(title, action = "") {
   return `<div class="panel-title"><h2>${title}</h2>${action}</div>`;
 }
 
+function exportButton(key, label = "导出CSV") {
+  return `<button class="ghost-button compact-button" data-export-csv="${escapeHtml(key)}">${label}</button>`;
+}
+
+function actionGroup(...items) {
+  return `<div class="top-actions">${items.filter(Boolean).join("")}</div>`;
+}
+
 function loadShellState() {
   try {
     const stored = JSON.parse(localStorage.getItem("quant_a_share_shell") || "null");
@@ -522,30 +530,30 @@ function renderMarket() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
-        ${panelTitle(`涨停池 ${data.limitPools.limitUp.length} · 炸板 ${data.limitPools.broken.length}`, `${tag(`交易日 ${data.limitPools.date || "-"}`, "info")}${freshnessTag("limitPools")}`)}
+        ${panelTitle(`涨停池 ${data.limitPools.limitUp.length} · 炸板 ${data.limitPools.broken.length}`, actionGroup(tag(`交易日 ${data.limitPools.date || "-"}`, "info"), freshnessTag("limitPools"), exportButton("limitPools")))}
         ${simpleTable(["代码", "名称", "连板", "首次封板", "封板资金", "行业"], data.limitPools.limitUp.slice(0, 8).map((row) => [row.code, row.name, row.streak || "-", row.firstSealTime || "-", `${yi(row.sealFund)}亿`, row.industry || "-"]))}
       </div>
       <div class="panel">
-        ${panelTitle("北向资金", `${tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info")}${freshnessTag("northbound")}`)}
+        ${panelTitle("北向资金", actionGroup(tag(`${plainSigned(data.northbound.northNetBuyYi || 0, 2, "亿")}`, "info"), freshnessTag("northbound"), exportButton("northbound")))}
         ${simpleTable(["通道", "方向", "净买额", "指数", "涨跌幅", "上涨/下跌"], (data.northbound.rows || []).map((row) => [row.type, row.direction, `${yi(row.netBuyAmt)}亿`, row.indexName, signed(row.indexPct), `${row.upCount}/${row.downCount}`]))}
       </div>
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
-        ${panelTitle("ETF资金排行", `${tag(`合计 ${plainSigned(data.etfs.stats?.mainNetYi || 0, 2, "亿")}`, "info")}${freshnessTag("etfs")}`)}
+        ${panelTitle("ETF资金排行", actionGroup(tag(`合计 ${plainSigned(data.etfs.stats?.mainNetYi || 0, 2, "亿")}`, "info"), freshnessTag("etfs"), exportButton("etfs")))}
         ${simpleTable(["代码", "名称", "涨跌幅", "成交额", "主力净额", "折价率"], (data.etfs.rows || []).slice(0, 8).map((row) => [row.code, row.name, `${signed(row.pct)}%`, `${yi(row.amount)}亿`, `${plainSigned(yi(row.mainNet), 2, "亿")}`, `${plainSigned(row.discount || 0, 2, "%")}`]))}
       </div>
       <div class="panel">
-        ${panelTitle("东财人气榜", `${tag(`${data.popularity.rank?.items?.length || 0} 只`, "info")}${freshnessTag("popularity")}`)}
+        ${panelTitle("东财人气榜", actionGroup(tag(`${data.popularity.rank?.items?.length || 0} 只`, "info"), freshnessTag("popularity"), exportButton("hotRank")))}
         ${simpleTable(["排名", "代码", "名称", "最新价", "涨跌幅", "排名变化"], (data.popularity.rank?.items || []).slice(0, 8).map((row) => [row.rank, row.code, row.name || "-", row.price ? row.price.toFixed(2) : "-", `${signed(row.pct)}%`, plainSigned(row.rankChange || 0, 0)]))}
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle("数据源实时体检", `${tag(`源 ${sourceCoverageRows().length} 个`, "info")}${tag(`股票池 ${data.stocks.length} 只`)}`)}
+      ${panelTitle("数据源实时体检", actionGroup(tag(`源 ${sourceCoverageRows().length} 个`, "info"), tag(`股票池 ${data.stocks.length} 只`), exportButton("sourceCoverage")))}
       ${sourceCoverageTable()}
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle("复盘数据统计", `<button class="ghost-button" data-refresh-market="1">刷新</button>`)}
+      ${panelTitle("复盘数据统计", actionGroup(`<button class="ghost-button" data-refresh-market="1">刷新</button>`, exportButton("marketReview")))}
       ${simpleTable(["维度", "当前值", "说明"], [...data.metrics.map((m) => [m[0], m[1], m[2]]), ["复盘区间", `${marketStartDate} 至 ${marketEndDate}`, `${rows.length} 个交易样本`], ["区间成交额", `${review.avgAmountYi.toLocaleString()}亿`, "按当前图表样本均值"], ["区间涨跌", `${plainSigned(review.avgPct, 2, "%")}`, marketStateFilter]])}
     </section>
   `;
@@ -794,7 +802,7 @@ function renderScreener() {
       </div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, `${tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info")}${freshnessTag("stocks")}`)}
+      ${panelTitle(`${filtered.length ? "筛选结果" : "相似候选"} ${visibleRows.length} 条`, actionGroup(tag(`股票池 ${data.stocks.length} 只 · ${activeLabel || "未选择因子"}`, "info"), freshnessTag("stocks"), exportButton("screener")))}
       ${filtered.length ? stockTable(visibleRows.slice(0, 120)) : relaxed.length ? screenerRelaxedState(activeLabel, activeFactors.size) + stockTable(visibleRows.slice(0, 120)) : screenerEmptyState(activeLabel)}
       ${visibleRows.length > 120 ? `<p class="table-note">当前显示前 120 条，排序按成交额优先。</p>` : ""}
     </section>
@@ -849,7 +857,7 @@ function renderSectors() {
       <div class="panel"><h2>涨跌幅排名</h2><div id="sectorChangeChart" class="chart"></div></div>
     </section>
     <section class="panel" style="margin-top:14px">
-      ${panelTitle(sectorDataset === "concepts" ? "概念板块数据" : "行业板块数据", freshnessTag(sectorDataset === "concepts" ? "concepts" : "sectors"))}
+      ${panelTitle(sectorDataset === "concepts" ? "概念板块数据" : "行业板块数据", actionGroup(freshnessTag(sectorDataset === "concepts" ? "concepts" : "sectors"), exportButton("sectors")))}
       ${sectorBoardTable(rows)}
     </section>
   `;
@@ -933,11 +941,11 @@ function renderQuote() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
-        ${panelTitle("个股资金流", freshnessTag("moneyFlow"))}
+        ${panelTitle("个股资金流", actionGroup(freshnessTag("moneyFlow"), exportButton("moneyFlow")))}
         ${simpleTable(["日期", "收盘", "涨跌幅", "主力净额", "超大单", "大单"], (data.moneyFlow.rows || []).slice(-8).map((row) => [row.date, row.close.toFixed(2), `${signed(row.pct)}%`, `${plainSigned(yi(row.mainNet), 2, "亿")}`, `${plainSigned(yi(row.superNet), 2, "亿")}`, `${plainSigned(yi(row.bigNet), 2, "亿")}`]))}
       </div>
       <div class="panel">
-        ${panelTitle("财务快照", freshnessTag("fundamentals"))}
+        ${panelTitle("财务快照", actionGroup(freshnessTag("fundamentals"), exportButton("fundamentals")))}
         ${simpleTable(["指标", "数值", "口径"], [
           ["报告期", data.fundamentals?.reportLabel || "-", data.fundamentals?.source || "-"],
           ["营业总收入", financials.revenue ? `${yi(financials.revenue).toLocaleString()}亿` : "-", "新浪财报"],
@@ -947,7 +955,7 @@ function renderQuote() {
           ["毛利率", financials.grossMargin ? `${financials.grossMargin}%` : "-", "新浪财报"],
           ["资产负债率", financials.debtRatio ? `${financials.debtRatio}%` : "-", "新浪财报"],
         ])}
-        <div class="panel-title" style="margin-top:16px"><h2>BaoStock历史估值</h2>${freshnessTag("baostock")}</div>
+        <div class="panel-title" style="margin-top:16px"><h2>BaoStock历史估值</h2>${actionGroup(freshnessTag("baostock"), exportButton("baostock"))}</div>
         ${simpleTable(["指标", "数值", "口径"], [
           ["PE(TTM)", baoLatest.peTTM ? baoLatest.peTTM.toFixed(2) : "-", "BaoStock日线"],
           ["PB(MRQ)", baoLatest.pbMRQ ? baoLatest.pbMRQ.toFixed(2) : "-", "BaoStock日线"],
@@ -960,14 +968,14 @@ function renderQuote() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
-        ${panelTitle("人气关键词与相关股", freshnessTag("popularity"))}
+        ${panelTitle("人气关键词与相关股", actionGroup(freshnessTag("popularity"), exportButton("stockPopularity")))}
         ${simpleTable(["关键词", "热度", "时间"], (data.popularity.stock?.keywords || []).slice(0, 6).map((row) => [row.concept, row.heat.toLocaleString(), row.time]))}
         ${simpleTable(["相关股票", "涨跌幅", "时间"], (data.popularity.stock?.related || []).slice(0, 6).map((row) => [row.relatedCode, `${signed(row.pct)}%`, row.time]))}
       </div>
       <div class="panel">
-        ${panelTitle("公司公告", freshnessTag("announcements"))}
+        ${panelTitle("公司公告", actionGroup(freshnessTag("announcements"), exportButton("announcements")))}
         ${simpleTable(["来源", "日期", "分类", "标题"], (data.announcements.items || []).slice(0, 8).map((row) => [row.provider === "cninfo" ? "巨潮" : "东财", row.date, row.category || "-", row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
-        <div class="panel-title" style="margin-top:16px"><h2>调研/关系披露</h2>${freshnessTag("disclosures")}</div>
+        <div class="panel-title" style="margin-top:16px"><h2>调研/关系披露</h2>${actionGroup(freshnessTag("disclosures"), exportButton("disclosures"))}</div>
         ${simpleTable(["来源", "日期", "标题"], (data.disclosures.relations || []).slice(0, 6).map((row) => ["巨潮", row.date, row.url ? `<a href="${row.url}" target="_blank" rel="noreferrer">${row.title}</a>` : row.title]))}
       </div>
     </section>
@@ -1059,6 +1067,326 @@ function sectorBoardTable(rows) {
     ["名称", "涨跌幅", "排名", "排名变化", "上涨家数", "下跌家数", "涨停家数", "资金流向(亿)"],
     rows.slice(0, 120).map((row) => [escapeHtml(row.name), `${signed(row.pct)}%`, row.rank, signed(row.rankChange, 0), row.up, row.down, row.limit, signed(row.fund)])
   );
+}
+
+function exportCsv(key) {
+  const payload = exportRowsFor(key);
+  if (!payload || !payload.rows.length) {
+    showToast("当前没有可导出的数据。", "info");
+    return;
+  }
+  downloadCsv(payload.filename, payload.headers, payload.rows);
+}
+
+function exportRowsFor(key) {
+  switch (key) {
+    case "marketReview":
+      return exportPayload("market-review", ["类别", "日期/维度", "数值", "说明"], marketReviewExportRows());
+    case "sourceCoverage":
+      return exportPayload("source-coverage", ["来源", "状态", "覆盖", "最近样本", "新鲜度", "用途"], sourceCoverageExportRows());
+    case "limitPools":
+      return exportPayload("limit-pools", ["池", "交易日", "排名", "代码", "名称", "价格", "涨跌幅", "连板", "首次封板", "最后封板", "封板资金_亿", "成交额_亿", "换手率", "行业", "原因"], limitPoolExportRows());
+    case "northbound":
+      return exportPayload("northbound", ["交易日", "通道", "方向", "板块", "指数", "指数涨跌幅", "上涨家数", "下跌家数", "平盘家数", "净买额_亿", "净流入_亿", "剩余额度_亿", "额度阈值_亿"], northboundExportRows());
+    case "etfs":
+      return exportPayload("etf-flow", ["排名", "代码", "名称", "价格", "涨跌幅", "成交额_亿", "主力净额_亿", "超大单_亿", "大单_亿", "主力占比", "折价率", "日期"], etfExportRows());
+    case "hotRank":
+      return exportPayload("hot-rank", ["排名", "代码", "名称", "最新价", "涨跌幅", "排名变化", "历史排名变化"], (data.popularity.rank?.items || []).map((row) => [row.rank, row.code, row.name, row.price, row.pct, row.rankChange, row.historyRankChange]));
+    case "screener":
+      return exportPayload("factor-screener", screenerExportHeaders(), screenerExportRows());
+    case "sectors":
+      return sectorExportPayload();
+    case "moneyFlow":
+      return exportPayload(`money-flow-${selectedQuote}`, ["日期", "收盘", "涨跌幅", "主力净额_亿", "超大单_亿", "大单_亿", "中单_亿", "小单_亿", "主力占比", "超大单占比", "大单占比"], (data.moneyFlow.rows || []).map((row) => [row.date, row.close, row.pct, yi(row.mainNet), yi(row.superNet), yi(row.bigNet), yi(row.midNet), yi(row.smallNet), row.mainRatio, row.superRatio, row.bigRatio]));
+    case "fundamentals":
+      return exportPayload(`fundamentals-${selectedQuote}`, ["类别", "字段", "名称", "数值", "分组/口径", "报告期", "来源"], fundamentalsExportRows());
+    case "baostock":
+      return exportPayload(`baostock-${selectedQuote}`, ["日期", "代码", "开盘", "最高", "最低", "收盘", "前收", "涨跌幅", "成交量", "成交额_亿", "换手率", "PE_TTM", "PB_MRQ", "PS_TTM", "PCF_NCF_TTM", "交易状态", "是否ST"], baostockExportRows());
+    case "stockPopularity":
+      return exportPayload(`stock-popularity-${selectedQuote}`, ["类型", "时间", "代码/关键词", "相关代码", "热度/排名", "涨跌幅"], stockPopularityExportRows());
+    case "announcements":
+      return exportPayload(`announcements-${selectedQuote}`, ["来源", "日期", "代码", "名称", "分类", "标题", "链接"], announcementExportRows(data.announcements.items || []));
+    case "disclosures":
+      return exportPayload(`disclosures-${selectedQuote}`, ["来源", "日期", "代码", "名称", "分类", "标题", "链接"], announcementExportRows(data.disclosures.relations || []));
+    case "llmTopicFields":
+      return exportPayload(`llm-topic-fields-${activeTopicName()}`, ["字段", "值"], topicFieldRows(currentLlmTopic() || {}).map((row) => row));
+    case "llmTopicMapping":
+      return exportPayload(`llm-topic-mapping-${activeTopicName()}`, ["原始主题", "标准主题", "方法", "匹配", "得分", "最终类型"], llmTopicMappingExportRows());
+    case "llmTopicStocks":
+      return exportPayload(`llm-topic-stocks-${activeTopicName()}`, ["代码", "名称", "来源", "阶段", "置信度", "主题"], topicStockRows(currentLlmTopic() || {}).map((row) => [row.code, row.name, row.source, row.stage, row.confidence, row.theme]));
+    case "llmPool":
+      return exportPayload("llm-pool", ["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], filteredPoolRows(livePoolRows()).map((row) => [row.code, row.name, row.price, row.pct, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]));
+    case "llmSector": {
+      const table = llmSectorTable(filteredLlmSectorRows(liveLlmSectorRows()));
+      return exportPayload("llm-sector", table.headers, table.rows);
+    }
+    case "llmStock": {
+      const table = llmStockTable(filteredLlmStockRows(liveStockMatrixRows()));
+      return exportPayload("llm-stock", table.headers, table.rows);
+    }
+    case "researchIndustryStats": {
+      const reports = researchReports();
+      const rows = data.research?.stats?.byIndustry?.length ? data.research.stats.byIndustry : researchIndustryStats(reports);
+      return exportPayload("research-industry-stats", ["方向", "报告数"], rows.map((row) => [row.name, row.count]));
+    }
+    case "researchReports":
+      return exportPayload("research-reports", ["日期", "类型", "行业/主题", "标题", "机构", "作者", "页数", "链接"], researchReports().map((row) => [row.publishDate, row.category, row.industryName, row.title, row.orgSName || row.orgName, row.researcher, row.pages, row.url]));
+    case "aiHistory":
+      return exportPayload("ai-history", ["时间", "模式", "实时", "问题", "回答"], aiHistory.map((item) => [item.at, item.mode, item.realtime ? "开" : "关", item.question, item.answer]));
+    default:
+      return null;
+  }
+}
+
+function exportPayload(label, headers, rows) {
+  const date = compactDateValue(activeRequestTradeDate()) || compactDateValue(new Date().toISOString().slice(0, 10));
+  return {
+    filename: ["quant-a-share", label, date].map(filenamePart).filter(Boolean).join("_") + ".csv",
+    headers,
+    rows: rows || [],
+  };
+}
+
+function marketReviewExportRows() {
+  const review = marketReviewStats();
+  return [
+    ...data.metrics.map((row) => ["指标", row[0], row[1], row[2]]),
+    ["复盘", "复盘区间", `${marketStartDate} 至 ${marketEndDate}`, `${filteredMarketBreadth().length} 个交易样本`],
+    ["复盘", "区间成交额_亿", review.avgAmountYi, "当前图表样本均值"],
+    ["复盘", "区间涨跌", `${plainSigned(review.avgPct, 2, "%")}`, marketStateFilter],
+    ...filteredMarketBreadth().map((row) => ["样本", row[0], row[1], row[2]]),
+  ];
+}
+
+function sourceCoverageExportRows() {
+  const freshness = new Map(sourceFreshnessRows().map((row) => [row.key, row]));
+  const keyBySource = {
+    东方财富A股池: "stocks",
+    东方财富行业: "sectors",
+    东方财富概念: "concepts",
+    "涨停池/炸板池": "limitPools",
+    ETF资金: "etfs",
+    个股资金流: "moneyFlow",
+    北向资金: "northbound",
+    财务字段: "fundamentals",
+    BaoStock历史: "baostock",
+    "Yahoo/yfinance备份": "yahooChart",
+    东财人气榜: "popularity",
+    "公告/巨潮披露": "announcements",
+    东财研报: "research",
+    "GitHub Actions缓存": "cacheSnapshot",
+  };
+  return sourceCoverageRows().map((row) => {
+    const info = freshness.get(keyBySource[row[0]]);
+    return [row[0], row[1], row[2], row[3], info ? `${info.mode} · ${info.latest}` : "-", row[4]];
+  });
+}
+
+function limitPoolExportRows() {
+  return [
+    ["涨停", data.limitPools.limitUp || []],
+    ["炸板", data.limitPools.broken || []],
+    ["强势", data.limitPools.strong || []],
+  ].flatMap(([poolName, rows]) =>
+    rows.map((row) => [
+      poolName,
+      data.limitPools.date || "-",
+      row.rank,
+      row.code,
+      row.name,
+      row.price,
+      row.pct,
+      row.streak,
+      row.firstSealTime,
+      row.lastSealTime,
+      yi(row.sealFund),
+      yi(row.amount),
+      row.turnover,
+      row.industry,
+      row.rawReason || row.limitStats || "",
+    ])
+  );
+}
+
+function northboundExportRows() {
+  return (data.northbound.rows || data.northbound.northRows || []).map((row) => [
+    row.tradeDate,
+    row.type,
+    row.direction,
+    row.board,
+    row.indexName,
+    row.indexPct,
+    row.upCount,
+    row.downCount,
+    row.flatCount,
+    yi(row.netBuyAmt),
+    yi(row.dayNetAmtIn),
+    yi(row.dayAmtRemain),
+    yi(row.threshold),
+  ]);
+}
+
+function etfExportRows() {
+  return (data.etfs.rows || []).map((row) => [
+    row.rank,
+    row.code,
+    row.name,
+    row.price,
+    row.pct,
+    yi(row.amount),
+    yi(row.mainNet),
+    yi(row.superNet),
+    yi(row.bigNet),
+    row.mainRatio,
+    row.discount,
+    row.dataDate,
+  ]);
+}
+
+function screenerExportHeaders() {
+  return ["匹配", "代码", "名称", "最新价", "涨跌幅", "量能信号", "MACD", "流通市值_亿", "行业整体RPS_50", "行业RPS_50", "行业", "K线形态", "趋势支撑线_次日", "趋势压力线_60"];
+}
+
+function screenerExportRows() {
+  const filtered = filteredStocks();
+  const rows = filtered.length ? filtered : relaxedStocks();
+  return rows.map((stock, index) => stockExportRow(stock, index));
+}
+
+function stockExportRow(stock, index) {
+  const floatMvYi = Math.round(((stock.circMv || stock.totalMv || stock.amount * 12 || 0) / 100000000) * 10) / 10;
+  const sectorRps = stock.sectorRps || Math.min(98, stock.rps + 4);
+  const pattern = stock.pct >= 2 ? "看涨吞没" : stock.pct <= -3 ? "下探承接" : index % 2 === 0 ? "中继整理" : "缩量观察";
+  const match = Number.isFinite(stock.factorScore) ? `${stock.factorScore}/${stock.factorTotal}` : "";
+  return [match, stock.code, stock.name, stock.price, stock.pct, stock.volumeRatio >= 1.5 || stock.pct > 3 ? "放量" : "常量", stock.macd ? "金叉区" : "观察", floatMvYi, sectorRps, stock.rps, stock.industry, pattern, (stock.price * 0.96).toFixed(2), (stock.price * 1.08).toFixed(2)];
+}
+
+function sectorExportPayload() {
+  const rows = activeSectorRows();
+  if (sectorDataset === "concepts") {
+    return exportPayload("concept-boards", ["概念", "涨跌幅", "排名", "成分数", "成交额_亿", "领涨股", "领涨幅"], rows.map((row) => [row.name, row.pct, row.rank, row.companies, row.fund, row.leader, row.leaderPct]));
+  }
+  return exportPayload("industry-boards", ["名称", "涨跌幅", "排名", "排名变化", "上涨家数", "下跌家数", "涨停家数", "资金流向_亿"], rows.map((row) => [row.name, row.pct, row.rank, row.rankChange, row.up, row.down, row.limit, row.fund]));
+}
+
+function fundamentalsExportRows() {
+  const fundamentals = data.fundamentals || {};
+  const labels = {
+    revenue: "营业总收入",
+    parentNetProfit: "归母净利润",
+    netProfit: "净利润",
+    operatingCashFlow: "经营现金流量净额",
+    epsBasic: "基本每股收益",
+    navps: "每股净资产",
+    roe: "净资产收益率(ROE)",
+    roa: "总资产报酬率(ROA)",
+    grossMargin: "毛利率",
+    netMargin: "销售净利率",
+    debtRatio: "资产负债率",
+  };
+  const summaryRows = Object.entries(fundamentals.financials || {})
+    .filter(([, value]) => value !== null && value !== undefined && value !== "")
+    .map(([field, value]) => ["summary", field, labels[field] || field, value, "financials", fundamentals.reportLabel || fundamentals.reportDate || "-", fundamentals.source || "-"]);
+  const detailRows = (fundamentals.rows || []).map((row) => ["row", row.field, row.title, row.value, row.group, fundamentals.reportLabel || fundamentals.reportDate || "-", fundamentals.source || "-"]);
+  return [...summaryRows, ...detailRows];
+}
+
+function baostockExportRows() {
+  return (data.baostock?.rows || []).map((row) => [
+    row.date,
+    row.code,
+    row.open,
+    row.high,
+    row.low,
+    row.close,
+    row.preClose,
+    row.pct,
+    row.volume,
+    yi(row.amount),
+    row.turnover,
+    row.peTTM,
+    row.pbMRQ,
+    row.psTTM,
+    row.pcfNCFTTM,
+    row.tradeStatus,
+    row.isST ? "是" : "否",
+  ]);
+}
+
+function stockPopularityExportRows() {
+  const latest = data.popularity.stock?.latest;
+  return [
+    ...(latest ? [["当前排名", latest.calcTime, latest.code, "", latest.rank, latest.rankChange]] : []),
+    ...(data.popularity.stock?.keywords || []).map((row) => ["关键词", row.time, row.concept, row.code, row.heat, ""]),
+    ...(data.popularity.stock?.related || []).map((row) => ["相关股票", row.time, row.code, row.relatedCode, "", row.pct]),
+    ...(data.popularity.stock?.realtime || []).map((row) => ["实时排名", row.time, "", "", row.rank, ""]),
+  ];
+}
+
+function announcementExportRows(rows) {
+  return rows.map((row) => [row.provider || row.source || "-", row.date || row.sortDate || "-", row.code || "", row.name || "", row.category || "", row.title || "", row.url || row.pdfUrl || ""]);
+}
+
+function currentLlmTopic() {
+  const topics = activeLlmTopics();
+  return topics.find((topic) => topic.name === selectedTopicName) || topics[0] || liveTopics()[0] || null;
+}
+
+function activeTopicName() {
+  return currentLlmTopic()?.name || "topic";
+}
+
+function llmTopicMappingExportRows() {
+  const active = currentLlmTopic();
+  if (!active) return [];
+  return [[active.name, active.name, "public_board_candidate", "是", active.mappingScore, active.type]];
+}
+
+function downloadCsv(filename, headers, rows) {
+  const blob = new Blob(["\ufeff" + csvFromRows(headers, rows)], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast(`已导出 ${rows.length} 行。`, "success");
+}
+
+function csvFromRows(headers, rows) {
+  return [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+}
+
+function csvCell(value) {
+  const text = plainCell(value).replace(/\r?\n|\r/g, " ");
+  if (/[",\n]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
+  return text;
+}
+
+function plainCell(value) {
+  if (value === null || value === undefined) return "";
+  return String(value)
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)))
+    .trim();
+}
+
+function filenamePart(value) {
+  return String(value || "")
+    .replace(/[^\w\u4e00-\u9fa5-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
 }
 
 function renderWatchlist() {
@@ -1821,7 +2149,7 @@ function renderAi() {
       <div class="panel">
         <h2>结果</h2>
         <div id="aiAnswer" class="answer">${aiCurrentAnswer ? answerHtml(aiCurrentAnswer) : "点击“生成回答”查看分析。"}</div>
-        <h2 style="margin-top:16px">对话记录</h2>
+        <div style="margin-top:16px">${panelTitle("对话记录", exportButton("aiHistory"))}</div>
         ${aiHistoryTable()}
       </div>
     </section>
@@ -1888,15 +2216,15 @@ function renderLlmTab() {
           <p class="table-note">${escapeHtml(active.invalidation)}</p>
         </div>
         <div class="panel inset">
-          <h3>主题市场数据</h3>
+          ${panelTitle("主题市场数据", exportButton("llmTopicFields"))}
           ${simpleTable(["字段", "值"], fieldRows)}
         </div>
         <div class="panel inset">
-          <h3>主题映射</h3>
+          ${panelTitle("主题映射", exportButton("llmTopicMapping"))}
           ${simpleTable(["原始主题", "标准主题", "方法", "匹配", "得分", "最终类型"], [[active.name, active.name, "public_board_candidate", "是", active.mappingScore, active.type]])}
         </div>
         <div class="panel inset">
-          <h3>主题个股</h3>
+          ${panelTitle("主题个股", exportButton("llmTopicStocks"))}
           ${simpleTable(["代码", "名称", "来源", "阶段", "置信度", "操作"], topicStocks.map((row) => [row.code, row.name, row.source, row.stage, row.confidence, `<button class="ghost-button table-action" data-open-quote="${row.code}">查看</button>`]))}
         </div>
       </div>
@@ -1917,6 +2245,7 @@ function renderLlmTab() {
         <button class="primary-button align-end" data-apply-llm-pool="1">筛选</button>
       </div>
       <div class="detail-strip">${tag(`总数：${poolRows.length}`)}${tag(`关注：${poolRows.filter((row) => row.watch === "是").length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`收益选择：${llmPoolDate}`)}${tag("收盘态")}${tag("最关注", "info")}${tag("策略候选", "info")}${freshnessTag("llm")}</div>
+      <div class="toolbar">${exportButton("llmPool")}</div>
       ${simpleTable(["代码", "名称", "实时价", "盘中涨跌", "主题", "来源", "策略", "阶段", "仓位", "置信度", "买点价", "T+1", "T+3", "T+5", "关注"], page.rows.map((row) => [row.code, row.name, row.price, `${signed(row.pct)}%`, row.theme, row.source, row.strategy, row.stage, row.position, row.confidence, row.entry, row.t1, row.t3, row.t5, row.watch]))}
       ${llmPager("pool", page)}
     `;
@@ -1936,6 +2265,7 @@ function renderLlmTab() {
         <button class="primary-button align-end" data-apply-llm-sector="1">筛选</button>
       </div>
       <div class="detail-strip">${tag(`总数：${sectorRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`交易日：${llmSectorDate}`)}${tag("轮动", "info")}${tag("高位")}${tag("低吸")}${freshnessTag("llm")}</div>
+      <div class="toolbar">${exportButton("llmSector")}</div>
       ${simpleTable(table.headers, table.rows)}
       ${llmPager("sector", page)}
     `;
@@ -1955,6 +2285,7 @@ function renderLlmTab() {
         <button class="primary-button align-end" data-apply-llm-stock="1">筛选</button>
       </div>
       <div class="detail-strip">${tag(`总数：${matrixRows.length}`)}${tag(`第 ${page.page}/${page.pages} 页`)}${tag(`股票池 ${data.stocks.length} 只`)}${freshnessTag("llm")}${freshnessTag("stocks")}</div>
+      <div class="toolbar">${exportButton("llmStock")}</div>
       ${simpleTable(table.headers, table.rows)}
       ${llmPager("stock", page)}
     `;
@@ -1974,7 +2305,7 @@ function renderLlmTab() {
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel inset">
-        ${panelTitle("行业/主题分布", freshnessTag("research"))}
+        ${panelTitle("行业/主题分布", actionGroup(freshnessTag("research"), exportButton("researchIndustryStats")))}
         ${simpleTable(["方向", "报告数"], topIndustries.slice(0, 10).map((row) => [row.name, row.count]))}
       </div>
       <div class="panel inset">
@@ -1983,6 +2314,7 @@ function renderLlmTab() {
         <p class="table-note">报告来自东财研报中心，已进入 LLM 分析上下文。</p>
       </div>
     </section>
+    <div class="toolbar">${exportButton("researchReports")}</div>
     ${simpleTable(
       ["日期", "类型", "行业/主题", "标题", "机构", "作者", "页数"],
       reports.slice(0, 30).map((row) => [
@@ -2874,6 +3206,9 @@ function sectorMiniTable() {
 function attachEvents() {
   document.querySelectorAll("[data-toast]").forEach((button) => {
     button.addEventListener("click", () => showToast(button.dataset.toast || "已处理", "success"));
+  });
+  document.querySelectorAll("[data-export-csv]").forEach((button) => {
+    button.addEventListener("click", () => exportCsv(button.dataset.exportCsv));
   });
   document.querySelectorAll("[data-open-modal]").forEach((button) => {
     button.addEventListener("click", () => {

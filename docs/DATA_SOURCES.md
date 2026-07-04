@@ -55,6 +55,9 @@
 - Freshness badges
   - Market, sector, quote and LLM table headers now expose live/snapshot/memory-cache/cloud-cache/backup-source freshness from the same `/api/market` payload.
   - Chat context includes normalized `dataFreshness` rows alongside the source-coverage rows.
+- Table exports
+  - Market review, source coverage, limit pools, Stock Connect, ETF flow, hot rank, factor screener, boards, quote money flow, fundamentals, BaoStock rows, popularity, announcements, disclosures, LLM tables, research reports and AI history now export current-view CSV files in-browser.
+  - Exports use the same `/api/market` payload and active filters as the visible tables, so no extra backend route or local worker is needed.
 
 ## Recommended Free / Low-Cost Sources
 
@@ -69,7 +72,7 @@
 
 ## Next Enrichment Targets
 
-- Add export/download actions for selected tables and current AI/LLM reports.
+- Add optional column presets and saved export manifests for repeated research workflows.
 
 ## Design
 
