@@ -6074,93 +6074,125 @@ async function checkBackendStatus() {
 }
 
 async function loadMarketSnapshot() {
-  if (isGithubPages() && !VERCEL_BACKEND_URL) return;
   try {
-    const params = new URLSearchParams({ symbol: selectedQuote });
-    const tradeDate = compactDateValue(activeRequestTradeDate());
-    if (tradeDate) params.set("date", tradeDate);
-    if (selectedBoardCode) params.set("boardCode", selectedBoardCode);
-    const response = await fetch(`${apiBase()}/api/market?${params.toString()}`, { cache: "no-store" });
-    const payload = await response.json();
-    if (!payload.ok) return;
-    marketSource = payload.source || "公开源";
-    data.asOf = payload.asOf || "";
-    data.tradeDate = payload.tradeDate || "";
-    data.stockUniverse = payload.stockUniverse || { total: payload.stocks?.length || data.stocks.length, returned: payload.stocks?.length || data.stocks.length, limit: payload.stocks?.length || data.stocks.length, leaderSample: 0, source: "" };
-    data.featureCoverage = payload.featureCoverage || payload.stockUniverse?.featureCoverage || data.featureCoverage;
-    data.limitPoolCounts = payload.limitPoolCounts || data.limitPoolCounts;
-    data.dataCoverage = payload.dataCoverage || data.dataCoverage;
-    data.cacheSnapshot = payload.cacheSnapshot || null;
-    if (payload.market) {
-      const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
-      data.metrics = [
-        ["情绪温度", `${payload.market.temperature}%`, payload.market.state],
-        ["成交额", `${payload.market.amountYi.toLocaleString()}亿`, marketSource],
-        ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `全市场 ${payload.market.total || "-"} 只，平盘 ${payload.market.flat}`],
-        ["涨停/跌停", `${payload.market.exactLimitUp || payload.market.limitUp} / ${payload.market.limitDown}`, `炸板 ${payload.market.brokenLimit || 0}`],
-        ["连板高度", `${payload.market.maxStreak || 0}板`, `封板资金 ${payload.market.sealFundYi || 0}亿`],
-        ["北向净买", `${plainSigned(payload.market.northNetBuyYi || 0, 2, "亿")}`, "沪股通+深股通"],
-        ["ETF主力", `${plainSigned(payload.market.etfMainNetYi || 0, 2, "亿")}`, `ETF样本 ${payload.market.etfCount || 0}`],
-        ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
-        ["资金净流入", hasSectorFund ? `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿` : "无字段", hasSectorFund ? "板块资金聚合" : "当前板块源不含资金字段"],
-      ];
-      data.limitDistribution = payload.market.limitDistribution || data.limitDistribution;
-    }
-    if (Array.isArray(payload.stocks) && payload.stocks.length) {
-      const stockRows = payload.quote ? [payload.quote, ...payload.stocks.filter((stock) => stock.code !== payload.quote.code)] : payload.stocks;
-      data.stocks = buildClientStockRows(stockRows);
-    }
-    if (Array.isArray(payload.sectors) && payload.sectors.length) {
-      data.sectors = payload.sectors.map((sector, index) => [
-        sector.name,
-        sector.pct || 0,
-        sector.rank || index + 1,
-        index % 2 === 0 ? index : -index,
-        sector.upCount || 0,
-        sector.downCount || 0,
-        sector.flatCount || 0,
-        Math.round(((sector.netFund || 0) / 100000000) * 100) / 100,
-        sector.code || "",
-        yi(sector.amount || 0),
-      ]);
-    }
-    if (Array.isArray(payload.concepts) && payload.concepts.length) {
-      data.concepts = payload.concepts.map((concept, index) => [
-        concept.name,
-        concept.pct || 0,
-        concept.rank || index + 1,
-        concept.companyCount || 0,
-        yi(concept.amount || 0),
-        concept.leader?.name || "-",
-        concept.leader?.pct || 0,
-        concept.code || "",
-      ]);
-    }
-    data.boardConstituents = payload.boardConstituents || { code: selectedBoardCode, name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
-    if (payload.limitPools) data.limitPools = payload.limitPools;
-    if (payload.etfs) data.etfs = payload.etfs;
-    if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;
-    if (payload.northbound) data.northbound = payload.northbound;
-    if (payload.fundamentals) data.fundamentals = payload.fundamentals;
-    if (payload.popularity) data.popularity = payload.popularity;
-    if (payload.announcements) data.announcements = payload.announcements;
-    if (payload.disclosures) data.disclosures = payload.disclosures;
-    if (payload.research) data.research = payload.research;
-    if (payload.yahooChart) data.yahooChart = payload.yahooChart;
-    if (payload.baostock) data.baostock = payload.baostock;
-    if (Array.isArray(payload.indices) && payload.indices.length) {
-      data.indices = payload.indices.map((index) => [index.name, index.pct]);
-    }
-    if (Array.isArray(payload.marketKlines) && payload.marketKlines.length) {
-      data.breadth = payload.marketKlines.slice(-30).map((row) => [row.date, Math.round((row.amount || 0) / 100000000), row.pct || 0]);
-    }
-    data.quoteKlines = Array.isArray(payload.klines) ? payload.klines : [];
-    data.minuteKlines = Array.isArray(payload.minuteKlines) ? payload.minuteKlines : [];
-    renderRuntimeShell();
-    if (["market", "screener", "backtest", "compare", "sectors", "quote", "llm", "aiWallet", "subscription", "about"].includes(currentPage)) render();
+    const payload = await fetchLiveMarketPayload();
+    applyMarketPayload(payload);
   } catch (error) {
-    showToast("公开行情暂未更新，继续使用内置样本。", "info");
+    const loaded = await loadCachedMarketSnapshot();
+    if (!loaded) showToast("公开行情暂未更新，继续使用内置样本。", "info");
   }
+}
+
+async function fetchLiveMarketPayload() {
+  if (isGithubPages() && !VERCEL_BACKEND_URL) throw new Error("backend unavailable");
+  const params = new URLSearchParams({ symbol: selectedQuote });
+  const tradeDate = compactDateValue(activeRequestTradeDate());
+  if (tradeDate) params.set("date", tradeDate);
+  if (selectedBoardCode) params.set("boardCode", selectedBoardCode);
+  const response = await fetch(`${apiBase()}/api/market?${params.toString()}`, { cache: "no-store" });
+  const payload = await response.json();
+  if (!payload?.ok || !Array.isArray(payload.stocks) || !payload.stocks.length) throw new Error("empty market payload");
+  return payload;
+}
+
+async function loadCachedMarketSnapshot() {
+  try {
+    const response = await fetch(new URL("data/market-cache.json", location.href), { cache: "no-store" });
+    const payload = await response.json();
+    if (!payload?.ok || !Array.isArray(payload.stocks) || !payload.stocks.length) return false;
+    applyMarketPayload({
+      ...payload,
+      source: `${payload.source || "github-action-cache"}+static-cache-fallback`,
+      cacheSnapshot: {
+        ...(payload.cacheSnapshot || {}),
+        available: true,
+        generatedAt: payload.cacheSnapshot?.generatedAt || payload.asOf || payload.tradeDate || "",
+        usedFields: Array.from(new Set([...(payload.cacheSnapshot?.usedFields || []), "static-market-cache"])),
+      },
+    });
+    showToast("已切换到云缓存行情，因子选股继续可用。", "info");
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function applyMarketPayload(payload) {
+  marketSource = payload.source || "公开源";
+  data.asOf = payload.asOf || "";
+  data.tradeDate = payload.tradeDate || "";
+  data.stockUniverse = payload.stockUniverse || { total: payload.stocks?.length || data.stocks.length, returned: payload.stocks?.length || data.stocks.length, limit: payload.stocks?.length || data.stocks.length, leaderSample: 0, source: "" };
+  data.featureCoverage = payload.featureCoverage || payload.stockUniverse?.featureCoverage || data.featureCoverage;
+  data.limitPoolCounts = payload.limitPoolCounts || data.limitPoolCounts;
+  data.dataCoverage = payload.dataCoverage || data.dataCoverage;
+  data.cacheSnapshot = payload.cacheSnapshot || null;
+  if (payload.market) {
+    const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
+    data.metrics = [
+      ["情绪温度", `${payload.market.temperature}%`, payload.market.state],
+      ["成交额", `${payload.market.amountYi.toLocaleString()}亿`, marketSource],
+      ["上涨/下跌", `${payload.market.up} / ${payload.market.down}`, `全市场 ${payload.market.total || "-"} 只，平盘 ${payload.market.flat}`],
+      ["涨停/跌停", `${payload.market.exactLimitUp || payload.market.limitUp} / ${payload.market.limitDown}`, `炸板 ${payload.market.brokenLimit || 0}`],
+      ["连板高度", `${payload.market.maxStreak || 0}板`, `封板资金 ${payload.market.sealFundYi || 0}亿`],
+      ["北向净买", `${plainSigned(payload.market.northNetBuyYi || 0, 2, "亿")}`, "沪股通+深股通"],
+      ["ETF主力", `${plainSigned(payload.market.etfMainNetYi || 0, 2, "亿")}`, `ETF样本 ${payload.market.etfCount || 0}`],
+      ["站上MA5", `${payload.market.aboveMa5}%`, "全市场短线强度代理"],
+      ["资金净流入", hasSectorFund ? `${payload.market.netFundYi >= 0 ? "+" : ""}${payload.market.netFundYi}亿` : "无字段", hasSectorFund ? "板块资金聚合" : "当前板块源不含资金字段"],
+    ];
+    data.limitDistribution = payload.market.limitDistribution || data.limitDistribution;
+  }
+  if (Array.isArray(payload.stocks) && payload.stocks.length) {
+    const stockRows = payload.quote ? [payload.quote, ...payload.stocks.filter((stock) => stock.code !== payload.quote.code)] : payload.stocks;
+    data.stocks = buildClientStockRows(stockRows);
+  }
+  if (Array.isArray(payload.sectors) && payload.sectors.length) {
+    data.sectors = payload.sectors.map((sector, index) => [
+      sector.name,
+      sector.pct || 0,
+      sector.rank || index + 1,
+      index % 2 === 0 ? index : -index,
+      sector.upCount || 0,
+      sector.downCount || 0,
+      sector.flatCount || 0,
+      Math.round(((sector.netFund || 0) / 100000000) * 100) / 100,
+      sector.code || "",
+      yi(sector.amount || 0),
+    ]);
+  }
+  if (Array.isArray(payload.concepts) && payload.concepts.length) {
+    data.concepts = payload.concepts.map((concept, index) => [
+      concept.name,
+      concept.pct || 0,
+      concept.rank || index + 1,
+      concept.companyCount || 0,
+      yi(concept.amount || 0),
+      concept.leader?.name || "-",
+      concept.leader?.pct || 0,
+      concept.code || "",
+    ]);
+  }
+  data.boardConstituents = payload.boardConstituents || { code: selectedBoardCode, name: "", type: "", total: 0, returned: 0, rows: [], source: "" };
+  if (payload.limitPools) data.limitPools = payload.limitPools;
+  if (payload.etfs) data.etfs = payload.etfs;
+  if (payload.moneyFlow) data.moneyFlow = payload.moneyFlow;
+  if (payload.northbound) data.northbound = payload.northbound;
+  if (payload.fundamentals) data.fundamentals = payload.fundamentals;
+  if (payload.popularity) data.popularity = payload.popularity;
+  if (payload.announcements) data.announcements = payload.announcements;
+  if (payload.disclosures) data.disclosures = payload.disclosures;
+  if (payload.research) data.research = payload.research;
+  if (payload.yahooChart) data.yahooChart = payload.yahooChart;
+  if (payload.baostock) data.baostock = payload.baostock;
+  if (Array.isArray(payload.indices) && payload.indices.length) {
+    data.indices = payload.indices.map((index) => [index.name, index.pct]);
+  }
+  if (Array.isArray(payload.marketKlines) && payload.marketKlines.length) {
+    data.breadth = payload.marketKlines.slice(-30).map((row) => [row.date, Math.round((row.amount || 0) / 100000000), row.pct || 0]);
+  }
+  data.quoteKlines = Array.isArray(payload.klines) ? payload.klines : [];
+  data.minuteKlines = Array.isArray(payload.minuteKlines) ? payload.minuteKlines : [];
+  renderRuntimeShell();
+  if (["market", "screener", "backtest", "compare", "sectors", "quote", "llm", "aiWallet", "subscription", "about"].includes(currentPage)) render();
 }
 
 function activeRequestTradeDate() {
