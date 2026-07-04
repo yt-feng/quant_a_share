@@ -2217,7 +2217,7 @@ function renderWatchlist() {
           signed(stock.price * stock.pct / 100),
           signed(stock.pct),
           `${Math.round((stock.amount || 0) / 100000000 * 100) / 100}亿`,
-          `<button class="ghost-button table-action" data-remove-watch="${stock.code}">删除</button>`,
+          `<button class="ghost-button table-action" data-open-quote="${stock.code}">查看日线</button><button class="ghost-button table-action" data-remove-watch="${stock.code}">移除</button>`,
         ])
       )}
     </div>
