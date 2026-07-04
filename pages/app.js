@@ -126,12 +126,17 @@ const hotPrompts = [
   "Q12 分析近期大盘涨跌与成交额规律，结合行业/概念轮动、资金流向和人气榜，筛出低吸方向。",
 ];
 
-const walletLedger = [
+const DEFAULT_WALLET_LEDGER = [
   ["2026-07-03 21:48:38", "退款", 16.5, 86.5, 0, "AI决策矩阵 V2 结算退回剩余冻结"],
   ["2026-07-03 21:48:38", "消费", -13.5, 70, 16.5, "AI决策矩阵 V2 结算"],
   ["2026-07-03 21:48:05", "冻结", -30, 70, 30, "AI决策矩阵 V2 冻结预算"],
   ["2026-07-03 21:42:54", "赠送", 100, 100, 0, "钱包初始化赠送点数"],
 ];
+const QIMEN_STORAGE_KEY = "quant_a_share_qimen";
+let walletLedger = [...DEFAULT_WALLET_LEDGER];
+let qimenTasks = [];
+let qimenLastSync = null;
+let selectedQimenTaskId = "";
 
 const products = [
   ["sub", "账号订阅 一个月", "推荐", "订阅套餐", "订阅一个月", 88, "月度订阅", "账号开通 1 个月"],
@@ -161,12 +166,12 @@ const pages = [
 
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
-  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选。"],
+  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab；主题页已接入公开行情派生的主题全字段、新闻证据和主题个股。"],
-  ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
+  ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、同步起局扣点、本地持久化任务、DeepSeek 增强解盘。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
   ["订阅账号与点数", "已对齐", "账号状态、余额/冻结、商品筛选、10 个商品、商品说明、购买确认、扫码/订单状态、钱包账单。"],
 ];
@@ -217,6 +222,7 @@ function mount() {
   loadScreenerState();
   loadWatchlistState();
   loadQuoteState();
+  loadQimenState();
   renderRuntimeShell();
   renderNav();
   render();
@@ -715,6 +721,358 @@ function persistQuoteState() {
   }
 }
 
+function loadQimenState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem(QIMEN_STORAGE_KEY) || "null");
+    if (!stored) return;
+    const ledger = Array.isArray(stored.walletLedger) ? stored.walletLedger.map(normalizeLedgerRow).filter(Boolean) : [];
+    walletLedger = ledger.length ? ledger : [...DEFAULT_WALLET_LEDGER];
+    qimenTasks = Array.isArray(stored.qimenTasks) ? stored.qimenTasks.map(normalizeQimenTask).filter(Boolean).slice(0, 60) : [];
+    qimenLastSync = stored.qimenLastSync?.at ? stored.qimenLastSync : null;
+    selectedQimenTaskId = stored.selectedQimenTaskId || qimenTasks[0]?.id || "";
+  } catch (error) {
+    walletLedger = [...DEFAULT_WALLET_LEDGER];
+    qimenTasks = [];
+    qimenLastSync = null;
+    selectedQimenTaskId = "";
+  }
+}
+
+function persistQimenState() {
+  try {
+    localStorage.setItem(
+      QIMEN_STORAGE_KEY,
+      JSON.stringify({
+        walletLedger,
+        qimenTasks,
+        qimenLastSync,
+        selectedQimenTaskId,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("奇门任务已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeLedgerRow(row) {
+  if (!Array.isArray(row) || row.length < 6) return null;
+  return [
+    String(row[0] || nowLabel()),
+    String(row[1] || "记录"),
+    roundPoint(row[2]),
+    roundPoint(row[3]),
+    roundPoint(row[4]),
+    String(row[5] || ""),
+  ];
+}
+
+function normalizeQimenTask(task) {
+  if (!task) return null;
+  const id = String(task.id || `qm_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+  return {
+    id,
+    submittedAt: String(task.submittedAt || nowLabel()),
+    itemType: String(task.itemType || "金融"),
+    target: String(task.target || "现在适不适合进场"),
+    stage: String(task.stage || "在考虑阶段"),
+    calendar: String(task.calendar || "公历"),
+    time: String(task.time || qimenDefaultTime()),
+    city: String(task.city || "上海"),
+    output: String(task.output || "直接结论"),
+    mode: String(task.mode || "深入分析（20点）"),
+    billing: String(task.billing || "点数"),
+    points: roundPoint(task.points || qimenCostFromMode(task.mode)),
+    status: String(task.status || "完成"),
+    startedAt: String(task.startedAt || task.submittedAt || nowLabel()),
+    endedAt: String(task.endedAt || "-"),
+    question: String(task.question || ""),
+    syncAt: String(task.syncAt || qimenLastSync?.at || ""),
+    answer: String(task.answer || ""),
+    backendNote: String(task.backendNote || ""),
+    localResult: task.localResult && typeof task.localResult === "object" ? task.localResult : null,
+  };
+}
+
+function nowLabel() {
+  return new Date().toLocaleString("zh-CN", { hour12: false }).replace(/\//g, "-");
+}
+
+function qimenDefaultTime() {
+  const date = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function roundPoint(value, digits = 1) {
+  const number = Number(value) || 0;
+  return Math.round(number * 10 ** digits) / 10 ** digits;
+}
+
+function walletSummary() {
+  const latest = walletLedger[0] || DEFAULT_WALLET_LEDGER[0];
+  const recharge = walletLedger.reduce((sum, row) => {
+    const delta = Number(row[2]) || 0;
+    return sum + (["赠送", "充值"].includes(row[1]) && delta > 0 ? delta : 0);
+  }, 0);
+  const spent = walletLedger.reduce((sum, row) => {
+    const delta = Number(row[2]) || 0;
+    return sum + (row[1] === "消费" && delta < 0 ? Math.abs(delta) : 0);
+  }, 0);
+  return {
+    balance: roundPoint(latest[3]),
+    frozen: roundPoint(latest[4]),
+    recharge: roundPoint(recharge),
+    spent: roundPoint(spent),
+  };
+}
+
+function appendWalletLedger(type, delta, note, frozenDelta = 0) {
+  const summary = walletSummary();
+  const nextBalance = roundPoint(Math.max(0, summary.balance + (Number(delta) || 0)));
+  const nextFrozen = roundPoint(Math.max(0, summary.frozen + (Number(frozenDelta) || 0)));
+  walletLedger = [[nowLabel(), type, roundPoint(delta), nextBalance, nextFrozen, note], ...walletLedger].slice(0, 120);
+}
+
+function qimenFormState() {
+  return {
+    itemType: document.querySelector("#itemType")?.value || "金融",
+    target: document.querySelector("#qimenTarget")?.value || "现在适不适合进场",
+    stage: document.querySelector("#stage")?.value || "在考虑阶段",
+    calendar: document.querySelector("#qimenCalendar")?.value || "公历",
+    time: document.querySelector("#qimenTime")?.value || qimenDefaultTime(),
+    city: document.querySelector("#city")?.value || "上海",
+    output: document.querySelector("#qimenOutput")?.value || "直接结论",
+    mode: document.querySelector("#mode")?.value || "深入分析（20点）",
+    question: document.querySelector("#question")?.value || "",
+  };
+}
+
+function qimenCostFromMode(mode) {
+  return String(mode || "").includes("深入") ? 20 : 8;
+}
+
+function qimenSyncCost() {
+  return 1;
+}
+
+function qimenStatusTag(status) {
+  const tone = ["完成", "本地完成"].includes(status) ? "info" : status.includes("处理") ? "" : "demo";
+  return tag(escapeHtml(status), tone);
+}
+
+function qimenTaskTable(tasks) {
+  return simpleTable(
+    ["提交时间", "类型", "目标", "状态", "模式", "计费", "点数", "开始", "结束", "操作"],
+    tasks.slice(0, 30).map((task) => [
+      escapeHtml(task.submittedAt),
+      escapeHtml(task.itemType),
+      escapeHtml(task.target),
+      qimenStatusTag(task.status),
+      escapeHtml(task.mode),
+      escapeHtml(task.billing),
+      task.points,
+      escapeHtml(task.startedAt),
+      escapeHtml(task.endedAt),
+      `<button class="ghost-button table-action" data-view-qimen-task="${escapeHtml(task.id)}">查看</button>`,
+    ])
+  );
+}
+
+function qimenTaskResult(task) {
+  const result = task.localResult || qimenLocalAnalysis(task);
+  const aiBlock = task.answer
+    ? `<div class="answer-section"><strong>DeepSeek 增强解盘</strong><p>${answerHtml(task.answer)}</p></div>`
+    : task.status === "处理中"
+      ? `<div class="answer-section"><strong>DeepSeek 增强解盘</strong><p>正在等待后端返回，本地解盘已先进入任务详情。</p></div>`
+      : `<div class="answer-section"><strong>本地解盘</strong><p>${escapeHtml(task.backendNote || "已生成本地解读，可继续提交获取后端增强。")}</p></div>`;
+  return `
+    <div class="detail-strip">
+      ${tag(`任务 ${escapeHtml(task.id.slice(-8))}`, "info")}
+      ${qimenStatusTag(task.status)}
+      ${tag(`${task.points}点`)}
+      ${tag(escapeHtml(task.city))}
+    </div>
+    ${simpleTable(["项目", "内容"], [
+      ["判断对象", escapeHtml(result.subject)],
+      ["起局信息", escapeHtml(`${task.calendar} ${task.time} ${task.city}`)],
+      ["盘面结构", escapeHtml(`${result.palace} / ${result.door} / ${result.star} / ${result.god}`)],
+      ["直接结论", escapeHtml(result.conclusion)],
+      ["执行条件", escapeHtml(result.action)],
+      ["时间节点", escapeHtml(result.timing)],
+      ["失效线", escapeHtml(result.invalidation)],
+    ])}
+    ${aiBlock}
+  `;
+}
+
+function qimenSyncResult(sync) {
+  return `
+    <div class="detail-strip">${tag("已同步起局", "info")}${tag(`${qimenSyncCost()}点`)}${tag(escapeHtml(sync.city))}</div>
+    ${simpleTable(["字段", "当前值"], [
+      ["同步时间", escapeHtml(sync.at)],
+      ["历法", escapeHtml(sync.calendar)],
+      ["起局时间", escapeHtml(sync.time)],
+      ["城市", escapeHtml(sync.city)],
+    ])}
+  `;
+}
+
+function qimenLocalAnalysis(form) {
+  const stock = pickQimenStock(form.question);
+  const signals = qimenSignalDeck(form, stock);
+  const subject = stock ? `${stock.name}（${stock.code.slice(0, 6)}）` : form.target;
+  const pct = Number(stock?.pct) || 0;
+  const fund = Number(stock?.fund) || 0;
+  const rps = Number(stock?.rps) || 50;
+  const hotSector = data.sectors[0]?.[0] || data.concepts[0]?.[0] || "当前主线";
+  let conclusion = "先观察，等价格和量能同时确认后再行动。";
+  let action = "盘中放量站回关键均线再试探；没有量能配合则只观察。";
+  let invalidation = stock?.price ? `${(stock.price * 0.97).toFixed(2)} 附近` : "跌破前低或题材热度明显降温";
+  if (form.target.includes("减仓")) {
+    conclusion = pct >= 3 ? "适合把浮盈部分先锁定，保留观察仓。" : "不急于处理，先看关键位能否守住。";
+    action = "冲高缩量或跌回分时均价线时减一档；放量承接再保留。";
+  } else if (form.target.includes("低吸")) {
+    conclusion = fund >= 0 && pct < 2 ? "更适合等回踩承接，不适合情绪拉高时追价。" : "低吸条件还不完整。";
+    action = "回踩不破前一交易日中枢，且主力净额转正时再分批。";
+  } else if (pct >= 4) {
+    conclusion = "当前位置偏热，等回踩确认更从容。";
+    action = "只在缩量回踩后重新放量时试探，避免一次性打满。";
+  } else if (fund > 0 && rps >= 60) {
+    conclusion = "可以小仓观察，等确认信号后再加一档。";
+    action = `优先看 ${hotSector} 延续性和个股成交额，站稳分时均价线再执行。`;
+  }
+  return {
+    subject,
+    palace: signals.palace,
+    door: signals.door,
+    star: signals.star,
+    god: signals.god,
+    conclusion,
+    action,
+    timing: `${signals.timing}，若指数和板块同步转强，可把执行窗口前移一档。`,
+    invalidation,
+  };
+}
+
+function pickQimenStock(question) {
+  const text = String(question || "");
+  return (
+    data.stocks.find((stock) => text.includes(stock.code.slice(0, 6)) || text.includes(stock.name)) ||
+    data.stocks.find((stock) => stock.code.includes(selectedQuote)) ||
+    data.stocks[0] ||
+    null
+  );
+}
+
+function qimenSignalDeck(form, stock) {
+  const seed = hashString([form.itemType, form.target, form.stage, form.time, form.city, form.question, stock?.code].join("|"));
+  const palaces = ["坎宫", "艮宫", "震宫", "巽宫", "离宫", "坤宫", "兑宫", "乾宫"];
+  const doors = ["开门", "休门", "生门", "伤门", "杜门", "景门", "死门", "惊门"];
+  const stars = ["天辅", "天英", "天芮", "天柱", "天心", "天蓬", "天任", "天冲"];
+  const gods = ["值符", "腾蛇", "太阴", "六合", "白虎", "玄武", "九地", "九天"];
+  const timings = ["上午盘先看承接", "午后看资金回流", "收盘前确认强弱", "隔日开盘看延续"];
+  return {
+    palace: palaces[seed % palaces.length],
+    door: doors[Math.floor(seed / 3) % doors.length],
+    star: stars[Math.floor(seed / 5) % stars.length],
+    god: gods[Math.floor(seed / 7) % gods.length],
+    timing: timings[Math.floor(seed / 11) % timings.length],
+  };
+}
+
+function hashString(value) {
+  return String(value)
+    .split("")
+    .reduce((hash, char) => Math.abs((hash * 31 + char.charCodeAt(0)) | 0), 7);
+}
+
+function answerHtml(text) {
+  return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+function updateQimenTask(task) {
+  qimenTasks = qimenTasks.map((item) => (item.id === task.id ? normalizeQimenTask(task) : item));
+  persistQimenState();
+}
+
+async function handleQimenSubmit(button) {
+  const target = document.querySelector(`#${button.dataset.target}`);
+  if (!target) return;
+  const form = qimenFormState();
+  const points = qimenCostFromMode(form.mode);
+  const task = normalizeQimenTask({
+    id: `qm_${Date.now()}`,
+    submittedAt: nowLabel(),
+    itemType: form.itemType,
+    target: form.target,
+    stage: form.stage,
+    calendar: form.calendar,
+    time: form.time,
+    city: form.city,
+    output: form.output,
+    mode: form.mode,
+    billing: "点数",
+    points,
+    status: "处理中",
+    startedAt: nowLabel(),
+    endedAt: "-",
+    question: form.question,
+    syncAt: qimenLastSync?.at || "",
+    localResult: qimenLocalAnalysis(form),
+  });
+  qimenTasks = [task, ...qimenTasks.filter((item) => item.id !== task.id)].slice(0, 60);
+  selectedQimenTaskId = task.id;
+  appendWalletLedger("消费", -points, `奇门解盘 ${form.target}`);
+  persistQimenState();
+  const defaultText = button.dataset.defaultText || button.textContent;
+  button.dataset.defaultText = defaultText;
+  const progress = startChatProgress("qimen", target);
+  setButtonLoading(button, true);
+  try {
+    const result = await askBackend({
+      module: "qimen",
+      question: form.question,
+      mode: form.mode,
+      context: contextForModule("qimen"),
+    });
+    task.status = "完成";
+    task.answer = result.answer || "";
+    task.endedAt = nowLabel();
+    updateQimenTask(task);
+    progress.succeed();
+    target.innerHTML = qimenTaskResult(task);
+    showToast("奇门解盘已完成。", "success");
+  } catch (error) {
+    task.status = "本地完成";
+    task.backendNote = error.message || "后端暂未返回，已保留本地解盘。";
+    task.endedAt = nowLabel();
+    updateQimenTask(task);
+    progress.succeed();
+    target.innerHTML = qimenTaskResult(task);
+    showToast("本地解盘已生成，任务已保存。", "info");
+  } finally {
+    setButtonLoading(button, false);
+    render();
+  }
+}
+
+function handleQimenSync() {
+  const form = qimenFormState();
+  qimenLastSync = {
+    at: nowLabel(),
+    calendar: form.calendar,
+    time: form.time,
+    city: form.city,
+  };
+  appendWalletLedger("消费", -qimenSyncCost(), `同步起局 ${form.city}`);
+  persistQimenState();
+  render();
+  const target = document.querySelector("#qimenAnswer");
+  if (target) target.innerHTML = qimenSyncResult(qimenLastSync);
+  showToast("起局信息已同步。", "success");
+}
+
 function dedupeWatchlist(entries) {
   const seen = new Set();
   return entries.filter((entry) => {
@@ -1127,41 +1485,62 @@ function researchIndustryStats(reports) {
 }
 
 function renderQimen() {
+  const summary = walletSummary();
+  const selectedTask = qimenTasks.find((task) => task.id === selectedQimenTaskId) || qimenTasks[0];
+  const lastSyncText = qimenLastSync ? `${qimenLastSync.at} ${qimenLastSync.city}` : "未同步";
+  const historyRows = qimenTasks.slice(0, 6).map((task) => [
+    escapeHtml(task.submittedAt),
+    escapeHtml(task.itemType),
+    escapeHtml(task.target),
+    qimenStatusTag(task.status),
+    escapeHtml(task.mode),
+    `${task.points}点`,
+  ]);
   return `
+    <section class="grid metrics">
+      ${metric("可用点数", summary.balance, "钱包余额")}
+      ${metric("冻结点数", summary.frozen, "结算占用")}
+      ${metric("奇门任务", `${qimenTasks.length} 个`, "本机保存")}
+      ${metric("最近起局", lastSyncText, qimenLastSync ? qimenLastSync.calendar : "等待同步")}
+    </section>
     <section class="grid two">
       <div class="panel">
         ${panelTitle("奇门遁甲", `<div class="toolbar"><button class="ghost-button" data-open-modal="wallet">钱包账单</button><button class="ghost-button" data-open-modal="tasks">任务列表</button></div>`)}
         <p>把专业解盘转成你能直接看懂、能马上行动的建议。</p>
         <div class="form-grid">
           <label><span class="label">事项类型</span><select id="itemType"><option>金融</option><option>工作</option><option>合作</option></select></label>
-          <label><span class="label">判断目标</span><select><option>现在适不适合进场</option><option>是否继续持有</option><option>能否低吸</option><option>是否减仓</option></select></label>
+          <label><span class="label">判断目标</span><select id="qimenTarget"><option>现在适不适合进场</option><option>是否继续持有</option><option>能否低吸</option><option>是否减仓</option></select></label>
           <label><span class="label">当前阶段</span><select id="stage"><option>在考虑阶段</option><option>已持有/已开始</option><option>准备执行</option></select></label>
-          <label><span class="label">历法类型</span><select><option>公历</option><option>此刻</option></select></label>
-          <label><span class="label">时间输入</span><input value="2026-07-04 10:30" /></label>
-          <label><span class="label">城市</span><input id="city" value="上海" /></label>
-          <label><span class="label">输出偏好</span><select><option>直接结论</option><option>过程展开</option></select></label>
+          <label><span class="label">历法类型</span><select id="qimenCalendar"><option ${selectedAttr(qimenLastSync?.calendar === "公历")}>公历</option><option ${selectedAttr(qimenLastSync?.calendar === "此刻")}>此刻</option></select></label>
+          <label><span class="label">时间输入</span><input id="qimenTime" value="${escapeHtml(qimenLastSync?.time || qimenDefaultTime())}" /></label>
+          <label><span class="label">城市</span><input id="city" value="${escapeHtml(qimenLastSync?.city || "上海")}" /></label>
+          <label><span class="label">输出偏好</span><select id="qimenOutput"><option>直接结论</option><option>过程展开</option></select></label>
           <label><span class="label">解盘档位</span><select id="mode"><option>深入分析（20点）</option><option>快速结论（8点）</option></select></label>
         </div>
         <label style="margin-top:12px"><span class="label">事情摘要</span><textarea id="question">我最近在看一只科技股，已经涨了一段时间，现在担心追高，但又怕错过后面的上涨，想判断现在适不适合进场。</textarea></label>
         <div class="toolbar" style="margin-top:12px">
           <button class="ghost-button" data-fill-now="1">同步起局（1点）</button>
           <button class="primary-button" data-chat-module="qimen" data-target="qimenAnswer">提交解盘任务</button>
-          <button class="ghost-button" data-toast="表单已重置">重置</button>
+          <button class="ghost-button" data-reset-qimen="1">重置</button>
         </div>
       </div>
       <div class="panel">
         <h2>结果与详情</h2>
-        <div id="qimenAnswer" class="answer">请先起局，或直接提交解盘任务。</div>
+        <div id="qimenAnswer" class="answer">${selectedTask ? qimenTaskResult(selectedTask) : "请先起局，或直接提交解盘任务。"}</div>
       </div>
     </section>
     <section class="grid two" style="margin-top:14px">
       <div class="panel">
         <h2>我的历史</h2>
-        <div class="empty-state"><strong>还没有历史记录</strong><span>提交解盘任务后会显示排队、执行、完成和详情。</span></div>
+        ${
+          qimenTasks.length
+            ? simpleTable(["提交时间", "类型", "目标", "状态", "模式", "点数"], historyRows)
+            : `<div class="empty-state"><strong>还没有历史记录</strong><span>提交解盘任务后会显示排队、执行、完成和详情。</span></div>`
+        }
       </div>
       <div class="panel">
-        <h2>任务状态样例</h2>
-        ${simpleTable(["提交时间", "类型", "目标", "状态", "模式", "计费", "点数", "开始", "结束", "操作"], [])}
+        <h2>任务状态</h2>
+        ${qimenTaskTable(qimenTasks)}
       </div>
     </section>
   `;
@@ -1169,12 +1548,13 @@ function renderQimen() {
 
 function renderSubscription() {
   const visibleProducts = products.filter((product) => productFilter === "all" || product[0] === productFilter);
+  const summary = walletSummary();
   return `
     <section class="grid metrics">
       ${metric("当前账号", "演示账号", "登录状态")}
       ${metric("账号状态", "正常", "订阅与点数可用")}
-      ${metric("可用点数", "86.5", "钱包余额")}
-      ${metric("冻结点数", "0", "结算占用")}
+      ${metric("可用点数", summary.balance, "钱包余额")}
+      ${metric("冻结点数", summary.frozen, "结算占用")}
       ${metric("订阅商品", `${products.length} 个`, "点数包 / 订阅套餐")}
       ${metric("账单流水", `${walletLedger.length} 条`, "可查看")}
     </section>
@@ -1250,19 +1630,20 @@ function modalBody() {
     )}`;
   }
   if (modal.type === "wallet") {
+    const summary = walletSummary();
     return `
       <section class="grid metrics">
-        ${metric("可用点数", "86.5", "当前余额")}
-        ${metric("冻结点数", "0", "结算占用")}
-        ${metric("累计充值", "100", "初始化与充值")}
-        ${metric("累计消费", "13.5", "问答与解盘")}
+        ${metric("可用点数", summary.balance, "当前余额")}
+        ${metric("冻结点数", summary.frozen, "结算占用")}
+        ${metric("累计充值", summary.recharge, "初始化与充值")}
+        ${metric("累计消费", summary.spent, "问答与解盘")}
       </section>
-      <div class="toolbar" style="margin-top:12px"><input class="inline-input" placeholder="请输入兑换码，例如 QM-ABCD-123456" /><button class="primary-button" data-toast="兑换码已记录">立即充值</button></div>
-      ${simpleTable(["时间", "类型", "点数变化", "变更后余额", "变更后冻结", "备注"], walletLedger.map((row) => [row[0], row[1], signed(row[2], 1), row[3], row[4], row[5]]))}
+      <div class="toolbar" style="margin-top:12px"><input id="walletCode" class="inline-input" placeholder="请输入兑换码，例如 QM-ABCD-123456" /><button class="primary-button" data-recharge-wallet="1">立即充值</button></div>
+      ${simpleTable(["时间", "类型", "点数变化", "变更后余额", "变更后冻结", "备注"], walletLedger.map((row) => [escapeHtml(row[0]), escapeHtml(row[1]), signed(Number(row[2]) || 0, 1), row[3], row[4], escapeHtml(row[5])]))}
     `;
   }
   if (modal.type === "tasks") {
-    return `${simpleTable(["提交时间", "类型", "目标", "状态", "模式", "计费", "点数", "开始", "结束", "操作"], [["暂无数据", "-", "-", "空", "-", "-", "-", "-", "-", "-"]])}`;
+    return qimenTasks.length ? qimenTaskTable(qimenTasks) : `<div class="empty-state"><strong>暂无奇门任务</strong><span>提交解盘后会出现在这里。</span></div>`;
   }
   if (modal.type === "volParams") {
     return `<div class="form-grid"><label><span class="label">M1</span><input id="volM1" type="number" value="${quoteVolParams.m1}" min="1" max="120" /></label><label><span class="label">M2</span><input id="volM2" type="number" value="${quoteVolParams.m2}" min="1" max="120" /></label></div><div class="toolbar modal-actions"><button class="ghost-button" data-close-modal="1">取消</button><button class="primary-button" data-save-vol-params="1">确定</button></div>`;
@@ -1337,14 +1718,14 @@ function filteredStocks() {
 function relaxedStocks() {
   const filters = activeFilterPredicates();
   if (!filters.length) return [];
-  return data.stocks
+  const ranked = data.stocks
     .map((stock) => {
       const score = filters.reduce((sum, filter) => sum + (filter.pass(stock) ? 1 : 0), 0);
       return { ...stock, factorScore: score, factorTotal: filters.length };
     })
-    .filter((stock) => stock.factorScore > 0)
-    .sort((a, b) => b.factorScore - a.factorScore || sortScreenerRows(a, b))
-    .slice(0, 120);
+    .sort((a, b) => b.factorScore - a.factorScore || sortScreenerRows(a, b));
+  const positives = ranked.filter((stock) => stock.factorScore > 0);
+  return (positives.length ? positives : ranked).slice(0, 120);
 }
 
 function factorHitCounts() {
@@ -1610,7 +1991,7 @@ function screenerRelaxedState(activeLabel, factorTotal) {
     <div class="empty-state compact-empty">
       <div>
         <strong>严格组合暂未命中</strong>
-        <p>条件：${escapeHtml(activeLabel || "未选择因子")}。下方按匹配 ${factorTotal} 个因子的数量、成交额和强度排序。</p>
+        <p>条件：${escapeHtml(activeLabel || "未选择因子")}。下方按匹配 ${factorTotal} 个因子的数量、成交额和强度排序；若全部未命中，则展示最接近候选。</p>
       </div>
     </div>
   `;
@@ -1718,6 +2099,16 @@ function attachEvents() {
       modal = { type: "buy", productIndex: Number(button.dataset.buyProduct) };
       render();
     });
+  });
+  document.querySelector("[data-recharge-wallet]")?.addEventListener("click", () => {
+    const code = String(document.querySelector("#walletCode")?.value || "").trim();
+    const match = code.match(/(5000|2500|1000|500|300|200|100)/);
+    const points = match ? Number(match[1]) : 100;
+    appendWalletLedger("充值", points, code ? `兑换码 ${code}` : "手动充值点数");
+    persistQimenState();
+    modal = { type: "wallet" };
+    showToast(`已充值 ${points} 点。`, "success");
+    render();
   });
   document.querySelectorAll("[data-goto-page]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -1904,6 +2295,10 @@ function attachEvents() {
   });
   document.querySelectorAll("[data-chat-module]").forEach((button) => {
     button.addEventListener("click", async () => {
+      if (button.dataset.chatModule === "qimen") {
+        await handleQimenSubmit(button);
+        return;
+      }
       const target = document.querySelector(`#${button.dataset.target}`);
       const question = document.querySelector("#question")?.value || "";
       const mode = document.querySelector("#mode")?.value || "专家模式";
@@ -1931,8 +2326,24 @@ function attachEvents() {
     });
   });
   document.querySelector("[data-fill-now]")?.addEventListener("click", () => {
-    const target = document.querySelector("#qimenAnswer");
-    target.textContent = `已同步起局：${new Date().toLocaleString("zh-CN")}，城市：${document.querySelector("#city")?.value || "上海"}。`;
+    handleQimenSync();
+  });
+  document.querySelector("[data-reset-qimen]")?.addEventListener("click", () => {
+    qimenLastSync = null;
+    selectedQimenTaskId = qimenTasks[0]?.id || "";
+    persistQimenState();
+    showToast("表单已重置。", "success");
+    render();
+  });
+  document.querySelectorAll("[data-view-qimen-task]").forEach((button) => {
+    button.addEventListener("click", () => {
+      selectedQimenTaskId = button.dataset.viewQimenTask;
+      modal = null;
+      currentPage = "qimen";
+      persistQimenState();
+      renderNav();
+      render();
+    });
   });
   document.querySelectorAll("[data-add-watch]").forEach((button) => {
     button.addEventListener("click", (event) => {
@@ -2037,8 +2448,21 @@ function contextForModule(moduleName) {
     products: products.slice(0, 5).map((item) => ({ name: item[1], type: item[3], price: item[5] })),
     qimen: {
       itemType: document.querySelector("#itemType")?.value,
+      target: document.querySelector("#qimenTarget")?.value,
       stage: document.querySelector("#stage")?.value,
+      calendar: document.querySelector("#qimenCalendar")?.value,
+      time: document.querySelector("#qimenTime")?.value,
       city: document.querySelector("#city")?.value,
+      output: document.querySelector("#qimenOutput")?.value,
+      lastSync: qimenLastSync,
+      recentTasks: qimenTasks.slice(0, 5).map((task) => ({
+        submittedAt: task.submittedAt,
+        itemType: task.itemType,
+        target: task.target,
+        status: task.status,
+        points: task.points,
+      })),
+      wallet: walletSummary(),
     },
   };
 }

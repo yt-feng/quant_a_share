@@ -35,7 +35,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Clone enrichment: custom conditions, recent-N conditions, sort settings and saved strategies are now active filters and persist in browser storage.
 - Run controls: 交易日(不填则最新日), sort field, sort order, display columns, 筛选.
 - Table columns: 代码, 名称, 最新价, 涨跌幅, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
-- Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area.
+- Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area, including the all-zero case for over-strict custom filters.
 
 ## 行业
 
@@ -115,6 +115,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Task list view:
   - Columns: 提交时间, 类型, 目标, 状态, 模式, 计费, 点数, 开始, 结束, 操作.
   - Empty state supported.
+- Clone enrichment: sync 起局 deducts local points, wallet and task records persist in browser storage, submissions create task detail rows immediately, and DeepSeek responses are saved back into the selected task.
 
 ## Ai决策矩阵
 
