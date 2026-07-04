@@ -8,6 +8,7 @@ const stockLimit = process.env.MARKET_CACHE_STOCK_LIMIT || "8000";
 const remoteFallbackUrl = process.env.MARKET_CACHE_REMOTE_FALLBACK_URL || "https://quant-a-share.vercel.app/api/market";
 const remoteFallbackMinStocks = Number(process.env.MARKET_CACHE_REMOTE_FALLBACK_MIN_STOCKS || 4000);
 const remoteMoneyCoverageMinRatio = Number(process.env.MARKET_CACHE_REMOTE_MONEY_MIN_RATIO || 0.7);
+const richerUniverseMinExtra = Number(process.env.MARKET_CACHE_RICHER_UNIVERSE_MIN_EXTRA || 100);
 const MONEY_FIELDS = ["mainNet", "mainRatio", "superNet", "superRatio", "bigNet", "bigRatio", "midNet", "midRatio", "smallNet", "smallRatio"];
 const FINANCIAL_FIELDS = ["financialCached", "roe", "revenue", "netProfit", "grossMargin", "debtRatio", "reportDate"];
 const HISTORY_FIELDS = ["baostockCached", "ma5Price", "ma20Price", "ma60Price", "pct20", "pct60", "high60", "low60", "historyDate"];
@@ -68,17 +69,18 @@ async function fetchRemoteFallback() {
 function preserveRicherMarketUniverse(snapshot, previous) {
   const currentCount = snapshot.stocks?.length || 0;
   const previousCount = previous?.stocks?.length || 0;
-  if (!previous?.ok || previousCount < 1000 || previousCount <= currentCount * 1.25) return snapshot;
+  if (!previous?.ok || previousCount < 1000 || previousCount < currentCount + richerUniverseMinExtra) return snapshot;
+  const stocks = mergeRemoteStockFeatures(previous.stocks, snapshot.stocks);
   return {
     ...snapshot,
     source: `${snapshot.source}+previous-market-universe-preserved`,
-    stocks: previous.stocks,
+    stocks,
     stockUniverse: previous.stockUniverse,
     featureCoverage: previous.featureCoverage || previous.stockUniverse?.featureCoverage || snapshot.featureCoverage,
     dataCoverage: {
       ...(snapshot.dataCoverage || {}),
-      stocks: previous.stocks.length,
-      stockUniverseTotal: previous.stockUniverse?.total || previous.stocks.length,
+      stocks: stocks.length,
+      stockUniverseTotal: previous.stockUniverse?.total || stocks.length,
     },
     cacheSnapshot: {
       ...(snapshot.cacheSnapshot || {}),
@@ -212,12 +214,13 @@ async function preserveRemoteMarketUniverse(snapshot) {
     const remote = await fetchRemoteFallback();
     const remoteCount = remote?.stocks?.length || 0;
     if (!remote?.ok) return rebuildMarketMetrics(snapshot);
-    if (remoteCount > currentCount * 1.25) {
+    if (remoteCount >= currentCount + richerUniverseMinExtra) {
+      const stocks = mergeRemoteStockFeatures(remote.stocks || [], snapshot.stocks || []);
       return rebuildMarketMetrics({
         ...snapshot,
         source: `${snapshot.source}+remote-market-universe-preserved`,
         market: remote.market || snapshot.market,
-        stocks: remote.stocks,
+        stocks,
         stockUniverse: remote.stockUniverse,
         featureCoverage: remote.featureCoverage || remote.stockUniverse?.featureCoverage || snapshot.featureCoverage,
         limitPoolCounts: remote.limitPoolCounts || snapshot.limitPoolCounts,
