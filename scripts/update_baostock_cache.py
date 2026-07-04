@@ -135,10 +135,29 @@ def fetch_symbol(symbol: str, start_date: str, end_date: str):
     return summary
 
 
+def load_previous_payload():
+    if not OUTPUT_PATH.exists():
+        return {}
+    try:
+        return json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def previous_symbol_cache(previous_payload, symbol: str):
+    cached = previous_payload.get("symbols", {}).get(symbol)
+    if not cached or not cached.get("rows"):
+        return None
+    item = dict(cached)
+    item["reusedFromGeneratedAt"] = previous_payload.get("generatedAt", "")
+    return item
+
+
 def main():
     end_date = date.today()
     start_date = end_date - timedelta(days=LOOKBACK_DAYS)
     symbols = candidate_symbols()
+    previous_payload = load_previous_payload()
     payload = {
         "ok": True,
         "source": "baostock-history-cache",
@@ -148,21 +167,44 @@ def main():
         "requestedSymbols": symbols,
         "symbols": {},
         "errors": {},
+        "refreshErrors": {},
+        "reusedSymbols": [],
     }
     login = bs.login()
-    if login.error_code != "0":
-        raise RuntimeError(login.error_msg)
-    try:
+    if login.error_code == "0":
+        try:
+            for symbol in symbols:
+                try:
+                    payload["symbols"][symbol] = fetch_symbol(symbol, start_date.isoformat(), end_date.isoformat())
+                except Exception as error:
+                    cached = previous_symbol_cache(previous_payload, symbol)
+                    if cached:
+                        payload["symbols"][symbol] = cached
+                        payload["refreshErrors"][symbol] = str(error)
+                        payload["reusedSymbols"].append(symbol)
+                    else:
+                        payload["errors"][symbol] = str(error)
+        finally:
+            bs.logout()
+    else:
+        payload["refreshErrors"]["login"] = login.error_msg
         for symbol in symbols:
-            try:
-                payload["symbols"][symbol] = fetch_symbol(symbol, start_date.isoformat(), end_date.isoformat())
-            except Exception as error:
-                payload["errors"][symbol] = str(error)
-    finally:
-        bs.logout()
+            cached = previous_symbol_cache(previous_payload, symbol)
+            if cached:
+                payload["symbols"][symbol] = cached
+                payload["reusedSymbols"].append(symbol)
+            else:
+                payload["errors"][symbol] = login.error_msg
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_PATH.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({"output": str(OUTPUT_PATH), "symbols": list(payload["symbols"].keys()), "errors": payload["errors"]}, ensure_ascii=False, indent=2))
+    print(json.dumps({
+        "output": str(OUTPUT_PATH),
+        "symbols": list(payload["symbols"].keys()),
+        "cached": len(payload["symbols"]),
+        "reused": len(payload["reusedSymbols"]),
+        "errors": payload["errors"],
+        "refreshErrors": payload["refreshErrors"],
+    }, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
