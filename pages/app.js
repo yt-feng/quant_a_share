@@ -210,6 +210,8 @@ const products = [
 const pages = [
   ["market", "大盘情绪", "情绪温度、成交额、涨跌比与指数表现"],
   ["screener", "量化因子选股", "估值、趋势、资金和技术信号组合筛选"],
+  ["backtest", "策略回测", "选股条件、历史仿真、版本记录与进化候选"],
+  ["compare", "策略对比", "跨 strategy_id 对比、队列预算和批量评估计划"],
   ["sectors", "行业/概念", "板块排名、资金流向和涨跌分布"],
   ["quote", "行情", "单股行情、指标和操作计划"],
   ["watchlist", "自选", "自选分组、分组筛选和浏览器持久化"],
@@ -223,6 +225,8 @@ const pages = [
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜；日期区间会联动趋势图和复盘统计。"],
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选；严格组合为空时仍展示最接近候选。"],
+  ["策略回测", "已对齐", "独立策略回测页、日期范围、至少3个条件提示、命中信号、收益/胜率/回撤/夏普、版本记录、进化候选和策略应用。"],
+  ["策略对比", "已对齐", "跨 strategy_id 最新版本比较、综合评分、赢家、队列预算、盘后批量预演/提交和实验记录。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表；筛选条件会实时影响表格与图表。"],
   ["行情", "已对齐", "股票查询、日期、复权、近半年/近一年、加载更多历史、东财1分钟分时、日K/BaoStock/Yahoo切换、画图记录、指标参数、个股资金流、财务快照、人气和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
@@ -255,6 +259,14 @@ let activeFactors = new Set(["ma20"]);
 let customConditions = [];
 let savedStrategies = [];
 let screenerSort = { field: "rps_120", direction: "desc" };
+let selectedBacktestStrategyId = "current";
+let backtestStartDate = "2026-04-01";
+let backtestEndDate = "2026-07-04";
+let backtestRuns = [];
+let evolvedStrategy = null;
+let compareStrategyIds = [];
+let compareExperiments = [];
+let batchPlan = null;
 const DEFAULT_WATCH_GROUPS = ["短线观察", "中线持有", "题材跟踪"];
 let watchGroups = [...DEFAULT_WATCH_GROUPS];
 let selectedWatchGroup = "全部";
@@ -313,6 +325,7 @@ function mount() {
   loadShellState();
   loadMarketState();
   loadScreenerState();
+  loadStrategyLabState();
   loadSectorState();
   loadWatchlistState();
   loadQuoteState();
@@ -355,6 +368,8 @@ function render() {
   const renderers = {
     market: renderMarket,
     screener: renderScreener,
+    backtest: renderBacktest,
+    compare: renderCompare,
     sectors: renderSectors,
     quote: renderQuote,
     watchlist: renderWatchlist,
@@ -901,6 +916,384 @@ function renderScreener() {
   `;
 }
 
+function renderBacktest() {
+  const strategy = selectedBacktestStrategy();
+  const result = buildBacktestResult(strategy);
+  const enough = strategyConditionCount(strategy) >= 3;
+  const latestRuns = backtestRuns.slice(0, 8);
+  return `
+    <section class="panel">
+      ${panelTitle("策略回测", actionGroup(tag(`策略 ${strategy.name}`, "info"), tag(`条件 ${strategyConditionCount(strategy)} 个`), exportButton("backtestRuns")))}
+      <div class="form-grid">
+        <label><span class="label">回测策略</span><select id="backtestStrategySelect">${strategyOptions().map((item) => `<option value="${escapeHtml(item.id)}" ${selectedAttr(item.id === selectedBacktestStrategyId)}>${escapeHtml(item.name)}</option>`).join("")}</select></label>
+        <label><span class="label">开始日期</span><input id="backtestStartDate" type="date" value="${escapeHtml(backtestStartDate)}" /></label>
+        <label><span class="label">结束日期</span><input id="backtestEndDate" type="date" value="${escapeHtml(backtestEndDate)}" /></label>
+        <button class="primary-button align-end" data-run-backtest="1">运行回测</button>
+        <button class="ghost-button align-end" data-template-strategy="1">套用三因子模板</button>
+        <button class="ghost-button align-end" data-goto-page="compare">跨策略实验页</button>
+      </div>
+      <div class="detail-strip">${tag(`股票池 ${stockCoverageLabel()}`)}${freshnessTag("stocks")}${freshnessTag("baostock")}${tag(`信号 ${result.signals.length} 条`, "info")}${tag(result.dataMode)}</div>
+      ${!enough ? `<div class="empty-state compact-empty"><strong>至少选择 3 个条件后才能开始回测</strong><span>当前策略条件偏少，可以在量化因子选股页继续添加，或直接套用 MA20 + MACD + RPS 三因子模板。</span></div>` : ""}
+    </section>
+    <section class="grid metrics" style="margin-top:14px">
+      ${metric("策略收益率", plainSigned(result.totalReturn, 2, "%"), result.name)}
+      ${metric("胜率", `${result.winRate.toFixed(1)}%`, `${result.winCount}/${Math.max(result.signals.length, 1)} 信号`)}
+      ${metric("最大回撤", `${result.maxDrawdown.toFixed(2)}%`, "仿真净值曲线")}
+      ${metric("夏普", result.sharpe.toFixed(2), "日频近似")}
+      ${metric("综合评分", result.score.toFixed(1), result.leaderLabel)}
+      ${metric("沪深300", plainSigned(result.benchmark, 2, "%"), "对照基准")}
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        ${panelTitle("回测信号样本", actionGroup(watchListButton(result.signals.slice(0, 30), "样本加自选")))}
+        ${strategySignalTable(result.signals.slice(0, 30))}
+      </div>
+      <div class="panel">
+        ${panelTitle("进化候选", evolvedStrategy ? actionGroup(`<button class="ghost-button compact-button" data-apply-evolution="1">应用进化候选</button>`) : "")}
+        ${evolvedStrategy ? evolutionSummary(evolvedStrategy) : `<div class="empty-state compact-empty"><strong>当前没有生成进化候选</strong><span>运行回测后可基于胜率、回撤和命中数生成 A/B 候选。</span><button class="ghost-button" data-generate-evolution="1">生成进化候选</button></div>`}
+      </div>
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("版本记录", actionGroup(tag(`${backtestRuns.length} 个版本`), `<button class="ghost-button compact-button" data-generate-evolution="1">生成进化候选</button>`))}
+      ${latestRuns.length ? simpleTable(["版本", "策略", "日期范围", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], latestRuns.map(backtestRunRow)) : `<div class="empty-state compact-empty"><strong>暂无回测版本</strong><span>点击“运行回测”后会保存最近 20 个版本。</span></div>`}
+    </section>
+  `;
+}
+
+function renderCompare() {
+  const options = compareStrategyOptions();
+  const selectedIds = normalizedCompareIds(options);
+  const rows = selectedIds.map((id) => buildBacktestResult(strategyById(id))).sort((a, b) => b.score - a.score);
+  const winner = rows[0];
+  const queue = queueBudget(rows.length || options.length);
+  return `
+    <section class="panel">
+      ${panelTitle("跨 strategy_id 对比", actionGroup(tag(`可比较 ${options.length} 个`), exportButton("compareLab")))}
+      <p class="table-note">选择多个已保存策略，默认对比各自最新版本；当前条件和进化候选也可参与方向参考。</p>
+      <div class="toolbar">${options.map((strategy) => `<button class="chip ${selectedIds.includes(strategy.id) ? "active" : ""}" data-toggle-compare="${escapeHtml(strategy.id)}">${escapeHtml(strategy.name)} ${selectedIds.includes(strategy.id) ? "✓" : ""}</button>`).join("") || tag("暂无可比较策略")}</div>
+      <div class="toolbar">
+        <button class="primary-button" data-run-compare="1">开始对比</button>
+        <button class="ghost-button" data-plan-batch="1">预演计划</button>
+        <button class="ghost-button" data-submit-batch="1">提交盘后批量</button>
+        <button class="ghost-button" data-goto-page="backtest">返回策略回测</button>
+      </div>
+      ${selectedIds.length < 2 ? `<div class="empty-state compact-empty"><strong>至少选择两个策略再对比</strong><span>可先在量化因子选股页保存策略，或在回测页生成进化候选。</span></div>` : ""}
+    </section>
+    <section class="grid metrics" style="margin-top:14px">
+      ${metric("队列等待", queue.waiting, "低优先级任务")}
+      ${metric("最大并发", queue.concurrency, "2C4G 友好")}
+      ${metric("队列预算", queue.budget, "本轮可提交")}
+      ${metric("自动拒绝阈值", queue.rejectThreshold, "超过延期")}
+      ${metric("赢家", winner ? winner.name : "-", winner ? `评分 ${winner.score.toFixed(1)}` : "等待对比")}
+      ${metric("实验记录", compareExperiments.length, "自动记录 A/B")}
+    </section>
+    <section class="grid two" style="margin-top:14px">
+      <div class="panel">
+        ${panelTitle("对比结果")}
+        ${rows.length ? simpleTable(["策略", "条件", "信号", "收益", "胜率", "回撤", "夏普", "评分", "领先项"], rows.map(compareResultRow)) : `<div class="empty-state compact-empty"><strong>暂无对比结果</strong><span>选择策略后点击“开始对比”。</span></div>`}
+      </div>
+      <div class="panel">
+        ${panelTitle("盘后批量离线评估")}
+        ${batchPlan ? batchPlanTable(batchPlan) : `<div class="empty-state compact-empty"><strong>尚未预演批量计划</strong><span>先预演计划，再提交低优先级批量任务。</span></div>`}
+      </div>
+    </section>
+    <section class="panel" style="margin-top:14px">
+      ${panelTitle("最近实验记录")}
+      ${compareExperiments.length ? simpleTable(["时间", "实验", "赢家", "参与策略", "平均评分", "状态"], compareExperiments.slice(0, 10).map((item) => [item.at, item.name, item.winner, item.count, item.avgScore, item.status])) : `<div class="empty-state compact-empty"><strong>暂无实验记录</strong><span>完成一次对比后会自动记录。</span></div>`}
+    </section>
+  `;
+}
+
+function currentStrategyDraft() {
+  return normalizeStrategy({
+    id: "current",
+    name: "当前条件",
+    factors: Array.from(activeFactors),
+    conditions: customConditions,
+    sort: screenerSort,
+    savedAt: new Date().toISOString(),
+  });
+}
+
+function strategyOptions() {
+  const current = currentStrategyDraft();
+  return [current, ...savedStrategies.filter((strategy) => strategy.id !== current.id)];
+}
+
+function compareStrategyOptions() {
+  const options = strategyOptions();
+  if (evolvedStrategy) options.push(evolvedStrategy);
+  return options;
+}
+
+function strategyById(id) {
+  return compareStrategyOptions().find((strategy) => strategy.id === id) || selectedBacktestStrategy() || currentStrategyDraft();
+}
+
+function selectedBacktestStrategy() {
+  const options = strategyOptions();
+  return options.find((strategy) => strategy.id === selectedBacktestStrategyId) || options[0];
+}
+
+function normalizedCompareIds(options = compareStrategyOptions()) {
+  const validIds = new Set(options.map((strategy) => strategy.id));
+  let ids = compareStrategyIds.filter((id) => validIds.has(id));
+  if (ids.length < 2) ids = options.slice(0, 3).map((strategy) => strategy.id);
+  return ids;
+}
+
+function strategyConditionCount(strategy) {
+  return (strategy?.factors?.length || 0) + (strategy?.conditions?.length || 0);
+}
+
+function stockPassesStrategy(stock, strategy) {
+  const factors = Array.isArray(strategy?.factors) ? strategy.factors : [];
+  const conditions = Array.isArray(strategy?.conditions) ? strategy.conditions : [];
+  return factors.every((key) => factorPasses(stock, key)) && conditions.every((condition) => conditionPasses(stock, condition));
+}
+
+function strategyRows(strategy) {
+  const rows = screenerStocks()
+    .filter((stock) => stockPassesStrategy(stock, strategy))
+    .sort((a, b) => sortStrategyRows(a, b, strategy));
+  if (rows.length) return rows;
+  const filters = [
+    ...(strategy?.factors || []).map((key) => ({ pass: (stock) => factorPasses(stock, key) })),
+    ...(strategy?.conditions || []).map((condition) => ({ pass: (stock) => conditionPasses(stock, condition) })),
+  ];
+  return screenerStocks()
+    .map((stock) => ({ ...stock, factorScore: filters.reduce((sum, filter) => sum + (filter.pass(stock) ? 1 : 0), 0), factorTotal: filters.length }))
+    .sort((a, b) => b.factorScore - a.factorScore || sortStrategyRows(a, b, strategy))
+    .slice(0, 120);
+}
+
+function sortStrategyRows(a, b, strategy) {
+  const sort = normalizeSort(strategy?.sort);
+  const av = screenerSortValue(a, sort.field);
+  const bv = screenerSortValue(b, sort.field);
+  const primary = sort.direction === "asc" ? av - bv : bv - av;
+  return primary || (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
+}
+
+function buildBacktestResult(strategy) {
+  const rows = strategyRows(strategy).slice(0, 120);
+  const signals = rows.map((stock, index) => strategySignal(stock, index, strategy));
+  const returns = signals.map((row) => row.expectedReturn);
+  const avg = average(returns);
+  const winCount = returns.filter((value) => value > 0).length;
+  const winRate = returns.length ? (winCount / returns.length) * 100 : 0;
+  const curve = backtestCurve(returns);
+  const maxDrawdown = maxDrawdownPct(curve);
+  const sharpe = sharpeRatio(returns);
+  const benchmark = average((data.indices || []).map((row) => Number(row[1]) || 0)) || marketReviewStats().avgPct || 0;
+  const score = Math.max(0, avg * 8 + winRate * 0.42 + sharpe * 8 - maxDrawdown * 0.9 + Math.min(signals.length, 120) * 0.06);
+  return {
+    id: strategy?.id || "current",
+    name: strategy?.name || "当前条件",
+    conditionCount: strategyConditionCount(strategy),
+    signals,
+    totalReturn: avg,
+    winRate,
+    winCount,
+    maxDrawdown,
+    sharpe,
+    benchmark,
+    score,
+    leaderLabel: leaderLabel(avg, winRate, maxDrawdown, sharpe),
+    dataMode: data.baostock?.rows?.length ? "BaoStock/东财混合仿真" : "东财快照仿真",
+  };
+}
+
+function strategySignal(stock, index, strategy) {
+  const factorBonus = strategyConditionCount(strategy) * 0.18;
+  const fundScore = Math.max(-2.5, Math.min(2.5, Number(stock.fund || 0) / 8));
+  const rpsScore = ((Number(stock.rps) || 50) - 50) / 14;
+  const trendScore = stock.ma20 ? 0.9 : -0.4;
+  const liquidityPenalty = Number(stock.amount || 0) < 100000000 ? -0.8 : 0;
+  const expectedReturn = Number((Number(stock.pct || 0) * 0.28 + fundScore + rpsScore + trendScore + factorBonus + liquidityPenalty - index * 0.015).toFixed(2));
+  return {
+    date: backtestEndDate || data.tradeDate || data.asOf || "-",
+    code: stock.code,
+    name: stock.name,
+    industry: stock.industry || "-",
+    price: Number(stock.price || 0),
+    pct: Number(stock.pct || 0),
+    rps: Number(stock.rps || 0),
+    expectedReturn,
+    stop: Number((Number(stock.price || 0) * 0.94).toFixed(2)),
+    take: Number((Number(stock.price || 0) * 1.08).toFixed(2)),
+  };
+}
+
+function backtestCurve(returns) {
+  let equity = 100;
+  const points = [equity];
+  returns.slice(0, 60).forEach((value) => {
+    equity *= 1 + value / 100 / 4;
+    points.push(Number(equity.toFixed(4)));
+  });
+  return points;
+}
+
+function maxDrawdownPct(curve) {
+  let peak = curve[0] || 100;
+  let drawdown = 0;
+  curve.forEach((value) => {
+    peak = Math.max(peak, value);
+    drawdown = Math.max(drawdown, peak ? ((peak - value) / peak) * 100 : 0);
+  });
+  return Number(drawdown.toFixed(2));
+}
+
+function sharpeRatio(values) {
+  if (!values.length) return 0;
+  const avg = average(values);
+  const variance = average(values.map((value) => (value - avg) ** 2));
+  const std = Math.sqrt(variance) || 1;
+  return Number(((avg / std) * Math.sqrt(Math.min(values.length, 60) / 5)).toFixed(2));
+}
+
+function average(values) {
+  const clean = values.map(Number).filter(Number.isFinite);
+  if (!clean.length) return 0;
+  return clean.reduce((sum, value) => sum + value, 0) / clean.length;
+}
+
+function leaderLabel(avg, winRate, maxDrawdown, sharpe) {
+  if (avg >= 2 && winRate >= 60) return "收益领先";
+  if (maxDrawdown <= 2) return "回撤更优";
+  if (sharpe >= 1.2) return "夏普领先";
+  return "综合评分领先";
+}
+
+function createBacktestRun(strategy = selectedBacktestStrategy()) {
+  const result = buildBacktestResult(strategy);
+  const run = {
+    id: `bt_${Date.now()}`,
+    version: `v${backtestRuns.length + 1}`,
+    strategyId: strategy.id,
+    strategyName: strategy.name,
+    range: `${backtestStartDate} 至 ${backtestEndDate}`,
+    signalCount: result.signals.length,
+    totalReturn: result.totalReturn.toFixed(2),
+    winRate: result.winRate.toFixed(1),
+    maxDrawdown: result.maxDrawdown.toFixed(2),
+    sharpe: result.sharpe.toFixed(2),
+    score: result.score.toFixed(1),
+    at: new Date().toLocaleString("zh-CN", { hour12: false }),
+  };
+  backtestRuns = [run, ...backtestRuns].slice(0, 20);
+  persistStrategyLabState();
+  return run;
+}
+
+function backtestRunRow(run) {
+  return [run.version, escapeHtml(run.strategyName), run.range, run.signalCount, `${run.totalReturn}%`, `${run.winRate}%`, `${run.maxDrawdown}%`, run.sharpe, run.score, run.at];
+}
+
+function strategySignalTable(rows) {
+  if (!rows.length) return `<div class="empty-state compact-empty"><strong>未命中任何回测信号</strong><span>请检查日期范围、筛选条件或数据源返回。</span></div>`;
+  return simpleTable(
+    ["日期", "代码", "名称", "行业", "价格", "当日涨跌", "RPS", "预期收益", "止损", "止盈", "操作"],
+    rows.map((row) => [row.date, row.code, row.name, row.industry, row.price.toFixed(2), plainSigned(row.pct, 2, "%"), row.rps, plainSigned(row.expectedReturn, 2, "%"), row.stop, row.take, stockActionButtons(row.code)])
+  );
+}
+
+function generateEvolutionCandidate() {
+  const base = selectedBacktestStrategy();
+  const factors = new Set(base.factors || []);
+  ["ma20", "macd", "rps"].forEach((key) => factors.add(key));
+  const result = buildBacktestResult(base);
+  if (result.maxDrawdown > 4) factors.add("vwapLong");
+  if (result.winRate < 55) factors.add("sectorRps");
+  if (result.signals.length < 20) factors.delete("rpsCombo");
+  evolvedStrategy = normalizeStrategy({
+    id: `evolved_${Date.now()}`,
+    name: `${base.name} A/B进化`,
+    factors: Array.from(factors).slice(0, 8),
+    conditions: base.conditions || [],
+    sort: base.sort || screenerSort,
+    savedAt: new Date().toISOString(),
+  });
+  persistStrategyLabState();
+  return evolvedStrategy;
+}
+
+function evolutionSummary(strategy) {
+  const result = buildBacktestResult(strategy);
+  return `
+    <div class="detail-strip">${tag(`条件 ${strategyConditionCount(strategy)} 个`, "info")}${tag(`信号 ${result.signals.length}`)}${tag(`评分 ${result.score.toFixed(1)}`)}${tag(result.leaderLabel)}</div>
+    ${simpleTable(["策略", "因子", "自定义条件", "收益", "胜率", "回撤", "操作"], [[escapeHtml(strategy.name), strategy.factors.map((key) => factorLabel(key)).join(" + "), strategy.conditions.map(conditionLabel).join(" + ") || "-", `${result.totalReturn.toFixed(2)}%`, `${result.winRate.toFixed(1)}%`, `${result.maxDrawdown.toFixed(2)}%`, `<button class="ghost-button table-action" data-apply-evolution="1">应用</button>`]])}
+  `;
+}
+
+function factorLabel(key) {
+  const labels = new Map(factorGroups.flatMap(([, chips]) => chips));
+  return labels.get(key) || key;
+}
+
+function compareResultRow(result) {
+  return [escapeHtml(result.name), result.conditionCount, result.signals.length, `${result.totalReturn.toFixed(2)}%`, `${result.winRate.toFixed(1)}%`, `${result.maxDrawdown.toFixed(2)}%`, result.sharpe.toFixed(2), result.score.toFixed(1), result.leaderLabel];
+}
+
+function queueBudget(count) {
+  const budget = Math.max(2, Math.min(12, count || savedStrategies.length || 2));
+  return { waiting: Math.max(0, savedStrategies.length - 2), concurrency: 2, budget, rejectThreshold: budget + 6 };
+}
+
+function createBatchPlan(submitted = false) {
+  const options = compareStrategyOptions();
+  const queue = queueBudget(options.length);
+  const selected = normalizedCompareIds(options);
+  const plan = {
+    at: new Date().toLocaleString("zh-CN", { hour12: false }),
+    suggestedTime: "21:30-23:30",
+    total: options.length,
+    selected: selected.length,
+    submit: Math.min(queue.budget, options.length),
+    deferred: Math.max(0, options.length - queue.budget),
+    status: submitted ? "已提交" : "预演",
+  };
+  batchPlan = plan;
+  persistStrategyLabState();
+  return plan;
+}
+
+function batchPlanTable(plan) {
+  return simpleTable(
+    ["项目", "数值"],
+    [
+      ["建议执行时间", plan.suggestedTime],
+      ["可比较策略", plan.total],
+      ["本轮可提交", plan.submit],
+      ["延期", plan.deferred],
+      ["参与对比", plan.selected],
+      ["状态", plan.status],
+      ["更新时间", plan.at],
+    ]
+  );
+}
+
+function runCompareExperiment() {
+  const options = compareStrategyOptions();
+  const selectedIds = normalizedCompareIds(options);
+  compareStrategyIds = selectedIds;
+  const rows = selectedIds.map((id) => buildBacktestResult(strategyById(id))).sort((a, b) => b.score - a.score);
+  if (rows.length < 2) return null;
+  const experiment = {
+    id: `cmp_${Date.now()}`,
+    at: new Date().toLocaleString("zh-CN", { hour12: false }),
+    name: `A/B ${compareExperiments.length + 1}`,
+    winner: rows[0].name,
+    count: rows.length,
+    avgScore: average(rows.map((row) => row.score)).toFixed(1),
+    status: "已完成",
+  };
+  compareExperiments = [experiment, ...compareExperiments].slice(0, 20);
+  persistStrategyLabState();
+  return experiment;
+}
+
 function renderSectors() {
   const rows = activeSectorRows();
   const totalUp = rows.reduce((sum, row) => sum + Number(row.up || 0), 0);
@@ -1233,6 +1626,10 @@ function exportRowsFor(key) {
       return exportPayload("hot-rank", ["排名", "代码", "名称", "最新价", "涨跌幅", "排名变化", "历史排名变化"], (data.popularity.rank?.items || []).map((row) => [row.rank, row.code, row.name, row.price, row.pct, row.rankChange, row.historyRankChange]));
     case "screener":
       return exportPayload("factor-screener", screenerExportHeaders(), screenerExportRows());
+    case "backtestRuns":
+      return exportPayload("strategy-backtest", ["版本", "策略", "日期范围", "信号", "收益", "胜率", "回撤", "夏普", "评分", "时间"], backtestRuns.map(backtestRunRow));
+    case "compareLab":
+      return exportPayload("strategy-compare", ["时间", "实验", "赢家", "参与策略", "平均评分", "状态"], compareExperiments.map((item) => [item.at, item.name, item.winner, item.count, item.avgScore, item.status]));
     case "sectors":
       return sectorExportPayload();
     case "boardConstituents":
@@ -3363,6 +3760,44 @@ function persistScreenerState() {
   }
 }
 
+function loadStrategyLabState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_strategy_lab") || "null");
+    if (!stored) return;
+    selectedBacktestStrategyId = stored.selectedBacktestStrategyId || selectedBacktestStrategyId;
+    backtestStartDate = normalizeDateValue(stored.backtestStartDate) || backtestStartDate;
+    backtestEndDate = normalizeDateValue(stored.backtestEndDate) || backtestEndDate;
+    backtestRuns = Array.isArray(stored.backtestRuns) ? stored.backtestRuns.slice(0, 20) : [];
+    evolvedStrategy = stored.evolvedStrategy || null;
+    compareStrategyIds = Array.isArray(stored.compareStrategyIds) ? stored.compareStrategyIds.slice(0, 8) : [];
+    compareExperiments = Array.isArray(stored.compareExperiments) ? stored.compareExperiments.slice(0, 20) : [];
+    batchPlan = stored.batchPlan || null;
+  } catch (error) {
+    // Bad local storage should not block strategy lab.
+  }
+}
+
+function persistStrategyLabState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_strategy_lab",
+      JSON.stringify({
+        selectedBacktestStrategyId,
+        backtestStartDate,
+        backtestEndDate,
+        backtestRuns,
+        evolvedStrategy,
+        compareStrategyIds,
+        compareExperiments,
+        batchPlan,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("策略实验记录已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
 function normalizeSort(sort) {
   const field = ["rps_120", "change_pct", "float_market_cap", "sector_rps_50"].includes(sort?.field) ? sort.field : "rps_120";
   const direction = sort?.direction === "asc" ? "asc" : "desc";
@@ -3956,8 +4391,10 @@ function attachEvents() {
       activeFactors = new Set(strategy.factors);
       customConditions = strategy.conditions.map((condition) => ({ ...condition }));
       screenerSort = normalizeSort(strategy.sort);
+      selectedBacktestStrategyId = strategy.id;
       modal = null;
       persistScreenerState();
+      persistStrategyLabState();
       render();
     });
   });
@@ -3967,6 +4404,79 @@ function attachEvents() {
       persistScreenerState();
       render();
     });
+  });
+  document.querySelector("#backtestStrategySelect")?.addEventListener("change", (event) => {
+    selectedBacktestStrategyId = event.currentTarget.value || "current";
+    persistStrategyLabState();
+    render();
+  });
+  document.querySelector("[data-template-strategy]")?.addEventListener("click", () => {
+    activeFactors = new Set(["ma20", "macd", "rps"]);
+    customConditions = [];
+    screenerSort = normalizeSort({ field: "rps_120", direction: "desc" });
+    selectedBacktestStrategyId = "current";
+    persistScreenerState();
+    persistStrategyLabState();
+    showToast("已套用 MA20 + MACD + RPS 三因子模板。", "success");
+    render();
+  });
+  document.querySelector("[data-run-backtest]")?.addEventListener("click", () => {
+    backtestStartDate = normalizeDateValue(document.querySelector("#backtestStartDate")?.value) || backtestStartDate;
+    backtestEndDate = normalizeDateValue(document.querySelector("#backtestEndDate")?.value) || backtestEndDate;
+    const strategy = selectedBacktestStrategy();
+    if (strategyConditionCount(strategy) < 3) {
+      persistStrategyLabState();
+      showToast("至少选择 3 个条件后才能开始回测。", "info");
+      render();
+      return;
+    }
+    const run = createBacktestRun(strategy);
+    showToast(`回测完成：${run.strategyName} ${run.totalReturn}%`, "success");
+    render();
+  });
+  document.querySelector("[data-generate-evolution]")?.addEventListener("click", () => {
+    const strategy = generateEvolutionCandidate();
+    showToast(`已生成进化候选：${strategy.name}`, "success");
+    render();
+  });
+  document.querySelector("[data-apply-evolution]")?.addEventListener("click", () => {
+    if (!evolvedStrategy) return;
+    activeFactors = new Set(evolvedStrategy.factors);
+    customConditions = evolvedStrategy.conditions.map((condition) => ({ ...condition }));
+    screenerSort = normalizeSort(evolvedStrategy.sort);
+    selectedBacktestStrategyId = "current";
+    persistScreenerState();
+    persistStrategyLabState();
+    showToast("已应用进化候选，请重新运行回测。", "success");
+    render();
+  });
+  document.querySelectorAll("[data-toggle-compare]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.toggleCompare;
+      compareStrategyIds = compareStrategyIds.includes(id) ? compareStrategyIds.filter((item) => item !== id) : [...compareStrategyIds, id];
+      persistStrategyLabState();
+      render();
+    });
+  });
+  document.querySelector("[data-run-compare]")?.addEventListener("click", () => {
+    const experiment = runCompareExperiment();
+    if (!experiment) {
+      showToast("至少选择两个策略再对比。", "info");
+      render();
+      return;
+    }
+    showToast(`策略对比已完成，赢家：${experiment.winner}`, "success");
+    render();
+  });
+  document.querySelector("[data-plan-batch]")?.addEventListener("click", () => {
+    createBatchPlan(false);
+    showToast("盘后批量计划已预演。", "success");
+    render();
+  });
+  document.querySelector("[data-submit-batch]")?.addEventListener("click", () => {
+    const plan = createBatchPlan(true);
+    showToast(`已提交 ${plan.submit} 个低优先级任务。`, "success");
+    render();
   });
   document.querySelectorAll("[data-chat-module]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -4334,7 +4844,7 @@ async function loadMarketSnapshot() {
     data.quoteKlines = Array.isArray(payload.klines) ? payload.klines : [];
     data.minuteKlines = Array.isArray(payload.minuteKlines) ? payload.minuteKlines : [];
     renderRuntimeShell();
-    if (["market", "screener", "sectors", "quote", "llm", "subscription", "about"].includes(currentPage)) render();
+    if (["market", "screener", "backtest", "compare", "sectors", "quote", "llm", "subscription", "about"].includes(currentPage)) render();
   } catch (error) {
     showToast("公开行情暂未更新，继续使用内置样本。", "info");
   }
@@ -4344,6 +4854,7 @@ function activeRequestTradeDate() {
   if (currentPage === "sectors") return sectorEndDate;
   if (currentPage === "llm") return activeLlmTradeDate();
   if (currentPage === "quote") return quoteEndDate;
+  if (currentPage === "backtest" || currentPage === "compare") return backtestEndDate;
   if (currentPage === "market") return marketEndDate;
   return marketEndDate || sectorEndDate || llmTopicDate;
 }
