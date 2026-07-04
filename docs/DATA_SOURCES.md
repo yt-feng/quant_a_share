@@ -62,7 +62,7 @@
   - 行业/概念 date range and LLM per-tab transaction dates persist in browser storage, enter chat context and are sent to `/api/market?date=YYYYMMDD` when refreshing.
 - Freshness badges
   - Market, sector, quote and LLM table headers now expose live/snapshot/memory-cache/cloud-cache/backup-source freshness from the same `/api/market` payload.
-  - Chat context includes normalized `dataFreshness` rows alongside the source-coverage rows.
+  - Chat context includes normalized `dataFreshness` rows alongside the source-coverage rows and the top-level production coverage summary from `/api/market`.
 - Table exports
   - Market review, source coverage, limit pools, Stock Connect, ETF flow, hot rank, factor screener, boards, quote money flow, fundamentals, BaoStock rows, popularity, announcements, disclosures, LLM tables, research reports and AI history now export current-view CSV files in-browser.
   - Factor-screener exports include match score, main-money amount/ratio and feature-source labels, using the same `/api/market` payload and active filters as the visible tables.

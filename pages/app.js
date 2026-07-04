@@ -59,6 +59,9 @@ const data = {
   asOf: "",
   tradeDate: "",
   stockUniverse: { total: 0, returned: 0, limit: 6000, leaderSample: 0, source: "" },
+  featureCoverage: { total: 0, mainMoney: 0, limitPool: 0, hotRank: 0, financialCache: 0, baostockCache: 0 },
+  limitPoolCounts: { limitUp: 0, broken: 0, strong: 0, maxStreak: 0, sealFundYi: 0 },
+  dataCoverage: null,
   cacheSnapshot: null,
   stocks: [
     { code: "300750.SZ", name: "宁德时代", price: 268.4, pct: 3.8, industry: "电池", rps: 88, fund: 14.2, pe: 28, pb: 3.1, ma20: true, macd: true },
@@ -1815,6 +1818,8 @@ function exportRowsFor(key) {
       return exportPayload("market-review", ["类别", "日期/维度", "数值", "说明"], marketReviewExportRows());
     case "sourceCoverage":
       return exportPayload("source-coverage", ["来源", "状态", "覆盖", "最近样本", "新鲜度", "用途"], sourceCoverageExportRows());
+    case "productionCoverage":
+      return exportPayload("production-coverage", ["维度", "当前值", "口径", "说明"], productionCoverageRows());
     case "limitPools":
       return exportPayload("limit-pools", ["池", "交易日", "排名", "代码", "名称", "价格", "涨跌幅", "连板", "首次封板", "最后封板", "封板资金_亿", "成交额_亿", "换手率", "行业", "原因"], limitPoolExportRows());
     case "limitLadder":
@@ -1973,6 +1978,26 @@ function sourceCoverageExportRows() {
     const info = freshness.get(keyBySource[row[0]]);
     return [row[0], row[1], row[2], row[3], info ? `${info.mode} · ${info.latest}` : "-", row[4]];
   });
+}
+
+function productionCoverageRows() {
+  const feature = data.featureCoverage || data.stockUniverse?.featureCoverage || {};
+  const pools = data.limitPoolCounts || {};
+  const coverage = data.dataCoverage || {};
+  const stockTotal = Number(feature.total || coverage.stockUniverseTotal || data.stockUniverse?.total || data.stocks.length) || 0;
+  const ratio = (value, total = stockTotal) => (total ? `${value || 0}/${total} (${Math.round(((Number(value) || 0) / total) * 100)}%)` : `${value || 0}`);
+  return [
+    ["股票池", coverage.stocks || data.stocks.length, `全市场 ${coverage.stockUniverseTotal || data.stockUniverse?.total || data.stocks.length}`, "生产接口返回给前端的 A 股股票池"],
+    ["主力资金字段", ratio(feature.mainMoney), "Eastmoney clist 主/超/大/中/小单", "因子选股资金字段覆盖"],
+    ["涨停/炸板/强势池", `${pools.limitUp || 0}/${pools.broken || 0}/${pools.strong || 0}`, `连板高度 ${pools.maxStreak || 0} · 封板资金 ${pools.sealFundYi || 0}亿`, "Eastmoney 三池明细"],
+    ["行业/概念", `${coverage.sectors || data.sectors.length}/${coverage.concepts || data.concepts.length}`, "行业 / 概念", "板块排名、概念热度和 LLM 主题来源"],
+    ["ETF/北向", `${coverage.etfs || data.etfs?.rows?.length || 0}/${coverage.northboundRows || data.northbound?.rows?.length || 0}`, "ETF 行 / 北向行", "大盘情绪与资金复盘"],
+    ["个股资金流", coverage.moneyFlowRows || data.moneyFlow?.rows?.length || 0, "日资金流行数", "行情页个股主力/超大单/大单趋势"],
+    ["财务字段缓存", `${feature.financialCache || 0}股 / ${coverage.fundamentalsRows || data.fundamentals?.rows?.length || 0}项`, "GitHub Actions financial-cache + 实时财务", "估值、盈利、ROE 等财报字段"],
+    ["BaoStock历史缓存", `${feature.baostockCache || 0}股 / ${coverage.baostockRows || data.baostock?.rows?.length || 0}行`, "GitHub Actions baostock-cache", "历史K线、估值、换手、均线和收益"],
+    ["人气/公告/研报", `${coverage.hotRank || 0}/${coverage.announcements || 0}/${coverage.researchReports || 0}`, "人气榜 / 公告 / 研报", "热点、事件和产业链证据"],
+    ["K线备份", `${coverage.minuteKlines || data.minuteKlines.length}/${coverage.yahooKlines || data.yahooChart?.klines?.length || 0}`, "东财分钟线 / Yahoo日线", "行情页图表和全球备份"],
+  ];
 }
 
 function limitPoolExportRows() {
@@ -4468,6 +4493,11 @@ function renderAbout() {
       ${sourceCoverageTable()}
     </section>
     <section class="panel" style="margin-top:14px">
+      ${panelTitle("生产覆盖摘要", exportButton("productionCoverage"))}
+      <div class="detail-strip">${tag(`featureCoverage ${data.featureCoverage?.total || 0}`, "info")}${tag(`limitPools ${data.limitPoolCounts?.limitUp || 0}/${data.limitPoolCounts?.broken || 0}/${data.limitPoolCounts?.strong || 0}`)}${tag(`dataCoverage ${data.dataCoverage ? "已返回" : "等待接口"}`)}</div>
+      ${simpleTable(["维度", "当前值", "口径", "说明"], productionCoverageRows())}
+    </section>
+    <section class="panel" style="margin-top:14px">
       <h2>数据源路线</h2>
       <div class="table-wrap">
         <table>
@@ -5844,6 +5874,12 @@ function contextForModule(moduleName) {
     },
     dataSourceCoverage: sourceCoverageRows().map(([source, status, coverage, latest, usage]) => ({ source, status, coverage, latest, usage })),
     dataFreshness: sourceFreshnessRows(),
+    productionCoverage: {
+      featureCoverage: data.featureCoverage,
+      limitPoolCounts: data.limitPoolCounts,
+      dataCoverage: data.dataCoverage,
+      rows: productionCoverageRows().map(([dimension, current, scope, note]) => ({ dimension, current, scope, note })),
+    },
     stockUniverse: data.stockUniverse,
     metrics: data.metrics,
     sectors: data.sectors.slice(0, 8),
@@ -5993,6 +6029,9 @@ async function loadMarketSnapshot() {
     data.asOf = payload.asOf || "";
     data.tradeDate = payload.tradeDate || "";
     data.stockUniverse = payload.stockUniverse || { total: payload.stocks?.length || data.stocks.length, returned: payload.stocks?.length || data.stocks.length, limit: payload.stocks?.length || data.stocks.length, leaderSample: 0, source: "" };
+    data.featureCoverage = payload.featureCoverage || payload.stockUniverse?.featureCoverage || data.featureCoverage;
+    data.limitPoolCounts = payload.limitPoolCounts || data.limitPoolCounts;
+    data.dataCoverage = payload.dataCoverage || data.dataCoverage;
     data.cacheSnapshot = payload.cacheSnapshot || null;
     if (payload.market) {
       const hasSectorFund = !String(payload.source || "").includes("sina-industry-sectors");
