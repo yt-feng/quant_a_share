@@ -70,6 +70,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 
 - Group controls: 新分组名称, 新建分组, group selector, 删除分组.
 - Watch table columns: 代码, 名称, 分组, 最新价, 涨跌额, 涨跌幅(%), 成交额, 操作.
+- Clone enrichment: groups and watch entries persist in browser storage so Vercel can keep the feature serverless.
 
 ## LLM分析
 

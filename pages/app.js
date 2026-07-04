@@ -149,7 +149,7 @@ const pages = [
   ["screener", "量化因子选股", "估值、趋势、资金和技术信号组合筛选"],
   ["sectors", "行业/概念", "板块排名、资金流向和涨跌分布"],
   ["quote", "行情", "单股行情、指标和操作计划"],
-  ["watchlist", "自选", "本地演示自选分组"],
+  ["watchlist", "自选", "自选分组、分组筛选和浏览器持久化"],
   ["llm", "LLM分析", "主题热点、选股池、板块看板和产业链问答"],
   ["qimen", "奇门遁甲", "事项起局、任务提交和解盘问答"],
   ["ai", "AI决策矩阵", "DeepSeek 服务端问答"],
@@ -162,7 +162,7 @@ const coverageRows = [
   ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存、自定义条件、单因子命中数和相似候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
-  ["自选", "已对齐", "分组创建/删除、分组筛选、自选表和操作列。"],
+  ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
   ["LLM分析", "已对齐", "主题热点、选股池、板块全景看板、个股评估矩阵、产业链研报分析五个 tab。"],
   ["奇门遁甲", "已对齐", "钱包账单、任务列表、起局表单、历法类型、输出偏好、解盘档位、异步任务状态。"],
   ["AI决策矩阵", "已对齐", "新对话、钱包入口、实时搜索、三种模式、Q1-Q12 热门问题、DeepSeek 后端问答，多源行情上下文。"],
@@ -183,7 +183,14 @@ const dataSourceRows = [
 
 let currentPage = "market";
 let activeFactors = new Set(["ma20"]);
-let watchlist = ["300750.SZ", "688981.SH", "002230.SZ"];
+const DEFAULT_WATCH_GROUPS = ["短线观察", "中线持有", "题材跟踪"];
+let watchGroups = [...DEFAULT_WATCH_GROUPS];
+let selectedWatchGroup = "全部";
+let watchlist = [
+  { code: "300750.SZ", group: "短线观察" },
+  { code: "688981.SH", group: "题材跟踪" },
+  { code: "002230.SZ", group: "中线持有" },
+];
 let toastTimer = 0;
 let progressTimers = [];
 let selectedLlmTab = "主题热点";
@@ -193,6 +200,7 @@ let marketSource = "演示数据";
 let selectedQuote = "600519";
 
 function mount() {
+  loadWatchlistState();
   renderRuntimeShell();
   renderNav();
   render();
@@ -562,25 +570,32 @@ function renderQuote() {
 }
 
 function renderWatchlist() {
-  const rows = data.stocks.filter((stock) => watchlist.includes(stock.code));
+  const entries = watchlist
+    .map((entry) => ({ entry, stock: data.stocks.find((stock) => stock.code === entry.code) }))
+    .filter((row) => row.stock && (selectedWatchGroup === "全部" || row.entry.group === selectedWatchGroup));
+  const groupOptions = ["全部", ...watchGroups]
+    .map((group) => `<option value="${escapeHtml(group)}" ${group === selectedWatchGroup ? "selected" : ""}>${escapeHtml(group)}</option>`)
+    .join("");
+  const defaultAddGroup = selectedWatchGroup === "全部" ? watchGroups[0] : selectedWatchGroup;
   return `
     <div class="panel">
       <div class="form-grid">
-        <label><span class="label">新分组名称</span><input placeholder="新分组名称" /></label>
-        <label><span class="label">分组</span><select><option>全部</option><option>短线观察</option><option>中线持有</option><option>题材跟踪</option></select></label>
-        <button class="primary-button align-end" data-toast="新分组已创建">新建分组</button>
-        <button class="ghost-button align-end" data-toast="已删除空分组">删除分组</button>
+        <label><span class="label">新分组名称</span><input id="watchGroupName" placeholder="新分组名称" /></label>
+        <label><span class="label">分组</span><select id="watchGroupSelect" data-watch-group-select>${groupOptions}</select></label>
+        <button class="primary-button align-end" data-create-watch-group="1">新建分组</button>
+        <button class="ghost-button align-end" data-delete-watch-group="1">删除分组</button>
       </div>
       <div class="toolbar" style="margin-top:12px">
-        <button class="ghost-button" data-add-watch="300059.SZ">加入东方财富</button>
+        ${watchGroups.map((group) => tag(`${group} ${watchlist.filter((item) => item.group === group).length}`)).join("")}
+        <button class="ghost-button" data-add-watch="300059.SZ" data-watch-group="${escapeHtml(defaultAddGroup)}">加入东方财富</button>
         <button class="ghost-button" data-clear-watch="1">清空自选</button>
       </div>
       ${simpleTable(
         ["代码", "名称", "分组", "最新价", "涨跌额", "涨跌幅(%)", "成交额", "操作"],
-        rows.map((stock, index) => [
+        entries.map(({ stock, entry }) => [
           stock.code,
           stock.name,
-          index % 2 === 0 ? "短线观察" : "题材跟踪",
+          escapeHtml(entry.group),
           stock.price.toFixed(2),
           signed(stock.price * stock.pct / 100),
           signed(stock.pct),
@@ -590,6 +605,68 @@ function renderWatchlist() {
       )}
     </div>
   `;
+}
+
+function normalizeWatchEntry(item) {
+  if (typeof item === "string") return { code: item, group: DEFAULT_WATCH_GROUPS[0] };
+  return {
+    code: String(item?.code || "").trim(),
+    group: String(item?.group || DEFAULT_WATCH_GROUPS[0]).trim() || DEFAULT_WATCH_GROUPS[0],
+  };
+}
+
+function loadWatchlistState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_watchlist") || "null");
+    if (!stored) return;
+    const groups = Array.isArray(stored.groups) ? stored.groups.map((item) => String(item).trim()).filter(Boolean) : [];
+    const entries = Array.isArray(stored.watchlist) ? stored.watchlist.map(normalizeWatchEntry).filter((item) => item.code) : [];
+    watchGroups = [...new Set([...groups, ...entries.map((item) => item.group), ...DEFAULT_WATCH_GROUPS])];
+    watchlist = entries.length ? dedupeWatchlist(entries) : watchlist;
+    selectedWatchGroup = stored.selectedGroup && ["全部", ...watchGroups].includes(stored.selectedGroup) ? stored.selectedGroup : "全部";
+  } catch (error) {
+    // Bad local storage should not block the app shell.
+  }
+}
+
+function persistWatchlistState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_watchlist",
+      JSON.stringify({
+        groups: watchGroups,
+        selectedGroup: selectedWatchGroup,
+        watchlist,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("自选已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function dedupeWatchlist(entries) {
+  const seen = new Set();
+  return entries.filter((entry) => {
+    if (!entry.code || seen.has(entry.code)) return false;
+    seen.add(entry.code);
+    return true;
+  });
+}
+
+function addWatchEntry(code, group) {
+  const targetGroup = group && group !== "全部" ? group : watchGroups[0] || DEFAULT_WATCH_GROUPS[0];
+  if (!watchGroups.includes(targetGroup)) watchGroups.push(targetGroup);
+  const existing = watchlist.find((entry) => entry.code === code);
+  if (existing) existing.group = targetGroup;
+  else watchlist.push({ code, group: targetGroup });
+  watchlist = dedupeWatchlist(watchlist);
+  persistWatchlistState();
+}
+
+function removeWatchEntry(code) {
+  watchlist = watchlist.filter((entry) => entry.code !== code);
+  persistWatchlistState();
 }
 
 function renderAi() {
@@ -1222,19 +1299,56 @@ function attachEvents() {
     const target = document.querySelector("#qimenAnswer");
     target.textContent = `已同步起局：${new Date().toLocaleString("zh-CN")}，城市：${document.querySelector("#city")?.value || "上海"}。`;
   });
-  document.querySelector("[data-add-watch]")?.addEventListener("click", (event) => {
-    const code = event.currentTarget.dataset.addWatch;
-    if (!watchlist.includes(code)) watchlist.push(code);
-    render();
+  document.querySelectorAll("[data-add-watch]").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const code = event.currentTarget.dataset.addWatch;
+      const group = event.currentTarget.dataset.watchGroup || selectedWatchGroup;
+      addWatchEntry(code, group);
+      showToast(`已加入自选：${code}`, "success");
+      render();
+    });
   });
   document.querySelectorAll("[data-remove-watch]").forEach((button) => {
     button.addEventListener("click", () => {
-      watchlist = watchlist.filter((code) => code !== button.dataset.removeWatch);
+      removeWatchEntry(button.dataset.removeWatch);
       render();
     });
   });
   document.querySelector("[data-clear-watch]")?.addEventListener("click", () => {
     watchlist = [];
+    persistWatchlistState();
+    showToast("自选已清空。", "success");
+    render();
+  });
+  document.querySelector("[data-watch-group-select]")?.addEventListener("change", (event) => {
+    selectedWatchGroup = event.currentTarget.value || "全部";
+    persistWatchlistState();
+    render();
+  });
+  document.querySelector("[data-create-watch-group]")?.addEventListener("click", () => {
+    const input = document.querySelector("#watchGroupName");
+    const name = String(input?.value || "").trim().slice(0, 16);
+    if (!name) {
+      showToast("请输入分组名称。", "info");
+      return;
+    }
+    if (!watchGroups.includes(name)) watchGroups.push(name);
+    selectedWatchGroup = name;
+    persistWatchlistState();
+    render();
+  });
+  document.querySelector("[data-delete-watch-group]")?.addEventListener("click", () => {
+    if (selectedWatchGroup === "全部") {
+      showToast("请先选择一个分组。", "info");
+      return;
+    }
+    const deleted = selectedWatchGroup;
+    watchGroups = watchGroups.filter((group) => group !== deleted);
+    if (!watchGroups.length) watchGroups = [...DEFAULT_WATCH_GROUPS];
+    watchlist = watchlist.map((entry) => (entry.group === deleted ? { ...entry, group: watchGroups[0] } : entry));
+    selectedWatchGroup = "全部";
+    persistWatchlistState();
+    showToast(`已删除分组：${deleted}`, "success");
     render();
   });
 }
