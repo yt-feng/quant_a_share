@@ -321,6 +321,7 @@ let aiComposer = { stock: "东方财富", cost: "", horizon: "短线3-5天", act
 let aiQuestion = "结合实时行情，分析宁德时代现在能不能买，按短线3-5天思路给我操作计划。";
 let aiHistory = [];
 let aiCurrentAnswer = "";
+let aiExecution = null;
 
 function mount() {
   loadShellState();
@@ -1671,7 +1672,25 @@ function exportRowsFor(key) {
     case "researchReports":
       return exportPayload("research-reports", ["日期", "类型", "行业/主题", "标题", "机构", "作者", "页数", "链接"], researchReports().map((row) => [row.publishDate, row.category, row.industryName, row.title, row.orgSName || row.orgName, row.researcher, row.pages, row.url]));
     case "aiHistory":
-      return exportPayload("ai-history", ["时间", "模式", "实时", "点数", "场景", "问题", "回答"], aiHistory.map((item) => [item.at, item.mode, item.realtime ? "开" : "关", item.points || 0, item.scene || "-", item.question, item.answer]));
+      return exportPayload(
+        "ai-history",
+        ["时间", "模式", "实时", "点数", "场景", "请求ID", "模型", "模块", "耗时ms", "上下文字符", "Token", "问题", "回答"],
+        aiHistory.map((item) => [
+          item.at,
+          item.mode,
+          item.realtime ? "开" : "关",
+          item.points || 0,
+          item.scene || "-",
+          item.meta?.requestId || item.execution?.requestId || "",
+          item.meta?.model || item.execution?.model || "",
+          item.meta?.module || item.execution?.module || "",
+          item.meta?.durationMs || item.execution?.durationMs || 0,
+          item.meta?.contextChars || 0,
+          item.meta?.usage?.total_tokens || "",
+          item.question,
+          item.answer,
+        ])
+      );
     default:
       return null;
   }
@@ -2593,6 +2612,7 @@ function loadAiState() {
     aiQuestion = String(stored.question || aiQuestion);
     aiHistory = Array.isArray(stored.history) ? stored.history.map(normalizeAiHistoryItem).filter(Boolean).slice(0, 30) : [];
     aiCurrentAnswer = String(stored.currentAnswer || aiHistory[0]?.answer || "");
+    aiExecution = normalizeAiExecution(stored.execution || aiHistory[0]?.execution || null);
   } catch (error) {
     // Bad local storage should not block AI matrix.
   }
@@ -2609,6 +2629,7 @@ function persistAiState() {
         composer: aiComposer,
         question: aiQuestion,
         currentAnswer: aiCurrentAnswer,
+        execution: aiExecution,
         history: aiHistory,
         updatedAt: new Date().toISOString(),
       })
@@ -2627,12 +2648,41 @@ function normalizeAiHistoryItem(item) {
     realtime: item.realtime !== false,
     points: Number(item.points || 0),
     scene: String(item.scene || activeAiScene),
+    meta: normalizeAiMeta(item.meta),
+    execution: normalizeAiExecution(item.execution),
     question: String(item.question || "").slice(0, 500),
     answer: String(item.answer || ""),
   };
 }
 
-function recordAiHistory(question, mode, answer, points = 0) {
+function normalizeAiMeta(meta) {
+  return {
+    requestId: String(meta?.requestId || ""),
+    model: String(meta?.model || ""),
+    module: String(meta?.module || ""),
+    durationMs: Number(meta?.durationMs || 0),
+    promptChars: Number(meta?.promptChars || 0),
+    contextChars: Number(meta?.contextChars || 0),
+    usage: meta?.usage || null,
+  };
+}
+
+function normalizeAiExecution(execution) {
+  if (!execution) return null;
+  return {
+    status: String(execution.status || "已完成"),
+    requestId: String(execution.requestId || ""),
+    model: String(execution.model || ""),
+    module: String(execution.module || ""),
+    durationMs: Number(execution.durationMs || 0),
+    points: Number(execution.points || 0),
+    startedAt: String(execution.startedAt || ""),
+    endedAt: String(execution.endedAt || ""),
+    rows: Array.isArray(execution.rows) ? execution.rows.slice(0, 12) : [],
+  };
+}
+
+function recordAiHistory(question, mode, answer, points = 0, meta = {}, execution = null) {
   const item = normalizeAiHistoryItem({
     id: `ai_${Date.now()}`,
     at: nowLabel(),
@@ -2640,6 +2690,8 @@ function recordAiHistory(question, mode, answer, points = 0) {
     realtime: aiRealtime,
     points,
     scene: activeAiScene,
+    meta,
+    execution,
     question,
     answer,
   });
@@ -2647,12 +2699,14 @@ function recordAiHistory(question, mode, answer, points = 0) {
   aiHistory = [item, ...aiHistory].slice(0, 30);
   aiQuestion = question;
   aiCurrentAnswer = answer;
+  aiExecution = item.execution;
   persistAiState();
 }
 
 function resetAiConversation() {
   aiQuestion = "";
   aiCurrentAnswer = "";
+  aiExecution = null;
   persistAiState();
 }
 
@@ -2695,6 +2749,48 @@ function aiBillingCost(mode = aiMode, realtime = aiRealtime) {
 function canFreezeAiPoints(cost) {
   const summary = walletSummary();
   return roundPoint(summary.balance - summary.frozen) >= cost;
+}
+
+function buildAiExecution({ status, moduleName, mode, cost, result, error, startedAt, endedAt }) {
+  const meta = normalizeAiMeta({
+    requestId: result?.requestId || error?.requestId || "",
+    model: result?.model || "",
+    module: result?.module || moduleName,
+    durationMs: result?.durationMs || (endedAt && startedAt ? endedAt - startedAt : 0),
+    promptChars: result?.promptChars || 0,
+    contextChars: result?.contextChars || 0,
+    usage: result?.usage || null,
+  });
+  const sourceCount = sourceFreshnessRows().filter((row) => row.mode !== "待返回").length;
+  const usage = meta.usage || {};
+  const rows = [
+    ["输入识别", "完成", selectedAiSceneConfig().title, aiComposer.horizon || "-"],
+    ["数据映射", "完成", `${sourceCount} 个数据源`, `上下文 ${meta.contextChars || "-"} 字符`],
+    ["点数预冻结", cost ? "完成" : "跳过", cost ? `${cost}点` : "-", mode],
+    ["请求模型", status === "已完成" ? "完成" : "异常", meta.model || "DeepSeek", meta.durationMs ? `${meta.durationMs}ms` : "-"],
+    ["Token统计", usage.total_tokens ? "完成" : "待返回", usage.total_tokens ? `${usage.total_tokens} tokens` : "-", usage.prompt_tokens ? `prompt ${usage.prompt_tokens}` : "-"],
+    ["计费结算", status === "已完成" ? "完成" : "已退回冻结", cost ? `${cost}点` : "-", status],
+    ["结果落库", status === "已完成" ? "完成" : "未落库", meta.requestId || "-", error?.message || "历史记录已更新"],
+  ];
+  return normalizeAiExecution({
+    status,
+    requestId: meta.requestId,
+    model: meta.model,
+    module: meta.module,
+    durationMs: meta.durationMs,
+    points: cost,
+    startedAt: startedAt ? new Date(startedAt).toLocaleString("zh-CN", { hour12: false }) : "",
+    endedAt: endedAt ? new Date(endedAt).toLocaleString("zh-CN", { hour12: false }) : "",
+    rows,
+  });
+}
+
+function aiExecutionPanel() {
+  if (!aiExecution) return `<div class="empty-state compact-empty"><strong>暂无执行详情</strong><span>生成回答后会显示请求ID、模型、数据投喂、Token 和点数结算。</span></div>`;
+  return `
+    <div class="detail-strip">${tag(`状态：${aiExecution.status}`, "info")}${tag(`模块：${aiExecution.module || "-"}`)}${tag(`模型：${aiExecution.model || "-"}`)}${tag(`点数：${aiExecution.points || 0}`)}${tag(`耗时：${aiExecution.durationMs || 0}ms`)}</div>
+    ${simpleTable(["阶段", "状态", "结果", "备注"], aiExecution.rows.map((row) => row.map((cell) => escapeHtml(cell))))}
+  `;
 }
 
 function aiHistoryTable() {
@@ -2858,6 +2954,8 @@ function renderAi() {
       <div class="panel">
         <h2>结果</h2>
         <div id="aiAnswer" class="answer">${aiCurrentAnswer ? answerHtml(aiCurrentAnswer) : "点击“生成回答”查看分析。"}</div>
+        <div style="margin-top:16px">${panelTitle("执行详情")}</div>
+        ${aiExecutionPanel()}
         <div style="margin-top:16px">${panelTitle("对话记录", exportButton("aiHistory"))}</div>
         ${aiHistoryTable()}
       </div>
@@ -4176,6 +4274,8 @@ function attachEvents() {
       if (question) question.value = button.dataset.hotPrompt;
       if (currentPage === "ai") {
         aiQuestion = button.dataset.hotPrompt;
+        aiCurrentAnswer = "";
+        aiExecution = null;
         persistAiState();
       }
       showToast("热门问题已填入输入框。", "success");
@@ -4189,12 +4289,15 @@ function attachEvents() {
       aiMode = scene.mode;
       aiQuestion = hydrateAiPrompt(scene.prompt);
       aiCurrentAnswer = "";
+      aiExecution = null;
       persistAiState();
       render();
     });
   });
   document.querySelector("[data-compose-ai-prompt]")?.addEventListener("click", () => {
     aiQuestion = composeAiQuestion();
+    aiCurrentAnswer = "";
+    aiExecution = null;
     persistAiState();
     showToast("问句已生成。", "success");
     render();
@@ -4226,6 +4329,7 @@ function attachEvents() {
       aiMode = item.mode;
       aiRealtime = item.realtime;
       aiCurrentAnswer = item.answer;
+      aiExecution = item.execution;
       persistAiState();
       render();
     });
@@ -4571,6 +4675,7 @@ function attachEvents() {
       }
       const defaultText = button.dataset.defaultText || button.textContent;
       button.dataset.defaultText = defaultText;
+      const startedAt = Date.now();
       const progress = startChatProgress(button.dataset.chatModule, target);
       setButtonLoading(button, true);
       try {
@@ -4585,16 +4690,39 @@ function attachEvents() {
           context: contextForModule(button.dataset.chatModule),
         });
         progress.succeed();
-        target.textContent = result.answer || "后端没有返回内容。";
+        const endedAt = Date.now();
+        const answer = result.answer || "后端没有返回内容。";
+        target.textContent = answer;
         if (isAiAnswer) {
+          const execution = buildAiExecution({
+            status: "已完成",
+            moduleName: button.dataset.chatModule,
+            mode,
+            cost: billingCost,
+            result,
+            startedAt,
+            endedAt,
+          });
+          aiExecution = execution;
           appendWalletLedger("消费", -billingCost, `AI决策矩阵 ${mode} 结算`, -billingCost);
-          recordAiHistory(question, mode, result.answer || "后端没有返回内容。", billingCost);
+          recordAiHistory(question, mode, answer, billingCost, result, execution);
           persistSubscriptionState();
         }
         showToast("分析完成，结果已更新。", "success");
       } catch (error) {
+        const endedAt = Date.now();
         if (isAiAnswer) {
+          aiExecution = buildAiExecution({
+            status: "执行失败",
+            moduleName: button.dataset.chatModule,
+            mode,
+            cost: billingCost,
+            error,
+            startedAt,
+            endedAt,
+          });
           appendWalletLedger("退款", 0, `AI决策矩阵 ${mode} 退回冻结`, -billingCost);
+          persistAiState();
           persistSubscriptionState();
         }
         progress.fail();
@@ -5039,7 +5167,9 @@ async function askBackend(payload) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(data.error || "后端调用失败。");
+    const error = new Error(data.error || "后端调用失败。");
+    Object.assign(error, data);
+    throw error;
   }
   return data;
 }

@@ -1,3 +1,5 @@
+const { randomUUID } = require("crypto");
+
 const MODULE_PROMPTS = {
   ai_matrix: "你是A股AI决策矩阵助手，回答要给出结论、触发条件、失效条件、仓位区间和观察项。",
   llm_analysis: "你是A股市场研究助手，回答要覆盖主题热度、资金流向、板块轮动、候选股票池和观察顺序。",
@@ -52,9 +54,12 @@ function buildPrompt(moduleName, payload) {
 }
 
 module.exports = async function handler(req, res) {
+  const requestId = String(req.headers["x-request-id"] || randomUUID());
+  const startedAt = Date.now();
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("X-Request-ID", requestId);
 
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -63,13 +68,13 @@ module.exports = async function handler(req, res) {
   }
 
   if (req.method !== "POST") {
-    send(res, 405, { error: "只支持 POST" });
+    send(res, 405, { error: "只支持 POST", requestId });
     return;
   }
 
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) {
-    send(res, 500, { error: "服务端未配置 DEEPSEEK_API_KEY" });
+    send(res, 500, { error: "服务端未配置 DEEPSEEK_API_KEY", requestId });
     return;
   }
 
@@ -77,19 +82,20 @@ module.exports = async function handler(req, res) {
   try {
     payload = await readJson(req);
   } catch (error) {
-    send(res, 400, { error: "JSON 解析失败" });
+    send(res, 400, { error: "JSON 解析失败", requestId });
     return;
   }
 
   const question = String(payload.question || "").trim();
   if (!question) {
-    send(res, 400, { error: "问题不能为空" });
+    send(res, 400, { error: "问题不能为空", requestId });
     return;
   }
 
   const moduleName = String(payload.module || "ai_matrix");
   const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
   const systemPrompt = buildPrompt(moduleName, payload);
+  const contextChars = JSON.stringify(payload.context || {}).length;
 
   try {
     const response = await fetch("https://api.deepseek.com/chat/completions", {
@@ -114,6 +120,7 @@ module.exports = async function handler(req, res) {
       send(res, response.status, {
         error: data.error?.message || data.message || "DeepSeek 调用失败",
         providerStatus: response.status,
+        requestId,
       });
       return;
     }
@@ -124,8 +131,12 @@ module.exports = async function handler(req, res) {
       model,
       module: moduleName,
       usage: data.usage || null,
+      requestId,
+      durationMs: Date.now() - startedAt,
+      promptChars: systemPrompt.length + question.length,
+      contextChars,
     });
   } catch (error) {
-    send(res, 502, { error: "DeepSeek 请求失败" });
+    send(res, 502, { error: "DeepSeek 请求失败", requestId, durationMs: Date.now() - startedAt });
   }
 };
