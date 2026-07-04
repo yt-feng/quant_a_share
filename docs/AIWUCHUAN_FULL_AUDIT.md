@@ -32,6 +32,7 @@ This file tracks the visible product surface audited from the logged-in aiwuchua
 - Custom condition controls: field selector, operator selector, value input, 添加.
 - Recent-N condition controls: 近N日累计涨跌幅, N number input, operator, value(%), 添加近N日条件.
 - Strategy controls: 策略名称, 保存策略, 我的策略.
+- Clone enrichment: custom conditions, recent-N conditions, sort settings and saved strategies are now active filters and persist in browser storage.
 - Run controls: 交易日(不填则最新日), sort field, sort order, display columns, 筛选.
 - Table columns: 代码, 名称, 最新价, 涨跌幅, 量能信号, MACD, 流通市值, 行业整体RPS_50, 行业RPS_50, 行业, K线形态, 趋势支撑线_次日, 趋势压力线_60.
 - Clone enrichment: factor buttons show single-factor hit counts; if a strict multi-factor intersection is empty, the table shows similarity-ranked candidates with match counts instead of a blank result area.

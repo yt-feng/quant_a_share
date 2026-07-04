@@ -160,7 +160,7 @@ const pages = [
 
 const coverageRows = [
   ["大盘情绪", "已对齐", "日期范围、情绪状态、复盘统计入口、情绪指标、指数与涨跌分布、涨停池、北向资金、ETF资金、人气榜。"],
-  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、策略保存、自定义条件、单因子命中数和相似候选。"],
+  ["量化因子选股", "已对齐", "估值、市值、量价、RPS、均线、技术、资金、VWAP、结构、缠论、江恩、TD、自定义条件、近N日条件、策略保存/应用、单因子命中数和相似候选。"],
   ["行业/概念", "已对齐", "板块/概念切换、日期、预设筛选、排序、范围、柱状图/饼图、指标卡和明细表。"],
   ["行情", "已对齐", "股票查询、日期、复权、分时、画图工具、指标面板、参数弹窗、个股资金流、云端财务快照、BaoStock历史估值、人气关键词、相关股和双源公告。"],
   ["自选", "已对齐", "分组创建/删除、分组筛选、自选表、操作列和浏览器持久化。"],
@@ -186,6 +186,9 @@ const dataSourceRows = [
 
 let currentPage = "market";
 let activeFactors = new Set(["ma20"]);
+let customConditions = [];
+let savedStrategies = [];
+let screenerSort = { field: "rps_120", direction: "desc" };
 const DEFAULT_WATCH_GROUPS = ["短线观察", "中线持有", "题材跟踪"];
 let watchGroups = [...DEFAULT_WATCH_GROUPS];
 let selectedWatchGroup = "全部";
@@ -203,6 +206,7 @@ let marketSource = "演示数据";
 let selectedQuote = "600519";
 
 function mount() {
+  loadScreenerState();
   loadWatchlistState();
   renderRuntimeShell();
   renderNav();
@@ -341,6 +345,7 @@ function renderScreener() {
   const visibleRows = filtered.length ? filtered : relaxed;
   const activeLabel = activeFactorLabels();
   const factorCounts = factorHitCounts();
+  const conditionSummary = customConditions.length ? customConditions.map(conditionLabel).join(" + ") : "未添加自定义条件";
   return `
     <div class="panel">
       ${panelTitle(
@@ -369,32 +374,36 @@ function renderScreener() {
       <div class="panel">
         <h2>自定义条件</h2>
         <div class="form-grid">
-          <label><span class="label">选择字段</span><select><option>change_pct</option><option>volume_signal</option><option>macd</option><option>float_market_cap</option><option>sector_rps_50</option><option>support_line_next</option></select></label>
-          <label><span class="label">操作符</span><select><option>&gt;=</option><option>&lt;=</option><option>&gt;</option><option>&lt;</option><option>==</option></select></label>
-          <label><span class="label">值</span><input placeholder="值" /></label>
-          <button class="ghost-button align-end" data-toast="已加入条件">添加</button>
+          <label><span class="label">选择字段</span><select id="customField"><option value="change_pct">change_pct</option><option value="volume_signal">volume_signal</option><option value="macd">macd</option><option value="float_market_cap">float_market_cap</option><option value="sector_rps_50">sector_rps_50</option><option value="support_line_next">support_line_next</option></select></label>
+          <label><span class="label">操作符</span><select id="customOperator"><option>&gt;=</option><option>&lt;=</option><option>&gt;</option><option>&lt;</option><option>==</option></select></label>
+          <label><span class="label">值</span><input id="customValue" placeholder="值" /></label>
+          <button class="ghost-button align-end" data-add-custom-condition="1">添加</button>
         </div>
         <div class="form-grid" style="margin-top:12px">
-          <label><span class="label">近N日累计涨跌幅</span><input type="number" value="7" /></label>
-          <label><span class="label">比较</span><select><option>&lt;=</option><option>&gt;=</option></select></label>
-          <label><span class="label">值(%)</span><input placeholder="值(%)" /></label>
-          <button class="ghost-button align-end" data-toast="已加入近N日条件">添加近N日条件</button>
+          <label><span class="label">近N日累计涨跌幅</span><input id="recentDays" type="number" value="7" min="1" max="120" /></label>
+          <label><span class="label">比较</span><select id="recentOperator"><option>&lt;=</option><option>&gt;=</option></select></label>
+          <label><span class="label">值(%)</span><input id="recentValue" placeholder="值(%)" /></label>
+          <button class="ghost-button align-end" data-add-recent-condition="1">添加近N日条件</button>
+        </div>
+        <div class="toolbar" style="margin-top:12px">
+          ${customConditions.map((condition) => `<button class="chip active" data-remove-condition="${condition.id}">${conditionLabel(condition)} ×</button>`).join("") || tag(conditionSummary)}
+          ${customConditions.length ? `<button class="ghost-button compact-button" data-clear-conditions="1">清空条件</button>` : ""}
         </div>
       </div>
       <div class="panel">
         <h2>策略与输出</h2>
         <div class="form-grid">
-          <label><span class="label">策略名称</span><input placeholder="策略名称" /></label>
+          <label><span class="label">策略名称</span><input id="strategyName" placeholder="策略名称" /></label>
           <label><span class="label">交易日</span><input placeholder="交易日(不填则最新日)" /></label>
-          <label><span class="label">排序字段</span><select><option>rps_120</option><option>change_pct</option><option>float_market_cap</option><option>sector_rps_50</option></select></label>
-          <label><span class="label">排序</span><select><option>降序</option><option>升序</option></select></label>
+          <label><span class="label">排序字段</span><select id="screenerSortField" data-screener-sort-field><option value="rps_120" ${selectedAttr(screenerSort.field === "rps_120")}>rps_120</option><option value="change_pct" ${selectedAttr(screenerSort.field === "change_pct")}>change_pct</option><option value="float_market_cap" ${selectedAttr(screenerSort.field === "float_market_cap")}>float_market_cap</option><option value="sector_rps_50" ${selectedAttr(screenerSort.field === "sector_rps_50")}>sector_rps_50</option></select></label>
+          <label><span class="label">排序</span><select id="screenerSortDirection" data-screener-sort-direction><option value="desc" ${selectedAttr(screenerSort.direction === "desc")}>降序</option><option value="asc" ${selectedAttr(screenerSort.direction === "asc")}>升序</option></select></label>
         </div>
         <div class="toolbar" style="margin-top:12px">
           ${["symbol", "name", "close", "change_pct", "volume_signal", "macd", "float_market_cap", "sector_rps_50", "in_sector_rps_50", "sector", "candle_patterns", "support_line_next", "resistance_line_60"].map((item) => tag(item)).join("")}
         </div>
         <div class="toolbar">
-          <button class="ghost-button" data-toast="策略已保存到当前浏览器">保存策略</button>
-          <button class="ghost-button" data-open-modal="strategy">我的策略</button>
+          <button class="ghost-button" data-save-strategy="1">保存策略</button>
+          <button class="ghost-button" data-open-modal="strategy">我的策略 ${savedStrategies.length}</button>
         </div>
       </div>
     </section>
@@ -971,7 +980,18 @@ function renderModal() {
 
 function modalBody() {
   if (modal.type === "strategy") {
-    return `${simpleTable(["策略名称", "条件数", "创建者", "最近运行"], [["强势吸筹3+条件", 7, "本地", "2026-07-03"], ["VWAP低吸回踩", 5, "本地", "2026-07-03"]])}`;
+    if (!savedStrategies.length) return `<div class="empty-state"><strong>暂无已保存策略</strong><span>在量化因子选股页设置条件后点击保存策略。</span></div>`;
+    return `${simpleTable(
+      ["策略名称", "因子", "自定义条件", "排序", "最近保存", "操作"],
+      savedStrategies.map((strategy) => [
+        escapeHtml(strategy.name),
+        strategy.factors.length,
+        strategy.conditions.length,
+        `${strategy.sort.field}/${strategy.sort.direction === "asc" ? "升序" : "降序"}`,
+        strategy.savedAt?.slice(0, 10) || "-",
+        `<button class="ghost-button table-action" data-apply-strategy="${strategy.id}">应用</button><button class="ghost-button table-action" data-delete-strategy="${strategy.id}">删除</button>`,
+      ])
+    )}`;
   }
   if (modal.type === "wallet") {
     return `
@@ -1054,16 +1074,16 @@ function renderAbout() {
 }
 
 function filteredStocks() {
-  return data.stocks.filter((stock) => Array.from(activeFactors).every((key) => factorPasses(stock, key))).sort(sortScreenerRows);
+  return data.stocks.filter((stock) => stockPassesAllFilters(stock)).sort(sortScreenerRows);
 }
 
 function relaxedStocks() {
-  const keys = Array.from(activeFactors);
-  if (!keys.length) return [];
+  const filters = activeFilterPredicates();
+  if (!filters.length) return [];
   return data.stocks
     .map((stock) => {
-      const score = keys.reduce((sum, key) => sum + (factorPasses(stock, key) ? 1 : 0), 0);
-      return { ...stock, factorScore: score, factorTotal: keys.length };
+      const score = filters.reduce((sum, filter) => sum + (filter.pass(stock) ? 1 : 0), 0);
+      return { ...stock, factorScore: score, factorTotal: filters.length };
     })
     .filter((stock) => stock.factorScore > 0)
     .sort((a, b) => b.factorScore - a.factorScore || sortScreenerRows(a, b))
@@ -1079,7 +1099,62 @@ function factorHitCounts() {
 }
 
 function sortScreenerRows(a, b) {
-  return (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
+  const av = screenerSortValue(a, screenerSort.field);
+  const bv = screenerSortValue(b, screenerSort.field);
+  const primary = screenerSort.direction === "asc" ? av - bv : bv - av;
+  return primary || (Number(b.amount) || 0) - (Number(a.amount) || 0) || (Number(b.rps) || 0) - (Number(a.rps) || 0);
+}
+
+function stockPassesAllFilters(stock) {
+  return activeFilterPredicates().every((filter) => filter.pass(stock));
+}
+
+function activeFilterPredicates() {
+  return [
+    ...Array.from(activeFactors).map((key) => ({ label: key, pass: (stock) => factorPasses(stock, key) })),
+    ...customConditions.map((condition) => ({ label: conditionLabel(condition), pass: (stock) => conditionPasses(stock, condition) })),
+  ];
+}
+
+function screenerSortValue(stock, field) {
+  if (field === "change_pct") return Number(stock.pct) || 0;
+  if (field === "float_market_cap") return (Number(stock.circMv) || Number(stock.totalMv) || Number(stock.amount) * 12 || 0) / 100000000;
+  if (field === "sector_rps_50") return Number(stock.sectorRps) || 0;
+  return Number(stock.rps120) || 0;
+}
+
+function conditionPasses(stock, condition) {
+  const actual = conditionFieldValue(stock, condition);
+  const expected = Number(condition.value);
+  if (!Number.isFinite(expected)) return true;
+  if (condition.operator === ">=") return actual >= expected;
+  if (condition.operator === "<=") return actual <= expected;
+  if (condition.operator === ">") return actual > expected;
+  if (condition.operator === "<") return actual < expected;
+  return Math.abs(actual - expected) < 1e-9;
+}
+
+function conditionFieldValue(stock, condition) {
+  if (condition.field === "change_pct") return Number(stock.pct) || 0;
+  if (condition.field === "volume_signal") return stock.volumeRatio >= 1.5 || stock.pct > 3 ? 1 : 0;
+  if (condition.field === "macd") return stock.macd ? 1 : 0;
+  if (condition.field === "float_market_cap") return (Number(stock.circMv) || Number(stock.totalMv) || Number(stock.amount) * 12 || 0) / 100000000;
+  if (condition.field === "sector_rps_50") return Number(stock.sectorRps) || 0;
+  if (condition.field === "support_line_next") return Number(stock.price) ? Number((stock.price * 0.96).toFixed(2)) : 0;
+  if (condition.field === "n_day_pct") return estimateRecentReturn(stock, condition.days);
+  return 0;
+}
+
+function estimateRecentReturn(stock, days = 7) {
+  const n = Math.max(1, Math.min(120, Number(days) || 7));
+  const pct = Number(stock.pct) || 0;
+  const strengthDrift = ((Number(stock.rps) || 50) - 50) / 20;
+  return Math.round((pct * Math.max(1, Math.sqrt(n / 3)) + strengthDrift) * 100) / 100;
+}
+
+function conditionLabel(condition) {
+  if (condition.field === "n_day_pct") return `近${condition.days || 7}日涨跌幅 ${condition.operator} ${condition.value}%`;
+  return `${condition.field} ${condition.operator} ${condition.value}`;
 }
 
 function factorPasses(stock, key) {
@@ -1171,9 +1246,89 @@ function factorPasses(stock, key) {
 
 function activeFactorLabels() {
   const labels = new Map(factorGroups.flatMap(([, chips]) => chips));
-  return Array.from(activeFactors)
+  const factorLabels = Array.from(activeFactors)
     .map((key) => labels.get(key) || key)
-    .join(" + ");
+  const conditionLabels = customConditions.map(conditionLabel);
+  return [...factorLabels, ...conditionLabels].join(" + ");
+}
+
+function selectedAttr(value) {
+  return value ? "selected" : "";
+}
+
+function loadScreenerState() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("quant_a_share_screener") || "null");
+    if (!stored) return;
+    activeFactors = new Set(Array.isArray(stored.activeFactors) ? stored.activeFactors : Array.from(activeFactors));
+    customConditions = Array.isArray(stored.customConditions) ? stored.customConditions.map(normalizeCondition).filter(Boolean) : [];
+    savedStrategies = Array.isArray(stored.savedStrategies) ? stored.savedStrategies.map(normalizeStrategy).filter(Boolean) : [];
+    screenerSort = normalizeSort(stored.screenerSort);
+  } catch (error) {
+    // Bad local storage should not block screening.
+  }
+}
+
+function persistScreenerState() {
+  try {
+    localStorage.setItem(
+      "quant_a_share_screener",
+      JSON.stringify({
+        activeFactors: Array.from(activeFactors),
+        customConditions,
+        savedStrategies,
+        screenerSort,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  } catch (error) {
+    showToast("选股条件已更新，浏览器存储暂不可用。", "info");
+  }
+}
+
+function normalizeSort(sort) {
+  const field = ["rps_120", "change_pct", "float_market_cap", "sector_rps_50"].includes(sort?.field) ? sort.field : "rps_120";
+  const direction = sort?.direction === "asc" ? "asc" : "desc";
+  return { field, direction };
+}
+
+function normalizeCondition(condition) {
+  if (!condition?.field || !condition?.operator) return null;
+  const value = Number(condition.value);
+  if (!Number.isFinite(value)) return null;
+  return {
+    id: condition.id || `c_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    field: condition.field,
+    operator: condition.operator,
+    value,
+    days: condition.days ? Number(condition.days) : undefined,
+  };
+}
+
+function normalizeStrategy(strategy) {
+  if (!strategy?.name) return null;
+  return {
+    id: strategy.id || `s_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+    name: String(strategy.name).slice(0, 32),
+    factors: Array.isArray(strategy.factors) ? strategy.factors : [],
+    conditions: Array.isArray(strategy.conditions) ? strategy.conditions.map(normalizeCondition).filter(Boolean) : [],
+    sort: normalizeSort(strategy.sort),
+    savedAt: strategy.savedAt || new Date().toISOString(),
+  };
+}
+
+function saveCurrentStrategy(name) {
+  const strategy = normalizeStrategy({
+    id: `s_${Date.now()}`,
+    name: name || `策略 ${new Date().toLocaleDateString("zh-CN")}`,
+    factors: Array.from(activeFactors),
+    conditions: customConditions,
+    sort: screenerSort,
+    savedAt: new Date().toISOString(),
+  });
+  savedStrategies = [strategy, ...savedStrategies.filter((item) => item.name !== strategy.name)].slice(0, 20);
+  persistScreenerState();
+  return strategy;
 }
 
 function screenerEmptyState(activeLabel) {
@@ -1314,12 +1469,92 @@ function attachEvents() {
       const key = button.dataset.factor;
       if (activeFactors.has(key)) activeFactors.delete(key);
       else activeFactors.add(key);
+      persistScreenerState();
       render();
     });
   });
   document.querySelector("[data-clear-factors]")?.addEventListener("click", () => {
     activeFactors = new Set();
+    persistScreenerState();
     render();
+  });
+  document.querySelector("[data-add-custom-condition]")?.addEventListener("click", () => {
+    const condition = normalizeCondition({
+      id: `c_${Date.now()}`,
+      field: document.querySelector("#customField")?.value,
+      operator: document.querySelector("#customOperator")?.value,
+      value: document.querySelector("#customValue")?.value,
+    });
+    if (!condition) {
+      showToast("请输入有效条件值。", "info");
+      return;
+    }
+    customConditions.push(condition);
+    persistScreenerState();
+    render();
+  });
+  document.querySelector("[data-add-recent-condition]")?.addEventListener("click", () => {
+    const days = Number(document.querySelector("#recentDays")?.value || 7);
+    const condition = normalizeCondition({
+      id: `c_${Date.now()}`,
+      field: "n_day_pct",
+      operator: document.querySelector("#recentOperator")?.value,
+      value: document.querySelector("#recentValue")?.value,
+      days,
+    });
+    if (!condition) {
+      showToast("请输入有效近N日条件。", "info");
+      return;
+    }
+    customConditions.push(condition);
+    persistScreenerState();
+    render();
+  });
+  document.querySelectorAll("[data-remove-condition]").forEach((button) => {
+    button.addEventListener("click", () => {
+      customConditions = customConditions.filter((condition) => condition.id !== button.dataset.removeCondition);
+      persistScreenerState();
+      render();
+    });
+  });
+  document.querySelector("[data-clear-conditions]")?.addEventListener("click", () => {
+    customConditions = [];
+    persistScreenerState();
+    render();
+  });
+  document.querySelector("[data-screener-sort-field]")?.addEventListener("change", (event) => {
+    screenerSort = normalizeSort({ ...screenerSort, field: event.currentTarget.value });
+    persistScreenerState();
+    render();
+  });
+  document.querySelector("[data-screener-sort-direction]")?.addEventListener("change", (event) => {
+    screenerSort = normalizeSort({ ...screenerSort, direction: event.currentTarget.value });
+    persistScreenerState();
+    render();
+  });
+  document.querySelector("[data-save-strategy]")?.addEventListener("click", () => {
+    const strategy = saveCurrentStrategy(document.querySelector("#strategyName")?.value.trim());
+    showToast(`策略已保存：${strategy.name}`, "success");
+    render();
+  });
+  document.querySelectorAll("[data-apply-strategy]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const strategy = savedStrategies.find((item) => item.id === button.dataset.applyStrategy);
+      if (!strategy) return;
+      activeFactors = new Set(strategy.factors);
+      customConditions = strategy.conditions.map((condition) => ({ ...condition }));
+      screenerSort = normalizeSort(strategy.sort);
+      modal = null;
+      persistScreenerState();
+      render();
+    });
+  });
+  document.querySelectorAll("[data-delete-strategy]").forEach((button) => {
+    button.addEventListener("click", () => {
+      savedStrategies = savedStrategies.filter((item) => item.id !== button.dataset.deleteStrategy);
+      persistScreenerState();
+      render();
+    });
   });
   document.querySelectorAll("[data-chat-module]").forEach((button) => {
     button.addEventListener("click", async () => {
@@ -1416,6 +1651,17 @@ function contextForModule(moduleName) {
     sectors: data.sectors.slice(0, 8),
     concepts: data.concepts.slice(0, 8),
     stocks: data.stocks.slice(0, 8),
+    screener: {
+      activeFactors: Array.from(activeFactors),
+      customConditions: customConditions.map(conditionLabel),
+      sort: screenerSort,
+      savedStrategies: savedStrategies.slice(0, 5).map((strategy) => ({
+        name: strategy.name,
+        factors: strategy.factors,
+        conditions: strategy.conditions.map(conditionLabel),
+        sort: strategy.sort,
+      })),
+    },
     limitPools: {
       stats: data.limitPools.stats,
       limitUp: data.limitPools.limitUp.slice(0, 8),
