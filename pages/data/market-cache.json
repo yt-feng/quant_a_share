@@ -1,7 +1,7 @@
 {
   "ok": true,
-  "source": "sina-a-share-pages+sina-industry-sectors+sina-concept-boards+eastmoney-limit-pools+etf-fallback+moneyflow-fallback+northbound-fallback+sina-financial-report+hot-rank-fallback+stock-popularity-fallback+eastmoney-announcements+cninfo-relation-samples+research-fallback+yahoo-fallback+eastmoney-minute-trends+baostock-history-cache+index-fallback+quote-fallback+github-action-cache",
-  "asOf": "2026-10-02T07:19:38.590Z",
+  "source": "sina-a-share-pages+sina-industry-sectors+sina-concept-boards+eastmoney-limit-pools+etf-fallback+moneyflow-fallback+eastmoney-northbound+eastmoney-kamt+eastmoney-northbound-holdings+sina-financial-report+hot-rank-fallback+stock-popularity-fallback+eastmoney-announcements+cninfo-relation-samples+research-fallback+yahoo-fallback+eastmoney-minute-trends+baostock-history-cache+eastmoney-index-quotes+quote-fallback+github-action-cache",
+  "asOf": "2026-10-02T16:09:14.140Z",
   "tradeDate": "20261002",
   "market": {
     "temperature": 63.3,
@@ -46,7 +46,7 @@
       "total": 5814,
       "mainMoney": 5565,
       "limitPool": 226,
-      "hotRank": 101,
+      "hotRank": 109,
       "financialCache": 504,
       "baostockCache": 180
     }
@@ -19071,7 +19071,7 @@
       "limitStreak": 1,
       "sealFund": 64352456,
       "firstSealTime": "09:31:14",
-      "hotRank": 25,
+      "hotRank": 31,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.55,
@@ -19566,7 +19566,7 @@
       "limitStreak": 1,
       "sealFund": 33820020,
       "firstSealTime": "09:36:33",
-      "hotRank": 20,
+      "hotRank": 24,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -6.91,
@@ -19920,7 +19920,7 @@
       "limitStreak": 1,
       "sealFund": 32680616,
       "firstSealTime": "09:38:15",
-      "hotRank": 37,
+      "hotRank": 40,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.93,
@@ -21834,7 +21834,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 83,
+      "hotRank": 85,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -1.44,
@@ -22053,7 +22053,7 @@
       "limitStreak": 1,
       "sealFund": 26475540,
       "firstSealTime": "14:08:49",
-      "hotRank": 48,
+      "hotRank": 53,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.54,
@@ -25092,7 +25092,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 94,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.22,
@@ -26571,7 +26571,7 @@
       "limitStreak": 3,
       "sealFund": 141936300,
       "firstSealTime": "09:25:00",
-      "hotRank": 27,
+      "hotRank": 25,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -1.21,
@@ -27801,7 +27801,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 33,
+      "hotRank": 18,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 8.04,
@@ -30993,7 +30993,7 @@
       "limitStreak": 1,
       "sealFund": 57930701,
       "firstSealTime": "09:32:23",
-      "hotRank": 66,
+      "hotRank": 71,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.01,
@@ -32298,7 +32298,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 76,
+      "hotRank": 98,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -6.24,
@@ -35586,7 +35586,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 69,
+      "hotRank": 66,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 9.43,
@@ -37074,7 +37074,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 5,
+      "hotRank": 3,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 16.75,
@@ -40350,7 +40350,7 @@
       "limitStreak": 1,
       "sealFund": 64484683,
       "firstSealTime": "10:00:44",
-      "hotRank": 29,
+      "hotRank": 37,
       "hotRankChange": -1,
       "financialCached": true,
       "roe": 2.03,
@@ -43353,7 +43353,7 @@
       "limitStreak": 1,
       "sealFund": 65383695,
       "firstSealTime": "11:13:29",
-      "hotRank": 4,
+      "hotRank": 20,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.36,
@@ -43410,7 +43410,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 51,
+      "hotRank": 65,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 6.96,
@@ -44868,7 +44868,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 71,
+      "hotRank": 49,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.21,
@@ -45135,7 +45135,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 60,
+      "hotRank": 45,
       "hotRankChange": 2,
       "financialCached": true,
       "roe": 0.46,
@@ -49560,7 +49560,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 90,
+      "hotRank": 93,
       "hotRankChange": 0,
       "financialCached": false,
       "roe": 0,
@@ -50496,7 +50496,7 @@
       "limitStreak": 7,
       "sealFund": 1988381638,
       "firstSealTime": "09:25:00",
-      "hotRank": 14,
+      "hotRank": 15,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.31,
@@ -53691,7 +53691,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 59,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 6.55,
@@ -58746,7 +58746,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 63,
+      "hotRank": 74,
       "hotRankChange": -3,
       "financialCached": true,
       "roe": 5.09,
@@ -59472,7 +59472,7 @@
       "limitStreak": 1,
       "sealFund": 79271465,
       "firstSealTime": "09:30:08",
-      "hotRank": 45,
+      "hotRank": 50,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -1.31,
@@ -61176,7 +61176,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 88,
+      "hotRank": 87,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.96,
@@ -61680,7 +61680,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 55,
+      "hotRank": 57,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -4.34,
@@ -66168,7 +66168,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 72,
+      "hotRank": 77,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.23,
@@ -66873,7 +66873,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 99,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 19.22,
@@ -67464,7 +67464,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 70,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 19.6,
@@ -73143,7 +73143,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 39,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.32,
@@ -75297,7 +75297,7 @@
       "limitStreak": 1,
       "sealFund": 221548382,
       "firstSealTime": "10:49:10",
-      "hotRank": 13,
+      "hotRank": 12,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 8.61,
@@ -77451,7 +77451,7 @@
       "limitStreak": 1,
       "sealFund": 32962718,
       "firstSealTime": "13:38:19",
-      "hotRank": 57,
+      "hotRank": 63,
       "hotRankChange": 1,
       "financialCached": true,
       "roe": -5.74,
@@ -77622,7 +77622,7 @@
       "limitStreak": 2,
       "sealFund": 26412480,
       "firstSealTime": "09:32:06",
-      "hotRank": 28,
+      "hotRank": 36,
       "hotRankChange": 1,
       "financialCached": true,
       "roe": 1.43,
@@ -78279,7 +78279,7 @@
       "limitStreak": 2,
       "sealFund": 48320229,
       "firstSealTime": "10:11:16",
-      "hotRank": 11,
+      "hotRank": 14,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -0.6,
@@ -80547,7 +80547,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 32,
+      "hotRank": 10,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 13.19,
@@ -88968,7 +88968,7 @@
       "limitStreak": 1,
       "sealFund": 187204060,
       "firstSealTime": "09:48:35",
-      "hotRank": 17,
+      "hotRank": 23,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.42,
@@ -90093,7 +90093,7 @@
       "limitStreak": 1,
       "sealFund": 19000450,
       "firstSealTime": "09:55:33",
-      "hotRank": 36,
+      "hotRank": 43,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.98,
@@ -95019,7 +95019,7 @@
       "limitStreak": 1,
       "sealFund": 17764812,
       "firstSealTime": "09:48:57",
-      "hotRank": 21,
+      "hotRank": 29,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.16,
@@ -99414,7 +99414,7 @@
       "limitStreak": 1,
       "sealFund": 41772465,
       "firstSealTime": "10:11:23",
-      "hotRank": 19,
+      "hotRank": 22,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 11.56,
@@ -99834,7 +99834,7 @@
       "limitStreak": 1,
       "sealFund": 18473580,
       "firstSealTime": "13:38:53",
-      "hotRank": 59,
+      "hotRank": 68,
       "hotRankChange": -1,
       "financialCached": true,
       "roe": 6.16,
@@ -100092,7 +100092,7 @@
       "limitStreak": 1,
       "sealFund": 52047680,
       "firstSealTime": "09:41:00",
-      "hotRank": 30,
+      "hotRank": 35,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.01,
@@ -100530,7 +100530,7 @@
       "limitStreak": 1,
       "sealFund": 23284514,
       "firstSealTime": "09:33:33",
-      "hotRank": 80,
+      "hotRank": 100,
       "hotRankChange": 0,
       "financialCached": false,
       "roe": 0,
@@ -101646,7 +101646,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 56,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 23.13,
@@ -106398,7 +106398,7 @@
       "limitStreak": 2,
       "sealFund": 174751484,
       "firstSealTime": "09:25:00",
-      "hotRank": 65,
+      "hotRank": 62,
       "hotRankChange": 1,
       "financialCached": false,
       "roe": 0,
@@ -106989,7 +106989,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 49,
+      "hotRank": 52,
       "hotRankChange": 0,
       "financialCached": false,
       "roe": 0,
@@ -107313,7 +107313,7 @@
       "limitStreak": 2,
       "sealFund": 77280333,
       "firstSealTime": "09:25:00",
-      "hotRank": 35,
+      "hotRank": 34,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 0.3,
@@ -107904,7 +107904,7 @@
       "limitStreak": 1,
       "sealFund": 159267240,
       "firstSealTime": "09:30:12",
-      "hotRank": 50,
+      "hotRank": 48,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2,
@@ -114873,7 +114873,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 73,
+      "hotRank": 88,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -1.45,
@@ -117054,7 +117054,7 @@
       "limitStreak": 1,
       "sealFund": 181976717,
       "firstSealTime": "09:38:00",
-      "hotRank": 54,
+      "hotRank": 76,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -0.01,
@@ -141396,7 +141396,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 75,
+      "hotRank": 80,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 81.06,
@@ -141615,8 +141615,8 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 89,
-      "hotRankChange": 0,
+      "hotRank": 96,
+      "hotRankChange": -1,
       "financialCached": true,
       "roe": 9.99,
       "revenue": 1152245550.58,
@@ -141843,7 +141843,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 7,
+      "hotRank": 4,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -13.65,
@@ -142176,7 +142176,7 @@
       "limitStreak": 3,
       "sealFund": 40166967,
       "firstSealTime": "09:31:45",
-      "hotRank": 9,
+      "hotRank": 16,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -2.03,
@@ -146727,7 +146727,7 @@
       "limitStreak": 1,
       "sealFund": 61630536,
       "firstSealTime": "10:22:42",
-      "hotRank": 23,
+      "hotRank": 26,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.23,
@@ -149193,7 +149193,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 58,
+      "hotRank": 72,
       "hotRankChange": 1,
       "financialCached": true,
       "roe": 0.87,
@@ -152979,7 +152979,7 @@
       "limitStreak": 4,
       "sealFund": 67104051,
       "firstSealTime": "10:03:00",
-      "hotRank": 8,
+      "hotRank": 9,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -2.54,
@@ -153570,7 +153570,7 @@
       "limitStreak": 1,
       "sealFund": 38930557,
       "firstSealTime": "09:42:27",
-      "hotRank": 41,
+      "hotRank": 42,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -110.2,
@@ -154236,7 +154236,7 @@
       "limitStreak": 1,
       "sealFund": 135318456,
       "firstSealTime": "09:33:06",
-      "hotRank": 24,
+      "hotRank": 27,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -3.03,
@@ -154968,7 +154968,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 91,
+      "hotRank": 82,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.82,
@@ -159114,7 +159114,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 84,
+      "hotRank": 97,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 7.14,
@@ -163665,7 +163665,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 92,
+      "hotRank": 86,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 51.93,
@@ -164112,7 +164112,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 81,
+      "hotRank": 90,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.14,
@@ -164607,7 +164607,7 @@
       "limitStreak": 1,
       "sealFund": 24210319,
       "firstSealTime": "09:30:00",
-      "hotRank": 56,
+      "hotRank": 73,
       "hotRankChange": 1,
       "financialCached": true,
       "roe": 2.92,
@@ -166320,7 +166320,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 3,
+      "hotRank": 6,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 20.03,
@@ -166776,7 +166776,7 @@
       "limitStreak": 1,
       "sealFund": 38363198,
       "firstSealTime": "13:59:45",
-      "hotRank": 61,
+      "hotRank": 60,
       "hotRankChange": 1,
       "financialCached": true,
       "roe": 4.42,
@@ -168432,7 +168432,7 @@
       "limitStreak": 1,
       "sealFund": 62272520,
       "firstSealTime": "13:20:24",
-      "hotRank": 44,
+      "hotRank": 55,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.11,
@@ -173181,7 +173181,7 @@
       "limitStreak": 1,
       "sealFund": 30225558,
       "firstSealTime": "13:28:33",
-      "hotRank": 64,
+      "hotRank": 69,
       "hotRankChange": -1,
       "financialCached": true,
       "roe": 1.34,
@@ -174132,7 +174132,7 @@
       "limitStreak": 2,
       "sealFund": 69384959,
       "firstSealTime": "09:25:00",
-      "hotRank": 34,
+      "hotRank": 33,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 25.88,
@@ -174912,7 +174912,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 16,
+      "hotRank": 17,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.68,
@@ -177204,7 +177204,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 86,
+      "hotRank": 84,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.53,
@@ -179538,7 +179538,7 @@
       "limitStreak": 1,
       "sealFund": 60687307,
       "firstSealTime": "10:01:12",
-      "hotRank": 42,
+      "hotRank": 41,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.42,
@@ -180717,8 +180717,8 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
-      "hotRankChange": 0,
+      "hotRank": 95,
+      "hotRankChange": 1,
       "financialCached": true,
       "roe": 4.44,
       "revenue": 10510627614.2,
@@ -180888,7 +180888,7 @@
       "limitStreak": 1,
       "sealFund": 23670400,
       "firstSealTime": "11:09:00",
-      "hotRank": 67,
+      "hotRank": 79,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.04,
@@ -182934,7 +182934,7 @@
       "limitStreak": 1,
       "sealFund": 62458028,
       "firstSealTime": "10:05:48",
-      "hotRank": 40,
+      "hotRank": 44,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.66,
@@ -183762,7 +183762,7 @@
       "limitStreak": 3,
       "sealFund": 164830000,
       "firstSealTime": "09:25:00",
-      "hotRank": 12,
+      "hotRank": 11,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.11,
@@ -183876,7 +183876,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 68,
+      "hotRank": 67,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 5.13,
@@ -187524,7 +187524,7 @@
       "limitStreak": 1,
       "sealFund": 40009860,
       "firstSealTime": "09:33:03",
-      "hotRank": 52,
+      "hotRank": 61,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 0.58,
@@ -191229,7 +191229,7 @@
       "limitStreak": 1,
       "sealFund": 63476868,
       "firstSealTime": "09:31:36",
-      "hotRank": 31,
+      "hotRank": 28,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": -1.23,
@@ -192837,7 +192837,7 @@
       "limitStreak": 1,
       "sealFund": 25165555,
       "firstSealTime": "13:08:06",
-      "hotRank": 43,
+      "hotRank": 51,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.8,
@@ -194559,7 +194559,7 @@
       "limitStreak": 1,
       "sealFund": 34133321,
       "firstSealTime": "10:07:21",
-      "hotRank": 39,
+      "hotRank": 46,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.06,
@@ -196224,7 +196224,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 6,
+      "hotRank": 7,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 7.02,
@@ -198279,7 +198279,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 53,
+      "hotRank": 64,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.34,
@@ -201762,7 +201762,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 70,
+      "hotRank": 58,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.86,
@@ -209625,7 +209625,7 @@
       "limitStreak": 1,
       "sealFund": 14917195,
       "firstSealTime": "10:23:57",
-      "hotRank": 46,
+      "hotRank": 54,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 3.81,
@@ -212802,7 +212802,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 99,
+      "hotRank": 92,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.91,
@@ -215070,7 +215070,7 @@
       "limitStreak": 2,
       "sealFund": 34927230,
       "firstSealTime": "09:30:06",
-      "hotRank": 15,
+      "hotRank": 13,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.03,
@@ -215880,7 +215880,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 0,
+      "hotRank": 81,
       "hotRankChange": 0,
       "financialCached": false,
       "roe": 0,
@@ -219840,7 +219840,7 @@
       "limitStreak": 1,
       "sealFund": 51090473,
       "firstSealTime": "09:49:21",
-      "hotRank": 22,
+      "hotRank": 21,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 0.83,
@@ -227019,7 +227019,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 10,
+      "hotRank": 5,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 8.46,
@@ -231147,7 +231147,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 85,
+      "hotRank": 91,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 0.74,
@@ -234525,7 +234525,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 38,
+      "hotRank": 30,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 2.44,
@@ -239676,7 +239676,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 77,
+      "hotRank": 8,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 37.62,
@@ -246780,7 +246780,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 18,
+      "hotRank": 19,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 5.67,
@@ -262617,7 +262617,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 82,
+      "hotRank": 38,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 12.08,
@@ -270276,7 +270276,7 @@
       "limitStreak": 1,
       "sealFund": 23202445,
       "firstSealTime": "10:14:42",
-      "hotRank": 79,
+      "hotRank": 83,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 5.93,
@@ -278199,7 +278199,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 74,
+      "hotRank": 89,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 1.6,
@@ -279819,7 +279819,7 @@
       "limitStreak": 0,
       "sealFund": 0,
       "firstSealTime": "",
-      "hotRank": 62,
+      "hotRank": 75,
       "hotRankChange": 2,
       "financialCached": true,
       "roe": 3.63,
@@ -284994,7 +284994,7 @@
       "limitStreak": 3,
       "sealFund": 106419018,
       "firstSealTime": "09:31:15",
-      "hotRank": 26,
+      "hotRank": 32,
       "hotRankChange": 0,
       "financialCached": true,
       "roe": 4.29,
@@ -328486,36 +328486,6 @@
     "name": "贵州茅台",
     "rows": [
       {
-        "date": "2026-08-31",
-        "close": 1299.52,
-        "pct": 0.16,
-        "mainNet": -38633360,
-        "smallNet": -119883,
-        "midNet": 38753232,
-        "bigNet": -15361168,
-        "superNet": -23272192,
-        "mainRatio": -1.29,
-        "smallRatio": 0,
-        "midRatio": 1.29,
-        "bigRatio": -0.51,
-        "superRatio": -0.77
-      },
-      {
-        "date": "2026-09-01",
-        "close": 1299.56,
-        "pct": 0,
-        "mainNet": 220531760,
-        "smallNet": -97733,
-        "midNet": -220434016,
-        "bigNet": 52482800,
-        "superNet": 168048960,
-        "mainRatio": 5.2,
-        "smallRatio": 0,
-        "midRatio": -5.2,
-        "bigRatio": 1.24,
-        "superRatio": 3.96
-      },
-      {
         "date": "2026-09-02",
         "close": 1297.5,
         "pct": -0.16,
@@ -328784,24 +328754,54 @@
         "midRatio": 5.69,
         "bigRatio": -2.38,
         "superRatio": -3.3
+      },
+      {
+        "date": "2026-09-29",
+        "close": 1235.58,
+        "pct": -0.67,
+        "mainNet": 324185776,
+        "smallNet": -362437,
+        "midNet": -323823344,
+        "bigNet": 14867712,
+        "superNet": 309318064,
+        "mainRatio": 9.94,
+        "smallRatio": -0.01,
+        "midRatio": -9.93,
+        "bigRatio": 0.46,
+        "superRatio": 9.49
+      },
+      {
+        "date": "2026-09-30",
+        "close": 1258.62,
+        "pct": 1.86,
+        "mainNet": 533565520,
+        "smallNet": -539065,
+        "midNet": -533026464,
+        "bigNet": 121427904,
+        "superNet": 412137616,
+        "mainRatio": 11.12,
+        "smallRatio": -0.01,
+        "midRatio": -11.11,
+        "bigRatio": 2.53,
+        "superRatio": 8.59
       }
     ],
     "latest": {
-      "date": "2026-09-28",
-      "close": 1243.88,
-      "pct": 0.56,
-      "mainNet": -198158880,
-      "smallNet": -343470,
-      "midNet": 198502352,
-      "bigNet": -83004848,
-      "superNet": -115154032,
-      "mainRatio": -5.68,
+      "date": "2026-09-30",
+      "close": 1258.62,
+      "pct": 1.86,
+      "mainNet": 533565520,
+      "smallNet": -539065,
+      "midNet": -533026464,
+      "bigNet": 121427904,
+      "superNet": 412137616,
+      "mainRatio": 11.12,
       "smallRatio": -0.01,
-      "midRatio": 5.69,
-      "bigRatio": -2.38,
-      "superRatio": -3.3
+      "midRatio": -11.11,
+      "bigRatio": 2.53,
+      "superRatio": 8.59
     },
-    "sum5MainYi": -9.02
+    "sum5MainYi": 0.58
   },
   "northbound": {
     "source": "eastmoney-northbound+eastmoney-kamt+eastmoney-northbound-holdings",
@@ -328811,7 +328811,7 @@
         "type": "沪股通",
         "board": "沪港通",
         "direction": "北向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 0,
         "dayNetAmtIn": 0,
         "dayAmtRemain": 0,
@@ -328833,7 +328833,7 @@
         "type": "港股通(沪)",
         "board": "沪港通",
         "direction": "南向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 5094330400,
         "dayNetAmtIn": 42000000000,
         "dayAmtRemain": 0,
@@ -328845,17 +328845,17 @@
         "yearNetAmtIn": 7476000000000,
         "allNetAmtIn": 23998743392900,
         "indexName": "恒生指数",
-        "indexPct": -2.8,
-        "upCount": 62,
-        "downCount": 592,
-        "flatCount": 11
+        "indexPct": -2.6,
+        "upCount": 86,
+        "downCount": 569,
+        "flatCount": 10
       },
       {
         "tradeDate": "2026-10-02",
         "type": "深股通",
         "board": "深港通",
         "direction": "北向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 0,
         "dayNetAmtIn": 0,
         "dayAmtRemain": 0,
@@ -328877,7 +328877,7 @@
         "type": "港股通(深)",
         "board": "深港通",
         "direction": "南向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 1769280500,
         "dayNetAmtIn": 42000000000,
         "dayAmtRemain": 0,
@@ -328889,10 +328889,10 @@
         "yearNetAmtIn": 7476000000000,
         "allNetAmtIn": 23424606069000,
         "indexName": "恒生指数",
-        "indexPct": -2.8,
-        "upCount": 62,
-        "downCount": 592,
-        "flatCount": 11
+        "indexPct": -2.6,
+        "upCount": 86,
+        "downCount": 569,
+        "flatCount": 10
       }
     ],
     "northRows": [
@@ -328901,7 +328901,7 @@
         "type": "沪股通",
         "board": "沪港通",
         "direction": "北向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 0,
         "dayNetAmtIn": 0,
         "dayAmtRemain": 0,
@@ -328923,7 +328923,7 @@
         "type": "深股通",
         "board": "深港通",
         "direction": "北向",
-        "status": 4,
+        "status": 3,
         "netBuyAmt": 0,
         "dayNetAmtIn": 0,
         "dayAmtRemain": 0,
@@ -330630,7 +330630,7 @@
     "cache": {
       "scope": "vercel-serverless-memory",
       "hit": false,
-      "updatedAt": "2026-10-02T07:19:15.047Z",
+      "updatedAt": "2026-10-02T16:08:48.652Z",
       "ttlSeconds": 21600
     },
     "totalMv": 1313774400,
@@ -330645,902 +330645,902 @@
         {
           "rank": 1,
           "code": "601127.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "赛力斯",
+          "price": 46.94,
+          "pct": 0.28,
           "rankChange": 0,
           "historyRankChange": 0
         },
         {
           "rank": 2,
           "code": "600418.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "江淮汽车",
+          "price": 27.47,
+          "pct": 5.49,
           "rankChange": 0,
           "historyRankChange": 0
         },
         {
           "rank": 3,
-          "code": "001246.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600519.SH",
+          "name": "贵州茅台",
+          "price": 1258.62,
+          "pct": 1.86,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 2
         },
         {
           "rank": 4,
-          "code": "600663.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000002.SZ",
+          "name": "万  科Ａ",
+          "price": 4.26,
+          "pct": 4.41,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 3
         },
         {
           "rank": 5,
-          "code": "600519.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "300059.SZ",
+          "name": "东方财富",
+          "price": 17.79,
+          "pct": 0.11,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 5
         },
         {
           "rank": 6,
-          "code": "002487.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "001246.SZ",
+          "name": "N力勤",
+          "price": 65.09,
+          "pct": 206.59,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -3
         },
         {
           "rank": 7,
-          "code": "000002.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002487.SZ",
+          "name": "大金重工",
+          "price": 46.29,
+          "pct": 7.83,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -1
         },
         {
           "rank": 8,
-          "code": "000678.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "300308.SZ",
+          "name": "中际旭创",
+          "price": 808.44,
+          "pct": -0.56,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 77
         },
         {
           "rank": 9,
-          "code": "000011.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000678.SZ",
+          "name": "襄阳轴承",
+          "price": 12.89,
+          "pct": 9.98,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -1
         },
         {
           "rank": 10,
-          "code": "300059.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603259.SH",
+          "name": "药明康德",
+          "price": 167.34,
+          "pct": 4.16,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 23
         },
         {
           "rank": 11,
-          "code": "603200.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002242.SZ",
+          "name": "九阳股份",
+          "price": 12.5,
+          "pct": 10.04,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 2
         },
         {
           "rank": 12,
-          "code": "002242.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603127.SH",
+          "name": "昭衍新药",
+          "price": 49.3,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": 1
+          "historyRankChange": 0
         },
         {
           "rank": 13,
-          "code": "603127.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002866.SZ",
+          "name": "传艺科技",
+          "price": 16.9,
+          "pct": 10.03,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": 2
         },
         {
           "rank": 14,
-          "code": "600825.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603200.SH",
+          "name": "上海洗霸",
+          "price": 44.74,
+          "pct": 10.01,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -3
         },
         {
           "rank": 15,
-          "code": "002866.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600825.SH",
+          "name": "新华传媒",
+          "price": 10.35,
+          "pct": 9.99,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -1
         },
         {
           "rank": 16,
-          "code": "002074.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000011.SZ",
+          "name": "深物业A",
+          "price": 12.24,
+          "pct": 9.97,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -7
         },
         {
           "rank": 17,
-          "code": "603538.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002074.SZ",
+          "name": "国轩高科",
+          "price": 29.5,
+          "pct": 2.86,
           "rankChange": 0,
-          "historyRankChange": 1
+          "historyRankChange": -1
         },
         {
           "rank": 18,
-          "code": "300450.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600276.SH",
+          "name": "恒瑞医药",
+          "price": 47.2,
+          "pct": 3.46,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": 16
         },
         {
           "rank": 19,
-          "code": "603906.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "300450.SZ",
+          "name": "先导智能",
+          "price": 34.94,
+          "pct": 3.5,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -2
         },
         {
           "rank": 20,
-          "code": "600072.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600663.SH",
+          "name": "陆家嘴",
+          "price": 10.11,
+          "pct": 10.01,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -16
         },
         {
           "rank": 21,
-          "code": "603739.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002962.SZ",
+          "name": "五方光电",
+          "price": 16.17,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 1
         },
         {
           "rank": 22,
-          "code": "002962.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603906.SH",
+          "name": "龙蟠科技",
+          "price": 19.04,
+          "pct": 9.99,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -3
         },
         {
           "rank": 23,
-          "code": "000504.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603538.SH",
+          "name": "美诺华",
+          "price": 28.59,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -5
         },
         {
           "rank": 24,
-          "code": "000710.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600072.SH",
+          "name": "中船科技",
+          "price": 9.7,
+          "pct": 9.98,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -4
         },
         {
           "rank": 25,
-          "code": "600059.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600241.SH",
+          "name": "时代万恒",
+          "price": 9.72,
+          "pct": 9.95,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 4
         },
         {
           "rank": 26,
-          "code": "301190.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000504.SZ",
+          "name": "南华生物",
+          "price": 12.42,
+          "pct": 10.01,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": -3
         },
         {
           "rank": 27,
-          "code": "600241.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000710.SZ",
+          "name": "贝瑞基因",
+          "price": 10.87,
+          "pct": 10.02,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": -3
         },
         {
           "rank": 28,
-          "code": "603188.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 1,
-          "historyRankChange": -2
+          "code": "002388.SZ",
+          "name": "新亚制程",
+          "price": 9.1,
+          "pct": 10.04,
+          "rankChange": 0,
+          "historyRankChange": 3
         },
         {
           "rank": 29,
-          "code": "600592.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": -1,
-          "historyRankChange": -2
+          "code": "603739.SH",
+          "name": "蔚蓝生物",
+          "price": 14.04,
+          "pct": 10.03,
+          "rankChange": 0,
+          "historyRankChange": -8
         },
         {
           "rank": 30,
-          "code": "603928.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "300207.SZ",
+          "name": "欣旺达",
+          "price": 22,
+          "pct": 2.33,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 9
         },
         {
           "rank": 31,
-          "code": "002388.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600059.SH",
+          "name": "古越龙山",
+          "price": 12.27,
+          "pct": 10.04,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -6
         },
         {
           "rank": 32,
-          "code": "603259.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "301190.SZ",
+          "name": "善水科技",
+          "price": 35.93,
+          "pct": 20.01,
           "rankChange": 0,
-          "historyRankChange": 1
+          "historyRankChange": -4
         },
         {
           "rank": 33,
-          "code": "600276.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002058.SZ",
+          "name": "紫竹高科",
+          "price": 20.2,
+          "pct": 10.02,
           "rankChange": 0,
-          "historyRankChange": 1
+          "historyRankChange": -1
         },
         {
           "rank": 34,
-          "code": "002058.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -2
-        },
-        {
-          "rank": 35,
           "code": "605388.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 36,
-          "code": "603590.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 37,
-          "code": "600081.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 38,
-          "code": "300207.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "均瑶健康",
+          "price": 7.39,
+          "pct": 9.97,
           "rankChange": 0,
           "historyRankChange": 1
         },
         {
-          "rank": 39,
-          "code": "002454.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "rank": 35,
+          "code": "603928.SH",
+          "name": "兴业股份",
+          "price": 13.07,
+          "pct": 10.02,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": -5
+        },
+        {
+          "rank": 36,
+          "code": "603188.SH",
+          "name": "亚邦股份",
+          "price": 5.4,
+          "pct": 9.98,
+          "rankChange": 0,
+          "historyRankChange": -10
+        },
+        {
+          "rank": 37,
+          "code": "600592.SH",
+          "name": "龙溪股份",
+          "price": 16.2,
+          "pct": 9.98,
+          "rankChange": 0,
+          "historyRankChange": -10
+        },
+        {
+          "rank": 38,
+          "code": "300750.SZ",
+          "name": "宁德时代",
+          "price": 291.11,
+          "pct": 1.5,
+          "rankChange": 0,
+          "historyRankChange": 42
+        },
+        {
+          "rank": 39,
+          "code": "603083.SH",
+          "name": "剑桥科技",
+          "price": 205.45,
+          "pct": 2.16,
+          "rankChange": 0,
+          "historyRankChange": 164
         },
         {
           "rank": 40,
-          "code": "002226.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600081.SH",
+          "name": "东风科技",
+          "price": 11.89,
+          "pct": 9.99,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -3
         },
         {
           "rank": 41,
-          "code": "000692.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002164.SZ",
+          "name": "宁波东力",
+          "price": 13.26,
+          "pct": 10.04,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 1
         },
         {
           "rank": 42,
-          "code": "002164.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000692.SZ",
+          "name": "惠天热电",
+          "price": 4.59,
+          "pct": 10.07,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -1
         },
         {
           "rank": 43,
-          "code": "002419.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "603590.SH",
+          "name": "康辰药业",
+          "price": 32.11,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -7
         },
         {
           "rank": 44,
-          "code": "001318.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002226.SZ",
+          "name": "江南化工",
+          "price": 5.34,
+          "pct": 10.1,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -4
         },
         {
           "rank": 45,
-          "code": "601118.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600707.SH",
+          "name": "彩虹股份",
+          "price": 10.08,
+          "pct": 5.33,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": 19
         },
         {
           "rank": 46,
-          "code": "002755.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002454.SZ",
+          "name": "松芝股份",
+          "price": 5.61,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": -8
         },
         {
           "rank": 47,
           "code": "605011.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "杭州热电",
+          "price": 19.21,
+          "pct": 10.02,
           "rankChange": 0,
           "historyRankChange": -1
         },
         {
           "rank": 48,
-          "code": "600131.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "605577.SH",
+          "name": "龙版传媒",
+          "price": 16.28,
+          "pct": 10,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 1
         },
         {
           "rank": 49,
-          "code": "605366.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600699.SH",
+          "name": "均胜电子",
+          "price": 23.46,
+          "pct": 3.12,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": 24
         },
         {
           "rank": 50,
-          "code": "605577.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 51,
-          "code": "600664.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 52,
-          "code": "002316.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -2
-        },
-        {
-          "rank": 53,
-          "code": "002531.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 54,
-          "code": "688185.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 55,
-          "code": "601238.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 56,
-          "code": "001206.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 57,
-          "code": "603185.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 58,
-          "code": "000560.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 1,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 59,
-          "code": "603919.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": -1,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 60,
-          "code": "600707.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 2,
-          "historyRankChange": 4
-        },
-        {
-          "rank": 61,
-          "code": "001266.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 62,
-          "code": "301080.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 2,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 63,
-          "code": "601091.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": -3,
-          "historyRankChange": 4
-        },
-        {
-          "rank": 64,
-          "code": "002041.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": -1,
-          "historyRankChange": -4
-        },
-        {
-          "rank": 65,
-          "code": "605303.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -2
-        },
-        {
-          "rank": 66,
-          "code": "600356.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 67,
-          "code": "002188.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 68,
-          "code": "002244.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 69,
-          "code": "600487.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 70,
-          "code": "002594.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 71,
-          "code": "600699.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 2
-        },
-        {
-          "rank": 72,
-          "code": "601811.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 3
-        },
-        {
-          "rank": 73,
-          "code": "688137.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -1
-        },
-        {
-          "rank": 74,
-          "code": "301047.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "601118.SH",
+          "name": "海南橡胶",
+          "price": 6.37,
+          "pct": 10.02,
           "rankChange": 0,
           "historyRankChange": -3
         },
         {
-          "rank": 75,
-          "code": "688825.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "rank": 51,
+          "code": "002419.SZ",
+          "name": "天虹股份",
+          "price": 5.09,
+          "pct": 9.94,
+          "rankChange": 0,
+          "historyRankChange": -8
+        },
+        {
+          "rank": 52,
+          "code": "605366.SH",
+          "name": "宏柏新材",
+          "price": 10.41,
+          "pct": 6.77,
           "rankChange": 0,
           "historyRankChange": -1
         },
         {
-          "rank": 76,
-          "code": "600383.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "rank": 53,
+          "code": "600131.SH",
+          "name": "国网信通",
+          "price": 15.39,
+          "pct": 10.01,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -5
+        },
+        {
+          "rank": 54,
+          "code": "002755.SZ",
+          "name": "奥赛康",
+          "price": 13.55,
+          "pct": 9.98,
+          "rankChange": 0,
+          "historyRankChange": -9
+        },
+        {
+          "rank": 55,
+          "code": "001318.SZ",
+          "name": "阳光乳业",
+          "price": 13.04,
+          "pct": 10.04,
+          "rankChange": 0,
+          "historyRankChange": -11
+        },
+        {
+          "rank": 56,
+          "code": "603986.SH",
+          "name": "兆易创新",
+          "price": 353.9,
+          "pct": -3.72,
+          "rankChange": 0,
+          "historyRankChange": 49
+        },
+        {
+          "rank": 57,
+          "code": "601238.SH",
+          "name": "广汽集团",
+          "price": 5.84,
+          "pct": 4.29,
+          "rankChange": 0,
+          "historyRankChange": -1
+        },
+        {
+          "rank": 58,
+          "code": "002594.SZ",
+          "name": "比亚迪",
+          "price": 83.31,
+          "pct": 1.57,
+          "rankChange": 0,
+          "historyRankChange": 11
+        },
+        {
+          "rank": 59,
+          "code": "600900.SH",
+          "name": "长江电力",
+          "price": 28.54,
+          "pct": 0.56,
+          "rankChange": 0,
+          "historyRankChange": 55
+        },
+        {
+          "rank": 60,
+          "code": "001266.SZ",
+          "name": "宏英智能",
+          "price": 39.96,
+          "pct": 9.99,
+          "rankChange": 0,
+          "historyRankChange": 1
+        },
+        {
+          "rank": 61,
+          "code": "002316.SZ",
+          "name": "亚联发展",
+          "price": 4.95,
+          "pct": 10,
+          "rankChange": 0,
+          "historyRankChange": -11
+        },
+        {
+          "rank": 62,
+          "code": "605303.SH",
+          "name": "园林股份",
+          "price": 28.66,
+          "pct": 10.02,
+          "rankChange": 0,
+          "historyRankChange": 1
+        },
+        {
+          "rank": 63,
+          "code": "603185.SH",
+          "name": "弘元绿能",
+          "price": 15.15,
+          "pct": 10.02,
+          "rankChange": 0,
+          "historyRankChange": -6
+        },
+        {
+          "rank": 64,
+          "code": "002531.SZ",
+          "name": "天顺风能",
+          "price": 7.98,
+          "pct": 4.45,
+          "rankChange": 0,
+          "historyRankChange": -11
+        },
+        {
+          "rank": 65,
+          "code": "600664.SH",
+          "name": "哈药股份",
+          "price": 7.4,
+          "pct": 3.64,
+          "rankChange": 0,
+          "historyRankChange": -13
+        },
+        {
+          "rank": 66,
+          "code": "600487.SH",
+          "name": "亨通光电",
+          "price": 54.86,
+          "pct": -3.94,
+          "rankChange": 0,
+          "historyRankChange": 4
+        },
+        {
+          "rank": 67,
+          "code": "002244.SZ",
+          "name": "滨江集团",
+          "price": 10.14,
+          "pct": 7.19,
+          "rankChange": 0,
+          "historyRankChange": 1
+        },
+        {
+          "rank": 68,
+          "code": "603919.SH",
+          "name": "金徽酒",
+          "price": 17.4,
+          "pct": 9.99,
+          "rankChange": 0,
+          "historyRankChange": -10
+        },
+        {
+          "rank": 69,
+          "code": "002041.SZ",
+          "name": "登海种业",
+          "price": 10.23,
+          "pct": 10,
+          "rankChange": 0,
+          "historyRankChange": -9
+        },
+        {
+          "rank": 70,
+          "code": "601899.SH",
+          "name": "紫金矿业",
+          "price": 29.79,
+          "pct": 1.12,
+          "rankChange": 0,
+          "historyRankChange": 66
+        },
+        {
+          "rank": 71,
+          "code": "600356.SH",
+          "name": "恒丰纸业",
+          "price": 11.46,
+          "pct": 9.98,
+          "rankChange": 0,
+          "historyRankChange": -6
+        },
+        {
+          "rank": 72,
+          "code": "000560.SZ",
+          "name": "我爱我家",
+          "price": 3.7,
+          "pct": -1.6,
+          "rankChange": 0,
+          "historyRankChange": -13
+        },
+        {
+          "rank": 73,
+          "code": "001206.SZ",
+          "name": "依依股份",
+          "price": 18.62,
+          "pct": 9.98,
+          "rankChange": 0,
+          "historyRankChange": -18
+        },
+        {
+          "rank": 74,
+          "code": "601091.SH",
+          "name": "沈鼓集团",
+          "price": 23.15,
+          "pct": -8.1,
+          "rankChange": 0,
+          "historyRankChange": -7
+        },
+        {
+          "rank": 75,
+          "code": "301080.SZ",
+          "name": "百普赛斯",
+          "price": 141.07,
+          "pct": 14.69,
+          "rankChange": 0,
+          "historyRankChange": -13
+        },
+        {
+          "rank": 76,
+          "code": "688185.SH",
+          "name": "康希诺",
+          "price": 102.64,
+          "pct": 20,
+          "rankChange": 0,
+          "historyRankChange": -22
         },
         {
           "rank": 77,
-          "code": "300308.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "601811.SH",
+          "name": "新华文轩",
+          "price": 21.12,
+          "pct": 3.68,
           "rankChange": 0,
-          "historyRankChange": 8
+          "historyRankChange": -2
         },
         {
           "rank": 78,
           "code": "000592.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "平潭发展",
+          "price": 8.53,
+          "pct": -2.4,
           "rankChange": 0,
           "historyRankChange": 0
         },
         {
           "rank": 79,
-          "code": "300893.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002188.SZ",
+          "name": "中天服务",
+          "price": 6.4,
+          "pct": 9.97,
           "rankChange": 0,
-          "historyRankChange": -2
+          "historyRankChange": -13
         },
         {
           "rank": 80,
-          "code": "603948.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "688825.SH",
+          "name": "长鑫科技",
+          "price": 54.79,
+          "pct": -1.37,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": -6
         },
         {
           "rank": 81,
-          "code": "000993.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "002882.SZ",
+          "name": "金龙羽",
+          "price": 24.98,
+          "pct": 1.92,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 37
         },
         {
           "rank": 82,
-          "code": "300750.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000725.SZ",
+          "name": "京东方Ａ",
+          "price": 5.72,
+          "pct": 0.18,
           "rankChange": 0,
-          "historyRankChange": -2
+          "historyRankChange": 12
         },
         {
           "rank": 83,
-          "code": "600127.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "300893.SZ",
+          "name": "松原安全",
+          "price": 15.13,
+          "pct": 19.98,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": -6
         },
         {
           "rank": 84,
-          "code": "000858.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 85,
-          "code": "300142.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 86,
           "code": "002119.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 87,
-          "code": "600363.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -5
-        },
-        {
-          "rank": 88,
-          "code": "601218.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 89,
-          "code": "688836.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 90,
-          "code": "600802.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 91,
-          "code": "000725.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "name": "康强电子",
+          "price": 25.8,
+          "pct": -8.74,
           "rankChange": 0,
           "historyRankChange": 3
         },
         {
-          "rank": 92,
-          "code": "000980.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 0
-        },
-        {
-          "rank": 93,
-          "code": "300981.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": -3
-        },
-        {
-          "rank": 94,
-          "code": "605058.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 0,
-          "historyRankChange": 1
-        },
-        {
-          "rank": 95,
-          "code": "605287.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "rank": 85,
+          "code": "600127.SH",
+          "name": "金健米业",
+          "price": 13.14,
+          "pct": -1.65,
           "rankChange": 0,
           "historyRankChange": -2
         },
         {
-          "rank": 96,
-          "code": "600657.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "rank": 86,
+          "code": "000980.SZ",
+          "name": "众泰汽车",
+          "price": 2.26,
+          "pct": 1.8,
           "rankChange": 0,
-          "historyRankChange": 0
+          "historyRankChange": 6
+        },
+        {
+          "rank": 87,
+          "code": "601218.SH",
+          "name": "吉鑫科技",
+          "price": 6.08,
+          "pct": -0.82,
+          "rankChange": 0,
+          "historyRankChange": 1
+        },
+        {
+          "rank": 88,
+          "code": "688137.SH",
+          "name": "近岸蛋白",
+          "price": 160.39,
+          "pct": 13.47,
+          "rankChange": 0,
+          "historyRankChange": -16
+        },
+        {
+          "rank": 89,
+          "code": "301047.SZ",
+          "name": "义翘神州",
+          "price": 159,
+          "pct": 10.99,
+          "rankChange": 0,
+          "historyRankChange": -18
+        },
+        {
+          "rank": 90,
+          "code": "000993.SZ",
+          "name": "闽东电力",
+          "price": 17.09,
+          "pct": 4.98,
+          "rankChange": 0,
+          "historyRankChange": -9
+        },
+        {
+          "rank": 91,
+          "code": "300142.SZ",
+          "name": "沃森生物",
+          "price": 14.23,
+          "pct": 5.49,
+          "rankChange": 0,
+          "historyRankChange": -5
+        },
+        {
+          "rank": 92,
+          "code": "002821.SZ",
+          "name": "凯莱英",
+          "price": 188.62,
+          "pct": 5.3,
+          "rankChange": 0,
+          "historyRankChange": 9
+        },
+        {
+          "rank": 93,
+          "code": "600802.SH",
+          "name": "福建水泥",
+          "price": 7.24,
+          "pct": 4.32,
+          "rankChange": 0,
+          "historyRankChange": -2
+        },
+        {
+          "rank": 94,
+          "code": "600206.SH",
+          "name": "有研新材",
+          "price": 46.62,
+          "pct": -6.2,
+          "rankChange": 0,
+          "historyRankChange": 32
+        },
+        {
+          "rank": 95,
+          "code": "002185.SZ",
+          "name": "华天科技",
+          "price": 16.46,
+          "pct": -3.29,
+          "rankChange": 1,
+          "historyRankChange": 9
+        },
+        {
+          "rank": 96,
+          "code": "688836.SH",
+          "name": "宇树科技-W",
+          "price": 450.4,
+          "pct": -0.14,
+          "rankChange": -1,
+          "historyRankChange": -7
         },
         {
           "rank": 97,
-          "code": "603949.SH",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "000858.SZ",
+          "name": "五 粮 液",
+          "price": 70.06,
+          "pct": 1.88,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": -13
         },
         {
           "rank": 98,
-          "code": "301218.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "600383.SH",
+          "name": "金地集团",
+          "price": 2.74,
+          "pct": 7.45,
           "rankChange": 0,
-          "historyRankChange": -1
+          "historyRankChange": -22
         },
         {
           "rank": 99,
-          "code": "002821.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
+          "code": "601869.SH",
+          "name": "长飞光纤",
+          "price": 411.16,
+          "pct": 0.79,
           "rankChange": 0,
-          "historyRankChange": 2
+          "historyRankChange": 173
         },
         {
           "rank": 100,
-          "code": "002580.SZ",
-          "name": "",
-          "price": 0,
-          "pct": 0,
-          "rankChange": 1,
-          "historyRankChange": 2
+          "code": "603948.SH",
+          "name": "建业股份",
+          "price": 21.36,
+          "pct": 9.99,
+          "rankChange": 0,
+          "historyRankChange": -21
         }
       ]
     },
@@ -331548,44 +331548,44 @@
       "source": "eastmoney-stock-popularity",
       "latest": {
         "code": "600519.SH",
-        "rank": 5,
+        "rank": 3,
         "rankChange": 0,
-        "historyRankChange": 0,
-        "historyRank": 2721,
+        "historyRankChange": 2,
+        "historyRank": 2636,
         "total": 5572,
-        "calcTime": "2026-10-02 00:44:00"
+        "calcTime": "2026-10-02 23:50:00"
       },
       "keywords": [
         {
-          "time": "2026-10-02 00:00:00",
+          "time": "2026-10-02 23:00:00",
           "code": "600519.SH",
           "concept": "白酒",
           "conceptId": "BK0896",
-          "heat": 5775
+          "heat": 5552
         },
         {
-          "time": "2026-10-02 00:00:00",
+          "time": "2026-10-02 23:00:00",
           "code": "600519.SH",
           "concept": "茅指数",
           "conceptId": "BK0999",
           "heat": 219
         },
         {
-          "time": "2026-10-02 00:00:00",
+          "time": "2026-10-02 23:00:00",
           "code": "600519.SH",
           "concept": "超级品牌",
           "conceptId": "BK0811",
           "heat": 91
         },
         {
-          "time": "2026-10-02 00:00:00",
+          "time": "2026-10-02 23:00:00",
           "code": "600519.SH",
           "concept": "电商概念",
           "conceptId": "BK0665",
-          "heat": 56
+          "heat": 51
         },
         {
-          "time": "2026-10-02 00:00:00",
+          "time": "2026-10-02 23:00:00",
           "code": "600519.SH",
           "concept": "乡村振兴",
           "conceptId": "BK0834",
@@ -331594,86 +331594,210 @@
       ],
       "related": [
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "000002.SZ",
-          "pct": 7.95
+          "pct": 8
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "300308.SZ",
-          "pct": 5.92
+          "pct": 5.95
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "000568.SZ",
-          "pct": 5.83
+          "pct": 5.73
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "300750.SZ",
-          "pct": 4.82
+          "pct": 4.74
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "600809.SH",
-          "pct": 3.68
+          "pct": 3.61
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "601318.SH",
-          "pct": 3.16
+          "pct": 3.12
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "688825.SH",
-          "pct": 2.75
+          "pct": 2.72
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "600418.SH",
-          "pct": 2.52
+          "pct": 2.59
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "688836.SH",
-          "pct": 2.5
+          "pct": 2.47
         },
         {
-          "time": "2026-10-01 22:00:00",
+          "time": "2026-10-02 22:00:00",
           "code": "600519.SH",
           "relatedCode": "000858.SZ",
-          "pct": 10.22
+          "pct": 10.01
         }
       ],
       "realtime": [
         {
-          "time": "2026-10-02 00:00:00",
-          "rank": 5
+          "time": "2026-10-02 18:00:00",
+          "rank": 6
         },
         {
-          "time": "2026-10-02 00:10:00",
-          "rank": 5
+          "time": "2026-10-02 18:10:00",
+          "rank": 6
         },
         {
-          "time": "2026-10-02 00:20:00",
-          "rank": 5
+          "time": "2026-10-02 18:20:00",
+          "rank": 6
         },
         {
-          "time": "2026-10-02 00:30:00",
-          "rank": 5
+          "time": "2026-10-02 18:30:00",
+          "rank": 6
         },
         {
-          "time": "2026-10-02 00:40:00",
-          "rank": 5
+          "time": "2026-10-02 18:40:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 18:50:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:00:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:10:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:20:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:30:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:40:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 19:50:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:00:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:10:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:20:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:30:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:40:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 20:50:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 21:00:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 21:10:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 21:20:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 21:30:00",
+          "rank": 6
+        },
+        {
+          "time": "2026-10-02 21:40:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 21:50:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:00:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:10:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:20:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:30:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:40:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 22:50:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 23:00:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 23:10:00",
+          "rank": 4
+        },
+        {
+          "time": "2026-10-02 23:20:00",
+          "rank": 3
+        },
+        {
+          "time": "2026-10-02 23:30:00",
+          "rank": 3
+        },
+        {
+          "time": "2026-10-02 23:40:00",
+          "rank": 3
+        },
+        {
+          "time": "2026-10-02 23:50:00",
+          "rank": 3
         }
       ]
     }
@@ -332001,21 +332125,6 @@
       },
       {
         "provider": "cninfo-relation",
-        "title": "300502新易盛投资者关系管理信息20260911",
-        "date": "2026-09-12",
-        "sortDate": "2026-09-12 15:28:26",
-        "code": "300502.SZ",
-        "name": "新易盛",
-        "category": "012001",
-        "artCode": "1225562013",
-        "url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=300502&announcementId=1225562013&orgId=9900026455&announcementTime=2026-09-12%2015%3A28%3A26",
-        "pdfUrl": "http://static.cninfo.com.cn/finalpage/2026-09-12/1225562013.PDF",
-        "sample": true,
-        "sampleReason": "当前个股暂无近期调研披露，展示公开源近期样本",
-        "requestedSymbol": "600519"
-      },
-      {
-        "provider": "cninfo-relation",
         "title": "043-2026年9月10日投资者关系活动记录表-2",
         "date": "2026-09-11",
         "sortDate": "2026-09-11 09:04:09",
@@ -332106,21 +332215,6 @@
       },
       {
         "provider": "cninfo-relation",
-        "title": "投资者关系活动记录表20260823",
-        "date": "2026-08-23",
-        "sortDate": "2026-08-23 23:38:10",
-        "code": "300308.SZ",
-        "name": "中际旭创",
-        "category": "012001",
-        "artCode": "1225493952",
-        "url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=300308&announcementId=1225493952&orgId=9900022016&announcementTime=2026-08-23%2023%3A38%3A10",
-        "pdfUrl": "http://static.cninfo.com.cn/finalpage/2026-08-23/1225493952.PDF",
-        "sample": true,
-        "sampleReason": "当前个股暂无近期调研披露，展示公开源近期样本",
-        "requestedSymbol": "600519"
-      },
-      {
-        "provider": "cninfo-relation",
         "title": "040-2026年8月6日投资者关系活动记录表",
         "date": "2026-08-07",
         "sortDate": "2026-08-07 08:36:11",
@@ -332130,6 +332224,36 @@
         "artCode": "1225462850",
         "url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=000725&announcementId=1225462850&orgId=gssz0000725&announcementTime=2026-08-07%2008%3A36%3A11",
         "pdfUrl": "http://static.cninfo.com.cn/finalpage/2026-08-07/1225462850.PDF",
+        "sample": true,
+        "sampleReason": "当前个股暂无近期调研披露，展示公开源近期样本",
+        "requestedSymbol": "600519"
+      },
+      {
+        "provider": "cninfo-relation",
+        "title": "039-2026年8月5日投资者关系活动记录表",
+        "date": "2026-08-06",
+        "sortDate": "2026-08-06 10:24:09",
+        "code": "000725.SZ",
+        "name": "京东方Ａ",
+        "category": "012001",
+        "artCode": "1225460934",
+        "url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=000725&announcementId=1225460934&orgId=gssz0000725&announcementTime=2026-08-06%2010%3A24%3A09",
+        "pdfUrl": "http://static.cninfo.com.cn/finalpage/2026-08-06/1225460934.PDF",
+        "sample": true,
+        "sampleReason": "当前个股暂无近期调研披露，展示公开源近期样本",
+        "requestedSymbol": "600519"
+      },
+      {
+        "provider": "cninfo-relation",
+        "title": "038-2026年7月31日投资者关系活动记录表",
+        "date": "2026-07-31",
+        "sortDate": "2026-07-31 17:08:08",
+        "code": "000725.SZ",
+        "name": "京东方Ａ",
+        "category": "012001",
+        "artCode": "1225450639",
+        "url": "http://www.cninfo.com.cn/new/disclosure/detail?stockCode=000725&announcementId=1225450639&orgId=gssz0000725&announcementTime=2026-07-31%2017%3A08%3A08",
+        "pdfUrl": "http://static.cninfo.com.cn/finalpage/2026-07-31/1225450639.PDF",
         "sample": true,
         "sampleReason": "当前个股暂无近期调研披露，展示公开源近期样本",
         "requestedSymbol": "600519"
@@ -342556,7 +342680,7 @@
     "source": "baostock-history-cache",
     "symbol": "600519",
     "baostockCode": "sh.600519",
-    "generatedAt": "2026-10-02T07:04:27Z",
+    "generatedAt": "2026-10-02T15:52:38Z",
     "lookbackDays": 520
   },
   "indices": [
@@ -342880,7 +343004,7 @@
       "cache": {
         "scope": "vercel-serverless-memory",
         "hit": false,
-        "updatedAt": "2026-10-02T07:04:12.735Z",
+        "updatedAt": "2026-10-02T15:52:27.247Z",
         "ttlSeconds": 21600
       }
     }
@@ -346013,7 +346137,7 @@
     "available": true,
     "hit": false,
     "usedFields": [],
-    "generatedAt": "2026-10-02T07:19:38.686Z",
+    "generatedAt": "2026-10-02T16:09:14.206Z",
     "generatedBy": "github-actions",
     "symbol": "600519"
   },
@@ -346021,7 +346145,7 @@
     "total": 5814,
     "mainMoney": 5565,
     "limitPool": 226,
-    "hotRank": 101,
+    "hotRank": 109,
     "financialCache": 504,
     "baostockCache": 180
   },
