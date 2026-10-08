@@ -41,6 +41,9 @@ jobs:
       - name: Validate JavaScript
         run: npm run check:pages
 
+      - name: Test snapshot publication
+        run: python -m unittest discover -s tests -p 'test_push_market_cache.py' -v
+
       - name: Install Python data dependencies
         run: python -m pip install -r requirements.txt
 
@@ -58,6 +61,7 @@ jobs:
         run: npm run cache:market
 
       - name: Commit snapshot
+        id: publish
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -66,5 +70,17 @@ jobs:
             echo "No market cache changes"
           else
             git commit -m "Update market cache"
-            git push
+            python scripts/push_market_cache.py
           fi
+
+      - name: Preserve snapshot after publication failure
+        if: ${{ failure() && steps.publish.outcome == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: unpublished-market-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            pages/data/market-cache.json
+            pages/data/baostock-cache.json
+            pages/data/financial-cache.json

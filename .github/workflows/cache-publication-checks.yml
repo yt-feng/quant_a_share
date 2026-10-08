@@ -1,0 +1,36 @@
+name: Cache publication checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/market-cache.yml"
+      - ".github/workflows/cache-publication-checks.yml"
+      - "scripts/push_market_cache.py"
+      - "tests/test_push_market_cache.py"
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/market-cache.yml"
+      - ".github/workflows/cache-publication-checks.yml"
+      - "scripts/push_market_cache.py"
+      - "tests/test_push_market_cache.py"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate source syntax
+        run: npm run check:pages
+      - name: Test snapshot publication offline
+        run: python -m unittest discover -s tests -p 'test_push_market_cache.py' -v
