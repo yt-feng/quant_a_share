@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-10-14T14:33:45Z",
+  "generatedAt": "2026-10-15T05:57:11Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
@@ -354643,25 +354643,6 @@
       "low60": 0.25,
       "rows": [
         {
-          "date": "2025-05-12",
-          "code": "000004.SZ",
-          "open": 7.8,
-          "high": 8.12,
-          "low": 7.8,
-          "close": 8.12,
-          "preClose": 7.73,
-          "volume": 8486801.0,
-          "amount": 67758207.32,
-          "turnover": 6.7202,
-          "pct": 5.0453,
-          "peTTM": -8.114377,
-          "pbMRQ": 20.533666,
-          "psTTM": 10.585658,
-          "pcfNCFTTM": -56.01077,
-          "tradeStatus": "1",
-          "isST": true
-        },
-        {
           "date": "2025-05-13",
           "code": "000004.SZ",
           "open": 8.46,
@@ -414098,7 +414079,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000938",
-      "baostockCode": "sz.000938"
+      "baostockCode": "sz.000938",
+      "reusedFromGeneratedAt": "2026-10-14T14:33:45Z"
     },
     "002008": {
       "latest": {
@@ -885221,6 +885203,10 @@
     }
   },
   "errors": {},
-  "refreshErrors": {},
-  "reusedSymbols": []
+  "refreshErrors": {
+    "000938": "000938 query failed: 用户未登录"
+  },
+  "reusedSymbols": [
+    "000938"
+  ]
 }
