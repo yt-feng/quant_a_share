@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-10-19T16:31:44Z",
+  "generatedAt": "2026-10-20T06:06:45Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
