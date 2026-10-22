@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-10-21T14:32:01Z",
+  "generatedAt": "2026-10-22T06:09:49Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
@@ -354737,25 +354737,6 @@
       "high60": 8.36,
       "low60": 0.25,
       "rows": [
-        {
-          "date": "2025-05-19",
-          "code": "000004.SZ",
-          "open": 8.45,
-          "high": 8.66,
-          "low": 8.3,
-          "close": 8.59,
-          "preClose": 8.27,
-          "volume": 10474000.0,
-          "amount": 89232454.0,
-          "turnover": 8.2937,
-          "pct": 3.8694,
-          "peTTM": -8.584051,
-          "pbMRQ": 21.722191,
-          "psTTM": 11.198374,
-          "pcfNCFTTM": -59.252773,
-          "tradeStatus": "1",
-          "isST": true
-        },
         {
           "date": "2025-05-20",
           "code": "000004.SZ",
