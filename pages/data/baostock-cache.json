@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-10-30T15:59:58Z",
+  "generatedAt": "2026-11-02T07:45:16Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
@@ -5158,7 +5158,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600519",
-      "baostockCode": "sh.600519"
+      "baostockCode": "sh.600519",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000001": {
       "latest": {
@@ -10131,7 +10132,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000001",
-      "baostockCode": "sz.000001"
+      "baostockCode": "sz.000001",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300750": {
       "latest": {
@@ -15104,7 +15106,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300750",
-      "baostockCode": "sz.300750"
+      "baostockCode": "sz.300750",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688981": {
       "latest": {
@@ -20077,7 +20080,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688981",
-      "baostockCode": "sh.688981"
+      "baostockCode": "sh.688981",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300059": {
       "latest": {
@@ -25050,7 +25054,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300059",
-      "baostockCode": "sz.300059"
+      "baostockCode": "sz.300059",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002594": {
       "latest": {
@@ -30023,7 +30028,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002594",
-      "baostockCode": "sz.002594"
+      "baostockCode": "sz.002594",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603986": {
       "latest": {
@@ -34996,7 +35002,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603986",
-      "baostockCode": "sh.603986"
+      "baostockCode": "sh.603986",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300308": {
       "latest": {
@@ -39969,7 +39976,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300308",
-      "baostockCode": "sz.300308"
+      "baostockCode": "sz.300308",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000725": {
       "latest": {
@@ -44942,7 +44950,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000725",
-      "baostockCode": "sz.000725"
+      "baostockCode": "sz.000725",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300502": {
       "latest": {
@@ -49915,7 +49924,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300502",
-      "baostockCode": "sz.300502"
+      "baostockCode": "sz.300502",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002384": {
       "latest": {
@@ -54888,7 +54898,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002384",
-      "baostockCode": "sz.002384"
+      "baostockCode": "sz.002384",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688008": {
       "latest": {
@@ -59861,7 +59872,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688008",
-      "baostockCode": "sh.688008"
+      "baostockCode": "sh.688008",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "001309": {
       "latest": {
@@ -64834,7 +64846,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "001309",
-      "baostockCode": "sz.001309"
+      "baostockCode": "sz.001309",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600176": {
       "latest": {
@@ -69807,7 +69820,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600176",
-      "baostockCode": "sh.600176"
+      "baostockCode": "sh.600176",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600584": {
       "latest": {
@@ -74780,7 +74794,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600584",
-      "baostockCode": "sh.600584"
+      "baostockCode": "sh.600584",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600487": {
       "latest": {
@@ -79753,7 +79768,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600487",
-      "baostockCode": "sh.600487"
+      "baostockCode": "sh.600487",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688525": {
       "latest": {
@@ -84726,7 +84742,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688525",
-      "baostockCode": "sh.688525"
+      "baostockCode": "sh.688525",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002050": {
       "latest": {
@@ -89699,7 +89716,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002050",
-      "baostockCode": "sz.002050"
+      "baostockCode": "sz.002050",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601899": {
       "latest": {
@@ -94672,7 +94690,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601899",
-      "baostockCode": "sh.601899"
+      "baostockCode": "sh.601899",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300223": {
       "latest": {
@@ -99645,7 +99664,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300223",
-      "baostockCode": "sz.300223"
+      "baostockCode": "sz.300223",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688256": {
       "latest": {
@@ -104618,7 +104638,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688256",
-      "baostockCode": "sh.688256"
+      "baostockCode": "sh.688256",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688012": {
       "latest": {
@@ -109591,7 +109612,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688012",
-      "baostockCode": "sh.688012"
+      "baostockCode": "sh.688012",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002371": {
       "latest": {
@@ -114564,7 +114586,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002371",
-      "baostockCode": "sz.002371"
+      "baostockCode": "sz.002371",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002475": {
       "latest": {
@@ -119537,7 +119560,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002475",
-      "baostockCode": "sz.002475"
+      "baostockCode": "sz.002475",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "301308": {
       "latest": {
@@ -124510,7 +124534,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301308",
-      "baostockCode": "sz.301308"
+      "baostockCode": "sz.301308",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000021": {
       "latest": {
@@ -129483,7 +129508,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000021",
-      "baostockCode": "sz.000021"
+      "baostockCode": "sz.000021",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688017": {
       "latest": {
@@ -134456,7 +134482,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688017",
-      "baostockCode": "sh.688017"
+      "baostockCode": "sh.688017",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600183": {
       "latest": {
@@ -139429,7 +139456,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600183",
-      "baostockCode": "sh.600183"
+      "baostockCode": "sh.600183",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600522": {
       "latest": {
@@ -144402,7 +144430,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600522",
-      "baostockCode": "sh.600522"
+      "baostockCode": "sh.600522",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002407": {
       "latest": {
@@ -149375,7 +149404,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002407",
-      "baostockCode": "sz.002407"
+      "baostockCode": "sz.002407",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600667": {
       "latest": {
@@ -154348,7 +154378,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600667",
-      "baostockCode": "sh.600667"
+      "baostockCode": "sh.600667",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002463": {
       "latest": {
@@ -159321,7 +159352,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002463",
-      "baostockCode": "sz.002463"
+      "baostockCode": "sz.002463",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "301526": {
       "latest": {
@@ -164294,7 +164326,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301526",
-      "baostockCode": "sz.301526"
+      "baostockCode": "sz.301526",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300604": {
       "latest": {
@@ -169267,7 +169300,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300604",
-      "baostockCode": "sz.300604"
+      "baostockCode": "sz.300604",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300394": {
       "latest": {
@@ -174240,7 +174274,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300394",
-      "baostockCode": "sz.300394"
+      "baostockCode": "sz.300394",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300476": {
       "latest": {
@@ -179213,7 +179248,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300476",
-      "baostockCode": "sz.300476"
+      "baostockCode": "sz.300476",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300408": {
       "latest": {
@@ -184186,7 +184222,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300408",
-      "baostockCode": "sz.300408"
+      "baostockCode": "sz.300408",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688041": {
       "latest": {
@@ -189159,7 +189196,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688041",
-      "baostockCode": "sh.688041"
+      "baostockCode": "sh.688041",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000100": {
       "latest": {
@@ -194132,7 +194170,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000100",
-      "baostockCode": "sz.000100"
+      "baostockCode": "sz.000100",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002409": {
       "latest": {
@@ -199105,7 +199144,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002409",
-      "baostockCode": "sz.002409"
+      "baostockCode": "sz.002409",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300346": {
       "latest": {
@@ -204078,7 +204118,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300346",
-      "baostockCode": "sz.300346"
+      "baostockCode": "sz.300346",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000988": {
       "latest": {
@@ -209051,7 +209092,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000988",
-      "baostockCode": "sz.000988"
+      "baostockCode": "sz.000988",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000657": {
       "latest": {
@@ -214024,7 +214066,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000657",
-      "baostockCode": "sz.000657"
+      "baostockCode": "sz.000657",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600641": {
       "latest": {
@@ -218997,7 +219040,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600641",
-      "baostockCode": "sh.600641"
+      "baostockCode": "sh.600641",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002281": {
       "latest": {
@@ -223970,7 +224014,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002281",
-      "baostockCode": "sz.002281"
+      "baostockCode": "sz.002281",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603259": {
       "latest": {
@@ -228943,7 +228988,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603259",
-      "baostockCode": "sh.603259"
+      "baostockCode": "sh.603259",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300285": {
       "latest": {
@@ -233916,7 +233962,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300285",
-      "baostockCode": "sz.300285"
+      "baostockCode": "sz.300285",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300475": {
       "latest": {
@@ -238889,7 +238936,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300475",
-      "baostockCode": "sz.300475"
+      "baostockCode": "sz.300475",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "001248": {
       "latest": {
@@ -240461,7 +240509,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "001248",
-      "baostockCode": "sz.001248"
+      "baostockCode": "sz.001248",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601138": {
       "latest": {
@@ -245434,7 +245483,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601138",
-      "baostockCode": "sh.601138"
+      "baostockCode": "sh.601138",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002600": {
       "latest": {
@@ -250407,7 +250457,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002600",
-      "baostockCode": "sz.002600"
+      "baostockCode": "sz.002600",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002747": {
       "latest": {
@@ -255380,7 +255431,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002747",
-      "baostockCode": "sz.002747"
+      "baostockCode": "sz.002747",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600580": {
       "latest": {
@@ -260353,7 +260405,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600580",
-      "baostockCode": "sh.600580"
+      "baostockCode": "sh.600580",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002472": {
       "latest": {
@@ -265326,7 +265379,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002472",
-      "baostockCode": "sz.002472"
+      "baostockCode": "sz.002472",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601211": {
       "latest": {
@@ -270299,7 +270353,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601211",
-      "baostockCode": "sh.601211"
+      "baostockCode": "sh.601211",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601689": {
       "latest": {
@@ -275272,7 +275327,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601689",
-      "baostockCode": "sh.601689"
+      "baostockCode": "sh.601689",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002979": {
       "latest": {
@@ -280245,7 +280301,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002979",
-      "baostockCode": "sz.002979"
+      "baostockCode": "sz.002979",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603618": {
       "latest": {
@@ -285218,7 +285275,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603618",
-      "baostockCode": "sh.603618"
+      "baostockCode": "sh.603618",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002896": {
       "latest": {
@@ -290191,7 +290249,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002896",
-      "baostockCode": "sz.002896"
+      "baostockCode": "sz.002896",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600143": {
       "latest": {
@@ -295164,7 +295223,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600143",
-      "baostockCode": "sh.600143"
+      "baostockCode": "sh.600143",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300821": {
       "latest": {
@@ -300137,7 +300197,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300821",
-      "baostockCode": "sz.300821"
+      "baostockCode": "sz.300821",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300503": {
       "latest": {
@@ -305110,7 +305171,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300503",
-      "baostockCode": "sz.300503"
+      "baostockCode": "sz.300503",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000595": {
       "latest": {
@@ -310083,7 +310145,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000595",
-      "baostockCode": "sz.000595"
+      "baostockCode": "sz.000595",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000656": {
       "latest": {
@@ -315056,7 +315119,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000656",
-      "baostockCode": "sz.000656"
+      "baostockCode": "sz.000656",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002148": {
       "latest": {
@@ -320029,7 +320093,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002148",
-      "baostockCode": "sz.002148"
+      "baostockCode": "sz.002148",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002396": {
       "latest": {
@@ -325002,7 +325067,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002396",
-      "baostockCode": "sz.002396"
+      "baostockCode": "sz.002396",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600376": {
       "latest": {
@@ -329975,7 +330041,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600376",
-      "baostockCode": "sh.600376"
+      "baostockCode": "sh.600376",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603137": {
       "latest": {
@@ -334948,7 +335015,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603137",
-      "baostockCode": "sh.603137"
+      "baostockCode": "sh.603137",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600793": {
       "latest": {
@@ -339921,7 +339989,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600793",
-      "baostockCode": "sh.600793"
+      "baostockCode": "sh.600793",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603327": {
       "latest": {
@@ -344894,7 +344963,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603327",
-      "baostockCode": "sh.603327"
+      "baostockCode": "sh.603327",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000506": {
       "latest": {
@@ -349867,7 +349937,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000506",
-      "baostockCode": "sz.000506"
+      "baostockCode": "sz.000506",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002292": {
       "latest": {
@@ -354840,7 +354911,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002292",
-      "baostockCode": "sz.002292"
+      "baostockCode": "sz.002292",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000004": {
       "latest": {
@@ -359395,7 +359467,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000004",
-      "baostockCode": "sz.000004"
+      "baostockCode": "sz.000004",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600988": {
       "latest": {
@@ -364368,7 +364441,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600988",
-      "baostockCode": "sh.600988"
+      "baostockCode": "sh.600988",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000975": {
       "latest": {
@@ -369341,7 +369415,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000975",
-      "baostockCode": "sz.000975"
+      "baostockCode": "sz.000975",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002677": {
       "latest": {
@@ -374314,7 +374389,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002677",
-      "baostockCode": "sz.002677"
+      "baostockCode": "sz.002677",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002067": {
       "latest": {
@@ -379287,7 +379363,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002067",
-      "baostockCode": "sz.002067"
+      "baostockCode": "sz.002067",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002471": {
       "latest": {
@@ -384260,7 +384337,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002471",
-      "baostockCode": "sz.002471"
+      "baostockCode": "sz.002471",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "001317": {
       "latest": {
@@ -389233,7 +389311,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "001317",
-      "baostockCode": "sz.001317"
+      "baostockCode": "sz.001317",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "001270": {
       "latest": {
@@ -394206,7 +394285,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "001270",
-      "baostockCode": "sz.001270"
+      "baostockCode": "sz.001270",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600378": {
       "latest": {
@@ -399179,7 +399259,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600378",
-      "baostockCode": "sh.600378"
+      "baostockCode": "sh.600378",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688766": {
       "latest": {
@@ -404152,7 +404233,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688766",
-      "baostockCode": "sh.688766"
+      "baostockCode": "sh.688766",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002916": {
       "latest": {
@@ -409125,7 +409207,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002916",
-      "baostockCode": "sz.002916"
+      "baostockCode": "sz.002916",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000938": {
       "latest": {
@@ -414098,7 +414181,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000938",
-      "baostockCode": "sz.000938"
+      "baostockCode": "sz.000938",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002008": {
       "latest": {
@@ -419071,7 +419155,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002008",
-      "baostockCode": "sz.002008"
+      "baostockCode": "sz.002008",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603019": {
       "latest": {
@@ -424044,7 +424129,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603019",
-      "baostockCode": "sh.603019"
+      "baostockCode": "sh.603019",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300274": {
       "latest": {
@@ -429017,7 +429103,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300274",
-      "baostockCode": "sz.300274"
+      "baostockCode": "sz.300274",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600601": {
       "latest": {
@@ -433990,7 +434077,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600601",
-      "baostockCode": "sh.600601"
+      "baostockCode": "sh.600601",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600549": {
       "latest": {
@@ -438963,7 +439051,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600549",
-      "baostockCode": "sh.600549"
+      "baostockCode": "sh.600549",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600206": {
       "latest": {
@@ -443936,7 +444025,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600206",
-      "baostockCode": "sh.600206"
+      "baostockCode": "sh.600206",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688126": {
       "latest": {
@@ -448909,7 +448999,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688126",
-      "baostockCode": "sh.688126"
+      "baostockCode": "sh.688126",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603993": {
       "latest": {
@@ -453882,7 +453973,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603993",
-      "baostockCode": "sh.603993"
+      "baostockCode": "sh.603993",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300666": {
       "latest": {
@@ -458855,7 +458947,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300666",
-      "baostockCode": "sz.300666"
+      "baostockCode": "sz.300666",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600160": {
       "latest": {
@@ -463828,7 +463921,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600160",
-      "baostockCode": "sh.600160"
+      "baostockCode": "sh.600160",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300124": {
       "latest": {
@@ -468801,7 +468895,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300124",
-      "baostockCode": "sz.300124"
+      "baostockCode": "sz.300124",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300433": {
       "latest": {
@@ -473774,7 +473869,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300433",
-      "baostockCode": "sz.300433"
+      "baostockCode": "sz.300433",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002156": {
       "latest": {
@@ -478747,7 +478843,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002156",
-      "baostockCode": "sz.002156"
+      "baostockCode": "sz.002156",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600150": {
       "latest": {
@@ -483720,7 +483817,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600150",
-      "baostockCode": "sh.600150"
+      "baostockCode": "sh.600150",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300136": {
       "latest": {
@@ -488693,7 +488791,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300136",
-      "baostockCode": "sz.300136"
+      "baostockCode": "sz.300136",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "301217": {
       "latest": {
@@ -493666,7 +493765,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301217",
-      "baostockCode": "sz.301217"
+      "baostockCode": "sz.301217",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688521": {
       "latest": {
@@ -498639,7 +498739,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688521",
-      "baostockCode": "sh.688521"
+      "baostockCode": "sh.688521",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600030": {
       "latest": {
@@ -503612,7 +503713,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600030",
-      "baostockCode": "sh.600030"
+      "baostockCode": "sh.600030",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000977": {
       "latest": {
@@ -508585,7 +508687,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000977",
-      "baostockCode": "sz.000977"
+      "baostockCode": "sz.000977",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600460": {
       "latest": {
@@ -513558,7 +513661,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600460",
-      "baostockCode": "sh.600460"
+      "baostockCode": "sh.600460",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002185": {
       "latest": {
@@ -518531,7 +518635,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002185",
-      "baostockCode": "sz.002185"
+      "baostockCode": "sz.002185",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688498": {
       "latest": {
@@ -523504,7 +523609,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688498",
-      "baostockCode": "sh.688498"
+      "baostockCode": "sh.688498",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688797": {
       "latest": {
@@ -525190,7 +525296,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688797",
-      "baostockCode": "sh.688797"
+      "baostockCode": "sh.688797",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002636": {
       "latest": {
@@ -530163,7 +530270,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002636",
-      "baostockCode": "sz.002636"
+      "baostockCode": "sz.002636",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688347": {
       "latest": {
@@ -535136,7 +535244,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688347",
-      "baostockCode": "sh.688347"
+      "baostockCode": "sh.688347",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002273": {
       "latest": {
@@ -540109,7 +540218,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002273",
-      "baostockCode": "sz.002273"
+      "baostockCode": "sz.002273",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688120": {
       "latest": {
@@ -545082,7 +545192,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688120",
-      "baostockCode": "sh.688120"
+      "baostockCode": "sh.688120",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600276": {
       "latest": {
@@ -550055,7 +550166,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600276",
-      "baostockCode": "sh.600276"
+      "baostockCode": "sh.600276",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601869": {
       "latest": {
@@ -555028,7 +555140,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601869",
-      "baostockCode": "sh.601869"
+      "baostockCode": "sh.601869",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002428": {
       "latest": {
@@ -560001,7 +560114,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002428",
-      "baostockCode": "sz.002428"
+      "baostockCode": "sz.002428",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002354": {
       "latest": {
@@ -564974,7 +565088,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002354",
-      "baostockCode": "sz.002354"
+      "baostockCode": "sz.002354",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000636": {
       "latest": {
@@ -569947,7 +570062,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000636",
-      "baostockCode": "sz.000636"
+      "baostockCode": "sz.000636",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600118": {
       "latest": {
@@ -574920,7 +575036,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600118",
-      "baostockCode": "sh.600118"
+      "baostockCode": "sh.600118",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "605358": {
       "latest": {
@@ -579893,7 +580010,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "605358",
-      "baostockCode": "sh.605358"
+      "baostockCode": "sh.605358",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "301511": {
       "latest": {
@@ -584866,7 +584984,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301511",
-      "baostockCode": "sz.301511"
+      "baostockCode": "sz.301511",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000063": {
       "latest": {
@@ -589839,7 +589958,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000063",
-      "baostockCode": "sz.000063"
+      "baostockCode": "sz.000063",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002436": {
       "latest": {
@@ -594812,7 +594932,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002436",
-      "baostockCode": "sz.002436"
+      "baostockCode": "sz.002436",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300033": {
       "latest": {
@@ -599785,7 +599906,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300033",
-      "baostockCode": "sz.300033"
+      "baostockCode": "sz.300033",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688361": {
       "latest": {
@@ -604758,7 +604880,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688361",
-      "baostockCode": "sh.688361"
+      "baostockCode": "sh.688361",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300418": {
       "latest": {
@@ -609731,7 +609854,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300418",
-      "baostockCode": "sz.300418"
+      "baostockCode": "sz.300418",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600105": {
       "latest": {
@@ -614704,7 +614828,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600105",
-      "baostockCode": "sh.600105"
+      "baostockCode": "sh.600105",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688322": {
       "latest": {
@@ -619677,7 +619802,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688322",
-      "baostockCode": "sh.688322"
+      "baostockCode": "sh.688322",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002202": {
       "latest": {
@@ -624650,7 +624776,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002202",
-      "baostockCode": "sz.002202"
+      "baostockCode": "sz.002202",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300857": {
       "latest": {
@@ -629623,7 +629750,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300857",
-      "baostockCode": "sz.300857"
+      "baostockCode": "sz.300857",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300390": {
       "latest": {
@@ -634596,7 +634724,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300390",
-      "baostockCode": "sz.300390"
+      "baostockCode": "sz.300390",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002709": {
       "latest": {
@@ -639569,7 +639698,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002709",
-      "baostockCode": "sz.002709"
+      "baostockCode": "sz.002709",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600703": {
       "latest": {
@@ -644542,7 +644672,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600703",
-      "baostockCode": "sh.600703"
+      "baostockCode": "sh.600703",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688249": {
       "latest": {
@@ -649515,7 +649646,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688249",
-      "baostockCode": "sh.688249"
+      "baostockCode": "sh.688249",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601991": {
       "latest": {
@@ -654488,7 +654620,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601991",
-      "baostockCode": "sh.601991"
+      "baostockCode": "sh.601991",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300058": {
       "latest": {
@@ -659461,7 +659594,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300058",
-      "baostockCode": "sz.300058"
+      "baostockCode": "sz.300058",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "301165": {
       "latest": {
@@ -664434,7 +664568,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301165",
-      "baostockCode": "sz.301165"
+      "baostockCode": "sz.301165",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603083": {
       "latest": {
@@ -669407,7 +669542,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603083",
-      "baostockCode": "sh.603083"
+      "baostockCode": "sh.603083",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300607": {
       "latest": {
@@ -674380,7 +674516,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300607",
-      "baostockCode": "sz.300607"
+      "baostockCode": "sz.300607",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688048": {
       "latest": {
@@ -679353,7 +679490,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688048",
-      "baostockCode": "sh.688048"
+      "baostockCode": "sh.688048",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603501": {
       "latest": {
@@ -684326,7 +684464,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603501",
-      "baostockCode": "sh.603501"
+      "baostockCode": "sh.603501",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688146": {
       "latest": {
@@ -689299,7 +689438,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688146",
-      "baostockCode": "sh.688146"
+      "baostockCode": "sh.688146",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600172": {
       "latest": {
@@ -694272,7 +694412,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600172",
-      "baostockCode": "sh.600172"
+      "baostockCode": "sh.600172",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688110": {
       "latest": {
@@ -699245,7 +699386,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688110",
-      "baostockCode": "sh.688110"
+      "baostockCode": "sh.688110",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600909": {
       "latest": {
@@ -704218,7 +704360,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600909",
-      "baostockCode": "sh.600909"
+      "baostockCode": "sh.600909",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000333": {
       "latest": {
@@ -709191,7 +709334,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000333",
-      "baostockCode": "sz.000333"
+      "baostockCode": "sz.000333",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600879": {
       "latest": {
@@ -714164,7 +714308,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600879",
-      "baostockCode": "sh.600879"
+      "baostockCode": "sh.600879",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600498": {
       "latest": {
@@ -719137,7 +719282,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600498",
-      "baostockCode": "sh.600498"
+      "baostockCode": "sh.600498",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688629": {
       "latest": {
@@ -724110,7 +724256,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688629",
-      "baostockCode": "sh.688629"
+      "baostockCode": "sh.688629",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688549": {
       "latest": {
@@ -729083,7 +729230,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688549",
-      "baostockCode": "sh.688549"
+      "baostockCode": "sh.688549",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300054": {
       "latest": {
@@ -734056,7 +734204,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300054",
-      "baostockCode": "sz.300054"
+      "baostockCode": "sz.300054",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600111": {
       "latest": {
@@ -739029,7 +739178,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600111",
-      "baostockCode": "sh.600111"
+      "baostockCode": "sh.600111",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600707": {
       "latest": {
@@ -744002,7 +744152,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600707",
-      "baostockCode": "sh.600707"
+      "baostockCode": "sh.600707",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688808": {
       "latest": {
@@ -746429,7 +746580,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688808",
-      "baostockCode": "sh.688808"
+      "baostockCode": "sh.688808",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300570": {
       "latest": {
@@ -751402,7 +751554,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300570",
-      "baostockCode": "sz.300570"
+      "baostockCode": "sz.300570",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002167": {
       "latest": {
@@ -756375,7 +756528,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002167",
-      "baostockCode": "sz.002167"
+      "baostockCode": "sz.002167",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688106": {
       "latest": {
@@ -761348,7 +761502,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688106",
-      "baostockCode": "sh.688106"
+      "baostockCode": "sh.688106",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603256": {
       "latest": {
@@ -766321,7 +766476,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603256",
-      "baostockCode": "sh.603256"
+      "baostockCode": "sh.603256",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603667": {
       "latest": {
@@ -771294,7 +771450,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603667",
-      "baostockCode": "sh.603667"
+      "baostockCode": "sh.603667",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002326": {
       "latest": {
@@ -776267,7 +776424,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002326",
-      "baostockCode": "sz.002326"
+      "baostockCode": "sz.002326",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000547": {
       "latest": {
@@ -781240,7 +781398,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000547",
-      "baostockCode": "sz.000547"
+      "baostockCode": "sz.000547",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300115": {
       "latest": {
@@ -786213,7 +786372,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300115",
-      "baostockCode": "sz.300115"
+      "baostockCode": "sz.300115",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002056": {
       "latest": {
@@ -791186,7 +791346,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002056",
-      "baostockCode": "sz.002056"
+      "baostockCode": "sz.002056",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600547": {
       "latest": {
@@ -796159,7 +796320,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600547",
-      "baostockCode": "sh.600547"
+      "baostockCode": "sh.600547",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002080": {
       "latest": {
@@ -801132,7 +801294,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002080",
-      "baostockCode": "sz.002080"
+      "baostockCode": "sz.002080",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000792": {
       "latest": {
@@ -806105,7 +806268,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000792",
-      "baostockCode": "sz.000792"
+      "baostockCode": "sz.000792",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603078": {
       "latest": {
@@ -811078,7 +811242,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603078",
-      "baostockCode": "sh.603078"
+      "baostockCode": "sh.603078",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002938": {
       "latest": {
@@ -816051,7 +816216,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002938",
-      "baostockCode": "sz.002938"
+      "baostockCode": "sz.002938",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "603228": {
       "latest": {
@@ -821024,7 +821190,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603228",
-      "baostockCode": "sh.603228"
+      "baostockCode": "sh.603228",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300398": {
       "latest": {
@@ -825997,7 +826164,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300398",
-      "baostockCode": "sz.300398"
+      "baostockCode": "sz.300398",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300319": {
       "latest": {
@@ -830970,7 +831138,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300319",
-      "baostockCode": "sz.300319"
+      "baostockCode": "sz.300319",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600497": {
       "latest": {
@@ -835943,7 +836112,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600497",
-      "baostockCode": "sh.600497"
+      "baostockCode": "sh.600497",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600110": {
       "latest": {
@@ -840916,7 +841086,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600110",
-      "baostockCode": "sh.600110"
+      "baostockCode": "sh.600110",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002138": {
       "latest": {
@@ -845889,7 +846060,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002138",
-      "baostockCode": "sz.002138"
+      "baostockCode": "sz.002138",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600397": {
       "latest": {
@@ -850862,7 +851034,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600397",
-      "baostockCode": "sh.600397"
+      "baostockCode": "sh.600397",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002536": {
       "latest": {
@@ -855835,7 +856008,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002536",
-      "baostockCode": "sz.002536"
+      "baostockCode": "sz.002536",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "002261": {
       "latest": {
@@ -860808,7 +860982,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002261",
-      "baostockCode": "sz.002261"
+      "baostockCode": "sz.002261",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "688403": {
       "latest": {
@@ -865781,7 +865956,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688403",
-      "baostockCode": "sh.688403"
+      "baostockCode": "sh.688403",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "600246": {
       "latest": {
@@ -870754,7 +870930,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600246",
-      "baostockCode": "sh.600246"
+      "baostockCode": "sh.600246",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "000962": {
       "latest": {
@@ -875727,7 +875904,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000962",
-      "baostockCode": "sz.000962"
+      "baostockCode": "sz.000962",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "601678": {
       "latest": {
@@ -880700,7 +880878,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601678",
-      "baostockCode": "sh.601678"
+      "baostockCode": "sh.601678",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     },
     "300718": {
       "latest": {
@@ -885673,10 +885852,194 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300718",
-      "baostockCode": "sz.300718"
+      "baostockCode": "sz.300718",
+      "reusedFromGeneratedAt": "2026-10-30T15:59:58Z"
     }
   },
   "errors": {},
-  "refreshErrors": {},
-  "reusedSymbols": []
+  "refreshErrors": {
+    "login": "网络接收错误。"
+  },
+  "reusedSymbols": [
+    "600519",
+    "000001",
+    "300750",
+    "688981",
+    "300059",
+    "002594",
+    "603986",
+    "300308",
+    "000725",
+    "300502",
+    "002384",
+    "688008",
+    "001309",
+    "600176",
+    "600584",
+    "600487",
+    "688525",
+    "002050",
+    "601899",
+    "300223",
+    "688256",
+    "688012",
+    "002371",
+    "002475",
+    "301308",
+    "000021",
+    "688017",
+    "600183",
+    "600522",
+    "002407",
+    "600667",
+    "002463",
+    "301526",
+    "300604",
+    "300394",
+    "300476",
+    "300408",
+    "688041",
+    "000100",
+    "002409",
+    "300346",
+    "000988",
+    "000657",
+    "600641",
+    "002281",
+    "603259",
+    "300285",
+    "300475",
+    "001248",
+    "601138",
+    "002600",
+    "002747",
+    "600580",
+    "002472",
+    "601211",
+    "601689",
+    "002979",
+    "603618",
+    "002896",
+    "600143",
+    "300821",
+    "300503",
+    "000595",
+    "000656",
+    "002148",
+    "002396",
+    "600376",
+    "603137",
+    "600793",
+    "603327",
+    "000506",
+    "002292",
+    "000004",
+    "600988",
+    "000975",
+    "002677",
+    "002067",
+    "002471",
+    "001317",
+    "001270",
+    "600378",
+    "688766",
+    "002916",
+    "000938",
+    "002008",
+    "603019",
+    "300274",
+    "600601",
+    "600549",
+    "600206",
+    "688126",
+    "603993",
+    "300666",
+    "600160",
+    "300124",
+    "300433",
+    "002156",
+    "600150",
+    "300136",
+    "301217",
+    "688521",
+    "600030",
+    "000977",
+    "600460",
+    "002185",
+    "688498",
+    "688797",
+    "002636",
+    "688347",
+    "002273",
+    "688120",
+    "600276",
+    "601869",
+    "002428",
+    "002354",
+    "000636",
+    "600118",
+    "605358",
+    "301511",
+    "000063",
+    "002436",
+    "300033",
+    "688361",
+    "300418",
+    "600105",
+    "688322",
+    "002202",
+    "300857",
+    "300390",
+    "002709",
+    "600703",
+    "688249",
+    "601991",
+    "300058",
+    "301165",
+    "603083",
+    "300607",
+    "688048",
+    "603501",
+    "688146",
+    "600172",
+    "688110",
+    "600909",
+    "000333",
+    "600879",
+    "600498",
+    "688629",
+    "688549",
+    "300054",
+    "600111",
+    "600707",
+    "688808",
+    "300570",
+    "002167",
+    "688106",
+    "603256",
+    "603667",
+    "002326",
+    "000547",
+    "300115",
+    "002056",
+    "600547",
+    "002080",
+    "000792",
+    "603078",
+    "002938",
+    "603228",
+    "300398",
+    "300319",
+    "600497",
+    "600110",
+    "002138",
+    "600397",
+    "002536",
+    "002261",
+    "688403",
+    "600246",
+    "000962",
+    "601678",
+    "300718"
+  ]
 }
