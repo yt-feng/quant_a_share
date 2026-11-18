@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-11-17T18:40:19Z",
+  "generatedAt": "2026-11-18T08:37:22Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
@@ -734284,7 +734284,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300054",
-      "baostockCode": "sz.300054"
+      "baostockCode": "sz.300054",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600111": {
       "latest": {
@@ -739257,7 +739258,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600111",
-      "baostockCode": "sh.600111"
+      "baostockCode": "sh.600111",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600707": {
       "latest": {
@@ -744230,7 +744232,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600707",
-      "baostockCode": "sh.600707"
+      "baostockCode": "sh.600707",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "688808": {
       "latest": {
@@ -746885,7 +746888,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688808",
-      "baostockCode": "sh.688808"
+      "baostockCode": "sh.688808",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "300570": {
       "latest": {
@@ -751858,7 +751862,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300570",
-      "baostockCode": "sz.300570"
+      "baostockCode": "sz.300570",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002167": {
       "latest": {
@@ -756831,7 +756836,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002167",
-      "baostockCode": "sz.002167"
+      "baostockCode": "sz.002167",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "688106": {
       "latest": {
@@ -761804,7 +761810,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688106",
-      "baostockCode": "sh.688106"
+      "baostockCode": "sh.688106",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "603256": {
       "latest": {
@@ -766777,7 +766784,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603256",
-      "baostockCode": "sh.603256"
+      "baostockCode": "sh.603256",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "603667": {
       "latest": {
@@ -771750,7 +771758,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603667",
-      "baostockCode": "sh.603667"
+      "baostockCode": "sh.603667",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002326": {
       "latest": {
@@ -776723,7 +776732,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002326",
-      "baostockCode": "sz.002326"
+      "baostockCode": "sz.002326",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "000547": {
       "latest": {
@@ -781696,7 +781706,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000547",
-      "baostockCode": "sz.000547"
+      "baostockCode": "sz.000547",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "300115": {
       "latest": {
@@ -786669,7 +786680,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300115",
-      "baostockCode": "sz.300115"
+      "baostockCode": "sz.300115",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002056": {
       "latest": {
@@ -791642,7 +791654,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002056",
-      "baostockCode": "sz.002056"
+      "baostockCode": "sz.002056",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600547": {
       "latest": {
@@ -796615,7 +796628,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600547",
-      "baostockCode": "sh.600547"
+      "baostockCode": "sh.600547",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002080": {
       "latest": {
@@ -801588,7 +801602,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002080",
-      "baostockCode": "sz.002080"
+      "baostockCode": "sz.002080",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "000792": {
       "latest": {
@@ -806561,7 +806576,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000792",
-      "baostockCode": "sz.000792"
+      "baostockCode": "sz.000792",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "603078": {
       "latest": {
@@ -811534,7 +811550,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603078",
-      "baostockCode": "sh.603078"
+      "baostockCode": "sh.603078",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002938": {
       "latest": {
@@ -816507,7 +816524,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002938",
-      "baostockCode": "sz.002938"
+      "baostockCode": "sz.002938",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "603228": {
       "latest": {
@@ -821480,7 +821498,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603228",
-      "baostockCode": "sh.603228"
+      "baostockCode": "sh.603228",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "300398": {
       "latest": {
@@ -826453,7 +826472,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300398",
-      "baostockCode": "sz.300398"
+      "baostockCode": "sz.300398",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "300319": {
       "latest": {
@@ -831426,7 +831446,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300319",
-      "baostockCode": "sz.300319"
+      "baostockCode": "sz.300319",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600497": {
       "latest": {
@@ -836399,7 +836420,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600497",
-      "baostockCode": "sh.600497"
+      "baostockCode": "sh.600497",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600110": {
       "latest": {
@@ -841372,7 +841394,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600110",
-      "baostockCode": "sh.600110"
+      "baostockCode": "sh.600110",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002138": {
       "latest": {
@@ -846345,7 +846368,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002138",
-      "baostockCode": "sz.002138"
+      "baostockCode": "sz.002138",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600397": {
       "latest": {
@@ -851318,7 +851342,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600397",
-      "baostockCode": "sh.600397"
+      "baostockCode": "sh.600397",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002536": {
       "latest": {
@@ -856291,7 +856316,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002536",
-      "baostockCode": "sz.002536"
+      "baostockCode": "sz.002536",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "002261": {
       "latest": {
@@ -861264,7 +861290,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002261",
-      "baostockCode": "sz.002261"
+      "baostockCode": "sz.002261",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "688403": {
       "latest": {
@@ -866237,7 +866264,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688403",
-      "baostockCode": "sh.688403"
+      "baostockCode": "sh.688403",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "600246": {
       "latest": {
@@ -871210,7 +871238,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600246",
-      "baostockCode": "sh.600246"
+      "baostockCode": "sh.600246",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "000962": {
       "latest": {
@@ -876183,7 +876212,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000962",
-      "baostockCode": "sz.000962"
+      "baostockCode": "sz.000962",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "601678": {
       "latest": {
@@ -881156,7 +881186,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601678",
-      "baostockCode": "sh.601678"
+      "baostockCode": "sh.601678",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     },
     "300718": {
       "latest": {
@@ -886129,10 +886160,77 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300718",
-      "baostockCode": "sz.300718"
+      "baostockCode": "sz.300718",
+      "reusedFromGeneratedAt": "2026-11-17T18:40:19Z"
     }
   },
   "errors": {},
-  "refreshErrors": {},
-  "reusedSymbols": []
+  "refreshErrors": {
+    "300054": "300054 query failed: 网络接收错误。",
+    "600111": "600111 query failed: 网络接收错误。",
+    "600707": "600707 query failed: 网络接收错误。",
+    "688808": "688808 query failed: 网络接收错误。",
+    "300570": "300570 query failed: 网络接收错误。",
+    "002167": "002167 query failed: 网络接收错误。",
+    "688106": "688106 query failed: 网络接收错误。",
+    "603256": "603256 query failed: 网络接收错误。",
+    "603667": "603667 query failed: 网络接收错误。",
+    "002326": "002326 query failed: 网络接收错误。",
+    "000547": "000547 query failed: 网络接收错误。",
+    "300115": "300115 query failed: 网络接收错误。",
+    "002056": "002056 query failed: 网络接收错误。",
+    "600547": "600547 query failed: 网络接收错误。",
+    "002080": "002080 query failed: 网络接收错误。",
+    "000792": "000792 query failed: 网络接收错误。",
+    "603078": "603078 query failed: 网络接收错误。",
+    "002938": "002938 query failed: 网络接收错误。",
+    "603228": "603228 query failed: 网络接收错误。",
+    "300398": "300398 query failed: 网络接收错误。",
+    "300319": "300319 query failed: 网络接收错误。",
+    "600497": "600497 query failed: 网络接收错误。",
+    "600110": "600110 query failed: 网络接收错误。",
+    "002138": "002138 query failed: 网络接收错误。",
+    "600397": "600397 query failed: 网络接收错误。",
+    "002536": "002536 query failed: 网络接收错误。",
+    "002261": "002261 query failed: 网络接收错误。",
+    "688403": "688403 query failed: 网络接收错误。",
+    "600246": "600246 query failed: 网络接收错误。",
+    "000962": "000962 query failed: 网络接收错误。",
+    "601678": "601678 query failed: 网络接收错误。",
+    "300718": "300718 query failed: 网络接收错误。"
+  },
+  "reusedSymbols": [
+    "300054",
+    "600111",
+    "600707",
+    "688808",
+    "300570",
+    "002167",
+    "688106",
+    "603256",
+    "603667",
+    "002326",
+    "000547",
+    "300115",
+    "002056",
+    "600547",
+    "002080",
+    "000792",
+    "603078",
+    "002938",
+    "603228",
+    "300398",
+    "300319",
+    "600497",
+    "600110",
+    "002138",
+    "600397",
+    "002536",
+    "002261",
+    "688403",
+    "600246",
+    "000962",
+    "601678",
+    "300718"
+  ]
 }
