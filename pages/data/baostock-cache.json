@@ -1,7 +1,7 @@
 {
   "ok": true,
   "source": "baostock-history-cache",
-  "generatedAt": "2026-11-19T18:22:14Z",
+  "generatedAt": "2026-11-20T08:39:40Z",
   "lookbackDays": 520,
   "maxSymbols": 180,
   "requestedSymbols": [
@@ -355137,25 +355137,6 @@
       "low60": 0.25,
       "rows": [
         {
-          "date": "2025-06-17",
-          "code": "000004.SZ",
-          "open": 9.44,
-          "high": 9.62,
-          "low": 9.33,
-          "close": 9.42,
-          "preClose": 9.5,
-          "volume": 3521300.0,
-          "amount": 33354311.0,
-          "turnover": 2.7883,
-          "pct": -0.8421,
-          "peTTM": -9.413476,
-          "pbMRQ": 23.821076,
-          "psTTM": 12.280406,
-          "pcfNCFTTM": -64.978011,
-          "tradeStatus": "1",
-          "isST": true
-        },
-        {
           "date": "2025-06-18",
           "code": "000004.SZ",
           "open": 9.4,
@@ -518550,7 +518531,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002185",
-      "baostockCode": "sz.002185"
+      "baostockCode": "sz.002185",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688498": {
       "latest": {
@@ -523523,7 +523505,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688498",
-      "baostockCode": "sh.688498"
+      "baostockCode": "sh.688498",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688797": {
       "latest": {
@@ -525475,7 +525458,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688797",
-      "baostockCode": "sh.688797"
+      "baostockCode": "sh.688797",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002636": {
       "latest": {
@@ -530448,7 +530432,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002636",
-      "baostockCode": "sz.002636"
+      "baostockCode": "sz.002636",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688347": {
       "latest": {
@@ -535421,7 +535406,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688347",
-      "baostockCode": "sh.688347"
+      "baostockCode": "sh.688347",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002273": {
       "latest": {
@@ -540394,7 +540380,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002273",
-      "baostockCode": "sz.002273"
+      "baostockCode": "sz.002273",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688120": {
       "latest": {
@@ -545367,7 +545354,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688120",
-      "baostockCode": "sh.688120"
+      "baostockCode": "sh.688120",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600276": {
       "latest": {
@@ -550340,7 +550328,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600276",
-      "baostockCode": "sh.600276"
+      "baostockCode": "sh.600276",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "601869": {
       "latest": {
@@ -555313,7 +555302,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601869",
-      "baostockCode": "sh.601869"
+      "baostockCode": "sh.601869",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002428": {
       "latest": {
@@ -560286,7 +560276,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002428",
-      "baostockCode": "sz.002428"
+      "baostockCode": "sz.002428",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002354": {
       "latest": {
@@ -565259,7 +565250,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002354",
-      "baostockCode": "sz.002354"
+      "baostockCode": "sz.002354",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000636": {
       "latest": {
@@ -570232,7 +570224,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000636",
-      "baostockCode": "sz.000636"
+      "baostockCode": "sz.000636",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600118": {
       "latest": {
@@ -575205,7 +575198,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600118",
-      "baostockCode": "sh.600118"
+      "baostockCode": "sh.600118",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "605358": {
       "latest": {
@@ -580178,7 +580172,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "605358",
-      "baostockCode": "sh.605358"
+      "baostockCode": "sh.605358",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "301511": {
       "latest": {
@@ -585151,7 +585146,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301511",
-      "baostockCode": "sz.301511"
+      "baostockCode": "sz.301511",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000063": {
       "latest": {
@@ -590124,7 +590120,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000063",
-      "baostockCode": "sz.000063"
+      "baostockCode": "sz.000063",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002436": {
       "latest": {
@@ -595097,7 +595094,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002436",
-      "baostockCode": "sz.002436"
+      "baostockCode": "sz.002436",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300033": {
       "latest": {
@@ -600070,7 +600068,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300033",
-      "baostockCode": "sz.300033"
+      "baostockCode": "sz.300033",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688361": {
       "latest": {
@@ -605043,7 +605042,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688361",
-      "baostockCode": "sh.688361"
+      "baostockCode": "sh.688361",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300418": {
       "latest": {
@@ -610016,7 +610016,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300418",
-      "baostockCode": "sz.300418"
+      "baostockCode": "sz.300418",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600105": {
       "latest": {
@@ -614989,7 +614990,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600105",
-      "baostockCode": "sh.600105"
+      "baostockCode": "sh.600105",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688322": {
       "latest": {
@@ -619962,7 +619964,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688322",
-      "baostockCode": "sh.688322"
+      "baostockCode": "sh.688322",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002202": {
       "latest": {
@@ -624935,7 +624938,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002202",
-      "baostockCode": "sz.002202"
+      "baostockCode": "sz.002202",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300857": {
       "latest": {
@@ -629908,7 +629912,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300857",
-      "baostockCode": "sz.300857"
+      "baostockCode": "sz.300857",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300390": {
       "latest": {
@@ -634881,7 +634886,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300390",
-      "baostockCode": "sz.300390"
+      "baostockCode": "sz.300390",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002709": {
       "latest": {
@@ -639854,7 +639860,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002709",
-      "baostockCode": "sz.002709"
+      "baostockCode": "sz.002709",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600703": {
       "latest": {
@@ -644827,7 +644834,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600703",
-      "baostockCode": "sh.600703"
+      "baostockCode": "sh.600703",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688249": {
       "latest": {
@@ -649800,7 +649808,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688249",
-      "baostockCode": "sh.688249"
+      "baostockCode": "sh.688249",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "601991": {
       "latest": {
@@ -654773,7 +654782,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601991",
-      "baostockCode": "sh.601991"
+      "baostockCode": "sh.601991",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300058": {
       "latest": {
@@ -659746,7 +659756,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300058",
-      "baostockCode": "sz.300058"
+      "baostockCode": "sz.300058",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "301165": {
       "latest": {
@@ -664719,7 +664730,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "301165",
-      "baostockCode": "sz.301165"
+      "baostockCode": "sz.301165",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603083": {
       "latest": {
@@ -669692,7 +669704,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603083",
-      "baostockCode": "sh.603083"
+      "baostockCode": "sh.603083",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300607": {
       "latest": {
@@ -674665,7 +674678,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300607",
-      "baostockCode": "sz.300607"
+      "baostockCode": "sz.300607",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688048": {
       "latest": {
@@ -679638,7 +679652,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688048",
-      "baostockCode": "sh.688048"
+      "baostockCode": "sh.688048",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603501": {
       "latest": {
@@ -684611,7 +684626,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603501",
-      "baostockCode": "sh.603501"
+      "baostockCode": "sh.603501",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688146": {
       "latest": {
@@ -689584,7 +689600,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688146",
-      "baostockCode": "sh.688146"
+      "baostockCode": "sh.688146",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600172": {
       "latest": {
@@ -694557,7 +694574,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600172",
-      "baostockCode": "sh.600172"
+      "baostockCode": "sh.600172",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688110": {
       "latest": {
@@ -699530,7 +699548,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688110",
-      "baostockCode": "sh.688110"
+      "baostockCode": "sh.688110",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600909": {
       "latest": {
@@ -704503,7 +704522,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600909",
-      "baostockCode": "sh.600909"
+      "baostockCode": "sh.600909",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000333": {
       "latest": {
@@ -709476,7 +709496,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000333",
-      "baostockCode": "sz.000333"
+      "baostockCode": "sz.000333",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600879": {
       "latest": {
@@ -714449,7 +714470,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600879",
-      "baostockCode": "sh.600879"
+      "baostockCode": "sh.600879",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600498": {
       "latest": {
@@ -719422,7 +719444,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600498",
-      "baostockCode": "sh.600498"
+      "baostockCode": "sh.600498",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688629": {
       "latest": {
@@ -724395,7 +724418,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688629",
-      "baostockCode": "sh.688629"
+      "baostockCode": "sh.688629",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688549": {
       "latest": {
@@ -729368,7 +729392,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688549",
-      "baostockCode": "sh.688549"
+      "baostockCode": "sh.688549",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300054": {
       "latest": {
@@ -734341,7 +734366,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300054",
-      "baostockCode": "sz.300054"
+      "baostockCode": "sz.300054",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600111": {
       "latest": {
@@ -739314,7 +739340,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600111",
-      "baostockCode": "sh.600111"
+      "baostockCode": "sh.600111",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600707": {
       "latest": {
@@ -744287,7 +744314,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600707",
-      "baostockCode": "sh.600707"
+      "baostockCode": "sh.600707",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688808": {
       "latest": {
@@ -746980,7 +747008,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688808",
-      "baostockCode": "sh.688808"
+      "baostockCode": "sh.688808",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300570": {
       "latest": {
@@ -751953,7 +751982,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300570",
-      "baostockCode": "sz.300570"
+      "baostockCode": "sz.300570",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002167": {
       "latest": {
@@ -756926,7 +756956,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002167",
-      "baostockCode": "sz.002167"
+      "baostockCode": "sz.002167",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688106": {
       "latest": {
@@ -761899,7 +761930,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688106",
-      "baostockCode": "sh.688106"
+      "baostockCode": "sh.688106",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603256": {
       "latest": {
@@ -766872,7 +766904,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603256",
-      "baostockCode": "sh.603256"
+      "baostockCode": "sh.603256",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603667": {
       "latest": {
@@ -771845,7 +771878,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603667",
-      "baostockCode": "sh.603667"
+      "baostockCode": "sh.603667",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002326": {
       "latest": {
@@ -776818,7 +776852,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002326",
-      "baostockCode": "sz.002326"
+      "baostockCode": "sz.002326",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000547": {
       "latest": {
@@ -781791,7 +781826,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000547",
-      "baostockCode": "sz.000547"
+      "baostockCode": "sz.000547",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300115": {
       "latest": {
@@ -786764,7 +786800,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300115",
-      "baostockCode": "sz.300115"
+      "baostockCode": "sz.300115",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002056": {
       "latest": {
@@ -791737,7 +791774,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002056",
-      "baostockCode": "sz.002056"
+      "baostockCode": "sz.002056",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600547": {
       "latest": {
@@ -796710,7 +796748,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600547",
-      "baostockCode": "sh.600547"
+      "baostockCode": "sh.600547",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002080": {
       "latest": {
@@ -801683,7 +801722,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002080",
-      "baostockCode": "sz.002080"
+      "baostockCode": "sz.002080",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000792": {
       "latest": {
@@ -806656,7 +806696,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000792",
-      "baostockCode": "sz.000792"
+      "baostockCode": "sz.000792",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603078": {
       "latest": {
@@ -811629,7 +811670,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603078",
-      "baostockCode": "sh.603078"
+      "baostockCode": "sh.603078",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002938": {
       "latest": {
@@ -816602,7 +816644,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002938",
-      "baostockCode": "sz.002938"
+      "baostockCode": "sz.002938",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "603228": {
       "latest": {
@@ -821575,7 +821618,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "603228",
-      "baostockCode": "sh.603228"
+      "baostockCode": "sh.603228",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300398": {
       "latest": {
@@ -826548,7 +826592,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300398",
-      "baostockCode": "sz.300398"
+      "baostockCode": "sz.300398",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300319": {
       "latest": {
@@ -831521,7 +831566,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300319",
-      "baostockCode": "sz.300319"
+      "baostockCode": "sz.300319",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600497": {
       "latest": {
@@ -836494,7 +836540,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600497",
-      "baostockCode": "sh.600497"
+      "baostockCode": "sh.600497",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600110": {
       "latest": {
@@ -841467,7 +841514,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600110",
-      "baostockCode": "sh.600110"
+      "baostockCode": "sh.600110",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002138": {
       "latest": {
@@ -846440,7 +846488,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002138",
-      "baostockCode": "sz.002138"
+      "baostockCode": "sz.002138",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600397": {
       "latest": {
@@ -851413,7 +851462,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600397",
-      "baostockCode": "sh.600397"
+      "baostockCode": "sh.600397",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002536": {
       "latest": {
@@ -856386,7 +856436,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002536",
-      "baostockCode": "sz.002536"
+      "baostockCode": "sz.002536",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "002261": {
       "latest": {
@@ -861359,7 +861410,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "002261",
-      "baostockCode": "sz.002261"
+      "baostockCode": "sz.002261",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "688403": {
       "latest": {
@@ -866332,7 +866384,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "688403",
-      "baostockCode": "sh.688403"
+      "baostockCode": "sh.688403",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "600246": {
       "latest": {
@@ -871305,7 +871358,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "600246",
-      "baostockCode": "sh.600246"
+      "baostockCode": "sh.600246",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "000962": {
       "latest": {
@@ -876278,7 +876332,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "000962",
-      "baostockCode": "sz.000962"
+      "baostockCode": "sz.000962",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "601678": {
       "latest": {
@@ -881251,7 +881306,8 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "601678",
-      "baostockCode": "sh.601678"
+      "baostockCode": "sh.601678",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     },
     "300718": {
       "latest": {
@@ -886224,10 +886280,165 @@
       ],
       "source": "baostock-history-cache",
       "symbol": "300718",
-      "baostockCode": "sz.300718"
+      "baostockCode": "sz.300718",
+      "reusedFromGeneratedAt": "2026-11-19T18:22:14Z"
     }
   },
   "errors": {},
-  "refreshErrors": {},
-  "reusedSymbols": []
+  "refreshErrors": {
+    "002185": "002185 query failed: 网络接收错误。",
+    "688498": "688498 query failed: 网络接收错误。",
+    "688797": "688797 query failed: 网络接收错误。",
+    "002636": "002636 query failed: 网络接收错误。",
+    "688347": "688347 query failed: 网络接收错误。",
+    "002273": "002273 query failed: 网络接收错误。",
+    "688120": "688120 query failed: 网络接收错误。",
+    "600276": "600276 query failed: 网络接收错误。",
+    "601869": "601869 query failed: 网络接收错误。",
+    "002428": "002428 query failed: 网络接收错误。",
+    "002354": "002354 query failed: 网络接收错误。",
+    "000636": "000636 query failed: 网络接收错误。",
+    "600118": "600118 query failed: 网络接收错误。",
+    "605358": "605358 query failed: 网络接收错误。",
+    "301511": "301511 query failed: 网络接收错误。",
+    "000063": "000063 query failed: 网络接收错误。",
+    "002436": "002436 query failed: 网络接收错误。",
+    "300033": "300033 query failed: 网络接收错误。",
+    "688361": "688361 query failed: 网络接收错误。",
+    "300418": "300418 query failed: 网络接收错误。",
+    "600105": "600105 query failed: 网络接收错误。",
+    "688322": "688322 query failed: 网络接收错误。",
+    "002202": "002202 query failed: 网络接收错误。",
+    "300857": "300857 query failed: 网络接收错误。",
+    "300390": "300390 query failed: 网络接收错误。",
+    "002709": "002709 query failed: 网络接收错误。",
+    "600703": "600703 query failed: 网络接收错误。",
+    "688249": "688249 query failed: 网络接收错误。",
+    "601991": "601991 query failed: 网络接收错误。",
+    "300058": "300058 query failed: 网络接收错误。",
+    "301165": "301165 query failed: 网络接收错误。",
+    "603083": "603083 query failed: 网络接收错误。",
+    "300607": "300607 query failed: 网络接收错误。",
+    "688048": "688048 query failed: 网络接收错误。",
+    "603501": "603501 query failed: 网络接收错误。",
+    "688146": "688146 query failed: 网络接收错误。",
+    "600172": "600172 query failed: 网络接收错误。",
+    "688110": "688110 query failed: 网络接收错误。",
+    "600909": "600909 query failed: 网络接收错误。",
+    "000333": "000333 query failed: 网络接收错误。",
+    "600879": "600879 query failed: 网络接收错误。",
+    "600498": "600498 query failed: 网络接收错误。",
+    "688629": "688629 query failed: 网络接收错误。",
+    "688549": "688549 query failed: 网络接收错误。",
+    "300054": "300054 query failed: 网络接收错误。",
+    "600111": "600111 query failed: 网络接收错误。",
+    "600707": "600707 query failed: 网络接收错误。",
+    "688808": "688808 query failed: 网络接收错误。",
+    "300570": "300570 query failed: 网络接收错误。",
+    "002167": "002167 query failed: 网络接收错误。",
+    "688106": "688106 query failed: 网络接收错误。",
+    "603256": "603256 query failed: 网络接收错误。",
+    "603667": "603667 query failed: 网络接收错误。",
+    "002326": "002326 query failed: 网络接收错误。",
+    "000547": "000547 query failed: 网络接收错误。",
+    "300115": "300115 query failed: 网络接收错误。",
+    "002056": "002056 query failed: 网络接收错误。",
+    "600547": "600547 query failed: 网络接收错误。",
+    "002080": "002080 query failed: 网络接收错误。",
+    "000792": "000792 query failed: 网络接收错误。",
+    "603078": "603078 query failed: 网络接收错误。",
+    "002938": "002938 query failed: 网络接收错误。",
+    "603228": "603228 query failed: 网络接收错误。",
+    "300398": "300398 query failed: 网络接收错误。",
+    "300319": "300319 query failed: 网络接收错误。",
+    "600497": "600497 query failed: 网络接收错误。",
+    "600110": "600110 query failed: 网络接收错误。",
+    "002138": "002138 query failed: 网络接收错误。",
+    "600397": "600397 query failed: 网络接收错误。",
+    "002536": "002536 query failed: 网络接收错误。",
+    "002261": "002261 query failed: 网络接收错误。",
+    "688403": "688403 query failed: 网络接收错误。",
+    "600246": "600246 query failed: 网络接收错误。",
+    "000962": "000962 query failed: 网络接收错误。",
+    "601678": "601678 query failed: 网络接收错误。",
+    "300718": "300718 query failed: 网络接收错误。"
+  },
+  "reusedSymbols": [
+    "002185",
+    "688498",
+    "688797",
+    "002636",
+    "688347",
+    "002273",
+    "688120",
+    "600276",
+    "601869",
+    "002428",
+    "002354",
+    "000636",
+    "600118",
+    "605358",
+    "301511",
+    "000063",
+    "002436",
+    "300033",
+    "688361",
+    "300418",
+    "600105",
+    "688322",
+    "002202",
+    "300857",
+    "300390",
+    "002709",
+    "600703",
+    "688249",
+    "601991",
+    "300058",
+    "301165",
+    "603083",
+    "300607",
+    "688048",
+    "603501",
+    "688146",
+    "600172",
+    "688110",
+    "600909",
+    "000333",
+    "600879",
+    "600498",
+    "688629",
+    "688549",
+    "300054",
+    "600111",
+    "600707",
+    "688808",
+    "300570",
+    "002167",
+    "688106",
+    "603256",
+    "603667",
+    "002326",
+    "000547",
+    "300115",
+    "002056",
+    "600547",
+    "002080",
+    "000792",
+    "603078",
+    "002938",
+    "603228",
+    "300398",
+    "300319",
+    "600497",
+    "600110",
+    "002138",
+    "600397",
+    "002536",
+    "002261",
+    "688403",
+    "600246",
+    "000962",
+    "601678",
+    "300718"
+  ]
 }
